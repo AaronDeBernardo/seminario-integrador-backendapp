@@ -1,0 +1,37 @@
+###
+GET http://localhost:3000/api/usuarios/abogados/
+
+
+###
+GET http://localhost:3000/api/usuarios/abogados/4
+
+
+###
+POST http://localhost:3000/api/usuarios/abogados
+Content-Type: application/json
+
+{
+  "nombre": "Juan",
+  "apellido": "Pérez",
+  "email": "juanperez@example.com",
+  "telefono": "+5491123456789",
+  "contrasena": "miContraseña123",
+  "tipo_doc": "DNI",
+  "nro_doc": "12345678",
+  "foto": "datos-archivo",
+  "matricula": "55889",
+  "id_rol": 1
+}
+
+
+###
+PATCH http://localhost:3000/api/usuarios/abogados/5
+Content-Type: application/json
+
+{
+  "nombre": "Juan Bautista",
+  "apellido": "Rodriguez",
+  "matricula": "62358",
+  "id_rol": 1,
+  "telefono": "1234"
+}

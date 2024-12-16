@@ -1,0 +1,28 @@
+{
+  "name": "sem-int-backendapp",
+  "version": "1.0.0",
+  "description": "Backend de Sistema Jurídico, desarrollado en la materia Seminario Integrador - UTN FRRo",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -p ./tsconfig.json",
+    "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/app.js\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.2",
+    "tsc-watch": "^6.2.1",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@mikro-orm/core": "^6.4.1",
+    "@mikro-orm/mysql": "^6.4.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "reflect-metadata": "^0.2.2"
+  }
+}
