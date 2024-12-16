@@ -1,0 +1,36 @@
+###
+GET http://localhost:3000/api/usuarios/clientes/
+
+
+###
+GET http://localhost:3000/api/usuarios/clientes/8
+
+
+###
+POST http://localhost:3000/api/usuarios/clientes
+Content-Type: application/json
+
+{
+  "nombre": "Tony",
+  "apellido": "Stank",
+  "email": "iron@man.com",
+  "telefono": "+5491123456789",
+  "contrasena": "i-am-iron-man",
+  "tipo_doc": "DNI",
+  "nro_doc": "19587459",
+  "es_empresa": false
+}
+
+
+###
+PATCH http://localhost:3000/api/usuarios/clientes/19
+Content-Type: application/json
+
+{
+  "apellido": "Stark",
+  "es_empresa": true
+}
+
+
+### baja lógica
+PATCH http://localhost:3000/api/usuarios/clientes/deactivate/17
