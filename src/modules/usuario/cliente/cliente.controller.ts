@@ -56,15 +56,10 @@ export const controller = {
 
   add: async (req: Request, res: Response) => {
     try {
-      const usuario = em.create(Usuario, req.body.sanitizedInput);
-      const cliente = em.create(Cliente, {
-        ...req.body.sanitizedInput,
-        usuario: usuario,
-      });
-
+      const cliente = em.create(Cliente, req.body.sanitizedInput);
       await em.flush();
-      const data = new ClienteDTO(cliente);
 
+      const data = new ClienteDTO(cliente);
       res.status(201).json({ message: "Cliente creado.", data });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -80,8 +75,10 @@ export const controller = {
         { usuario: { id } },
         { populate: ["usuario"] }
       );
-      em.assign(cliente, req.body.sanitizedInput);
-      em.assign(cliente.usuario, req.body.sanitizedInput);
+
+      em.assign(cliente, req.body.sanitizedInput, {
+        updateByPrimaryKey: false,
+      });
 
       await em.flush();
       const data = new ClienteDTO(cliente);
@@ -97,7 +94,7 @@ export const controller = {
     }
   },
 
-  sanitize: async (req: Request, _res: Response, next: NextFunction) => {
+  sanitize: (req: Request, _res: Response, next: NextFunction) => {
     // llamar antes a sanitizeUsuario
     req.body.sanitizedInput = {
       ...req.body.sanitizedInput,
