@@ -1,0 +1,17 @@
+###
+GET http://localhost:3000/api/especialidades/abogados-especialidades/
+
+###
+GET http://localhost:3000/api/especialidades/abogados-especialidades/2/1
+
+###
+POST http://localhost:3000/api/especialidades/abogados-especialidades/
+Content-Type: application/json
+
+{
+  "id_abogado": 2,
+  "id_especialidad": 1
+}
+
+###
+DELETE http://localhost:3000/api/especialidades/abogados-especialidades/2/1
