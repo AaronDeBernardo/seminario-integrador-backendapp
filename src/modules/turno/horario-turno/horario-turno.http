@@ -1,0 +1,38 @@
+### Obtener todos los horarios de turnos
+GET http://localhost:3000/api/turnos/horarios/
+
+
+### Obtener todos los horarios de turnos para una fecha
+GET http://localhost:3000/api/turnos/horarios/disponibles/?fecha=2025-01-10
+
+
+### Obtener todos los horarios de turnos para una fecha y un abogado
+GET http://localhost:3000/api/turnos/horarios/disponibles/?fecha=2025-01-02&id_abogado=14
+
+
+### Crear un horario de turno
+POST http://localhost:3000/api/turnos/horarios/
+Content-Type: application/json
+
+{
+  "id_abogado": 4,
+  "hora_inicio": "10:30",
+  "hora_fin": "11:00",
+  "dia_semana": 2
+}
+
+
+### Modificar parcialmente un horario de turno
+PATCH http://localhost:3000/api/turnos/horarios/2
+Content-Type: application/json
+
+{
+  "id_abogado": 2,
+  "hora_inicio": "08:30",
+  "hora_fin": "09:15",
+  "dia_semana": 6
+}
+
+
+### Dar de baja un horario de turno
+PATCH http://localhost:3000/api/turnos/horarios/deactivate/4

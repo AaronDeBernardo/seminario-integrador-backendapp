@@ -1,4 +1,13 @@
-import { Entity, ManyToOne, OneToOne, Property, Rel } from "@mikro-orm/core";
+import {
+  Collection,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  Property,
+  Rel,
+} from "@mikro-orm/core";
+import { HorarioTurno } from "../../turno/horario-turno/horario-turno.entity.js";
 import { Rol } from "../rol/rol.entity.js";
 import { Usuario } from "../usuario/usuario.entity.js";
 
@@ -18,4 +27,10 @@ export class Abogado {
 
   @ManyToOne(() => Rol, { fieldName: "id_rol" })
   rol!: Rol;
+
+  @OneToMany({
+    entity: () => HorarioTurno,
+    mappedBy: "abogado",
+  })
+  horariosTurnos = new Collection<HorarioTurno>(this);
 }

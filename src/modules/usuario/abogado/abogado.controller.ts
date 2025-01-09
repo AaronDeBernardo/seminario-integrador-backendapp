@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
 import { Abogado } from "./abogado.entity.js";
 import { AbogadoDTO } from "./abogado.dto.js";
-import { Rol } from "../rol/rol.entity.js";
 import { Usuario } from "../usuario/usuario.entity.js";
+import { validateNumericId } from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -57,18 +57,9 @@ export const controller = {
 
   add: async (req: Request, res: Response) => {
     try {
-      const rol = await em.findOneOrFail(Rol, {
-        id: req.body.sanitizedInput.id_rol,
-      });
-
-      const usuario = em.create(Usuario, req.body.sanitizedInput);
-      const abogado = em.create(Abogado, {
-        ...req.body.sanitizedInput,
-        usuario,
-        rol,
-      });
-
+      const abogado = em.create(Abogado, req.body.sanitizedInput);
       await em.flush();
+
       const data = new AbogadoDTO(abogado);
 
       res.status(201).json({ message: "Abogado creado.", data });
@@ -80,15 +71,15 @@ export const controller = {
   update: async (req: Request, res: Response) => {
     try {
       const id = Number(req.params.id);
+      const abogado = await em.findOneOrFail(
+        Abogado,
+        { usuario: { id } },
+        { populate: ["usuario"] }
+      );
 
-      const rol = await em.findOneOrFail(Rol, {
-        id: req.body.sanitizedInput.id_rol,
+      em.assign(abogado, req.body.sanitizedInput, {
+        updateByPrimaryKey: false,
       });
-
-      const abogado = await em.findOneOrFail(Abogado, { usuario: { id } });
-      em.assign(abogado, req.body.sanitizedInput);
-      em.assign(abogado.usuario, req.body.sanitizedInput);
-      abogado.rol = rol;
 
       await em.flush();
       const data = new AbogadoDTO(abogado);
@@ -104,21 +95,25 @@ export const controller = {
     }
   },
 
-  sanitize: async (req: Request, _res: Response, next: NextFunction) => {
+  sanitize: (req: Request, res: Response, next: NextFunction) => {
     // llamar antes a sanitizeUsuario
-    req.body.sanitizedInput = {
-      ...req.body.sanitizedInput,
-      foto: req.body.foto,
-      matricula: req.body.matricula?.trim(),
-      id_rol: req.body.id_rol,
-    };
+    try {
+      req.body.sanitizedInput = {
+        ...req.body.sanitizedInput,
+        foto: req.body.foto,
+        matricula: req.body.matricula?.trim(),
+        rol: validateNumericId(req.body.id_rol, "id_rol"),
+      };
 
-    Object.keys(req.body.sanitizedInput).forEach((key) => {
-      if (req.body.sanitizedInput[key] === undefined) {
-        delete req.body.sanitizedInput[key];
-      }
-    });
+      Object.keys(req.body.sanitizedInput).forEach((key) => {
+        if (req.body.sanitizedInput[key] === undefined) {
+          delete req.body.sanitizedInput[key];
+        }
+      });
 
-    next();
+      next();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
   },
 };

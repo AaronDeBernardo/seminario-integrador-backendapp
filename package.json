@@ -21,6 +21,7 @@
   "dependencies": {
     "@mikro-orm/core": "^6.4.1",
     "@mikro-orm/mysql": "^6.4.1",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "reflect-metadata": "^0.2.2"

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
 import { ReseteoClave } from "./reseteo-clave.entity.js";
+import { validateNumericId } from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -24,17 +25,21 @@ export const controller = {
 
   recoverPassword: async (req: Request, res: Response) => {},
 
-  sanitize: async (req: Request, _res: Response, next: NextFunction) => {
-    req.body.sanitizedInput = {
-      id_usuario: req.body.id_usuario,
-    };
+  sanitize: (req: Request, res: Response, next: NextFunction) => {
+    try {
+      req.body.sanitizedInput = {
+        usuario: validateNumericId(req.body.id_usuario, "id_usuario"),
+      };
 
-    Object.keys(req.body.sanitizedInput).forEach((key) => {
-      if (req.body.sanitizedInput[key] === undefined) {
-        delete req.body.sanitizedInput[key];
-      }
-    });
+      Object.keys(req.body.sanitizedInput).forEach((key) => {
+        if (req.body.sanitizedInput[key] === undefined) {
+          delete req.body.sanitizedInput[key];
+        }
+      });
 
-    next();
+      next();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
   },
 };

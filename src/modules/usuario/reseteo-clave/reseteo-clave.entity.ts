@@ -1,9 +1,10 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Usuario } from "../usuario/usuario.entity.js";
 
 @Entity({ tableName: "reseteos_claves" })
 export class ReseteoClave {
-  @PrimaryKey({ type: "int" })
-  id_usuario!: number;
+  @ManyToOne(() => Usuario, { primary: true, fieldName: "id_usuario" })
+  usuario!: Usuario;
 
   @PrimaryKey({ type: "datetime" })
   fecha_hora!: Date;
