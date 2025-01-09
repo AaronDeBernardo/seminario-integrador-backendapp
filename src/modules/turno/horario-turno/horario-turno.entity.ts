@@ -29,4 +29,10 @@ export class HorarioTurno {
 
   @Property({ type: "date", nullable: true })
   fecha_baja?: Date;
+
+  @OneToMany({
+    entity: () => TurnoOtorgado,
+    mappedBy: "horarioTurno",
+  })
+  turnosOtorgados = new Collection<TurnoOtorgado>(this);
 }

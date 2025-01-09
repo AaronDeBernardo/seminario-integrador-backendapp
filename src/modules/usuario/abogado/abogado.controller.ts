@@ -2,9 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
 import { Abogado } from "./abogado.entity.js";
 import { AbogadoDTO } from "./abogado.dto.js";
-import { Rol } from "../rol/rol.entity.js";
 import { Usuario } from "../usuario/usuario.entity.js";
-import { validateId } from "../../../utils/validators.js";
+import { validateNumericId } from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -103,7 +102,7 @@ export const controller = {
         ...req.body.sanitizedInput,
         foto: req.body.foto,
         matricula: req.body.matricula?.trim(),
-        rol: validateId(req.body.id_rol, "id_rol"),
+        rol: validateNumericId(req.body.id_rol, "id_rol"),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {
