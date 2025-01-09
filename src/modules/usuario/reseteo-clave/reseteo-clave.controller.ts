@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
 import { ReseteoClave } from "./reseteo-clave.entity.js";
-import { validateId } from "../../../utils/validators.js";
+import { validateNumericId } from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -28,7 +28,7 @@ export const controller = {
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
-        usuario: validateId(req.body.id_usuario, "id_usuario"),
+        usuario: validateNumericId(req.body.id_usuario, "id_usuario"),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {
