@@ -1,0 +1,25 @@
+### Obtener todas las actividades activas
+GET http://localhost:3000/api/actividades/
+
+
+### Crear una actividad
+POST http://localhost:3000/api/actividades/
+Content-Type: application/json
+
+{
+  "nombre": "Redacción de testamento",
+  "cant_jus": 1
+}
+
+
+### Modificar una actividad
+PUT http://localhost:3000/api/actividades/4
+Content-Type: application/json
+
+{
+  "cant_jus": 1.2
+}
+
+
+### Dar de baja una actividad
+PATCH http://localhost:3000/api/actividades/deactivate/3
