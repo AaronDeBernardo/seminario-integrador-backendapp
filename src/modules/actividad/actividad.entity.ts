@@ -6,12 +6,14 @@ import {
   Property,
 } from "@mikro-orm/core";
 import { CostoActividad } from "./costo-actividad.entity.js";
+import { NotEmptyAndMaxLength } from "../../utils/validators.js";
 
-@Entity({tableName:"actividades"})
+@Entity({ tableName: "actividades" })
 export class Actividad {
   @PrimaryKey({ type: "int" })
   id!: number;
 
+  @NotEmptyAndMaxLength(50, "El nombre")
   @Property({ type: "varchar", length: 50 })
   nombre!: string;
 

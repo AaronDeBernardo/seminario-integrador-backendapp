@@ -1,24 +1,28 @@
 import { format } from "date-fns";
 import { NextFunction, Request, Response } from "express";
-import { orm } from "../../config/db.config.js";
 import { Actividad } from "./actividad.entity.js";
 import { ActividadDTO } from "./actividad.dto.js";
 import { CostoActividad } from "./costo-actividad.entity.js";
 import { HttpError } from "../../utils/http-error.js";
-import { validatePrice } from "../../utils/validators.js";
+import { orm } from "../../config/db.config.js";
+import { validateEntity, validatePrice } from "../../utils/validators.js";
 
 const em = orm.em;
 
 export const controller = {
-  findAll: async (req: Request, res: Response) => {
+  findAll: async (_req: Request, res: Response) => {
     try {
-      const results = await em.execute<ActividadDTO[]>(`
+      const results = await em.execute(`
         CALL get_actividades();
-      `); //TODO ver si demora mucho - no me devuelve según tipos de datos DTO
+      `);
+
+      const data = results[0].map((a: any) => {
+        return ActividadDTO.fromGetActividades(a);
+      });
 
       res.status(200).json({
         message: "Todas las actividades activas fueron encontradas.",
-        data: results[0],
+        data,
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -31,15 +35,21 @@ export const controller = {
       const costoActividad = em.create(CostoActividad, req.body.sanitizedInput);
       costoActividad.actividad = actividad;
 
+      validateEntity(actividad);
+
       await em.flush();
-      const data = new ActividadDTO(actividad, costoActividad);
+      const data = ActividadDTO.fromActividadAndCosto(
+        actividad,
+        costoActividad
+      );
 
       res.status(201).json({
         message: "Actividad creada.",
         data,
       });
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      if (error instanceof HttpError) error.send(res);
+      else res.status(500).json({ message: error.message });
     }
   },
 
@@ -48,52 +58,37 @@ export const controller = {
       const id = Number(req.params.id);
       const input = req.body.sanitizedInput;
 
-      const actividad = await em.findOneOrFail(Actividad, id);
+      const actividad = await em.findOneOrFail(Actividad, {
+        id,
+        fecha_baja: { $eq: null },
+      });
       em.assign(actividad, input);
 
-      const results = await em.execute<{ costo_actual: number }[]>(
+      const results = await em.execute<{ cant_jus: string }[]>(
         `
-        SELECT get_costo_actividad(?, NOW()) AS costo_actual
+        SELECT get_cant_jus_actividad(?, NOW()) AS cant_jus
         `,
         [id]
       );
 
-      let costo = new CostoActividad();
-      costo.cant_jus = Number(results[0].costo_actual);
+      const cant_jus_actual = Number(results[0].cant_jus);
+      let data = ActividadDTO.fromActividadAndCantJus(
+        actividad,
+        cant_jus_actual
+      );
 
-      if (costo.cant_jus !== input.cant_jus) {
-        costo = em.create(CostoActividad, input);
+      if (cant_jus_actual !== input.cant_jus) {
+        const costo = em.create(CostoActividad, input);
         costo.actividad = actividad;
+        data = ActividadDTO.fromActividadAndCosto(actividad, costo);
       }
-      await em.flush();
 
-      const data = new ActividadDTO(actividad, costo);
+      validateEntity(actividad);
+      await em.flush();
 
       res.status(200).json({
         message: "Actividad actualizada.",
         data,
-      });
-    } catch (error: any) {
-      let errorCode = 500;
-      if (error.message.match("not found")) errorCode = 404;
-      res.status(errorCode).json({ message: error.message });
-    }
-  },
-
-  logicalDelete: async (req: Request, res: Response) => {
-    try {
-      const id = Number(req.params.id);
-
-      const actividad = await em.findOneOrFail(Actividad, id);
-      if (actividad.fecha_baja)
-        throw new HttpError(403, "La actividad ya se encuentra dada de baja.");
-
-      actividad.fecha_baja = format(new Date(), "yyyy-MM-dd");
-      await em.flush();
-
-      res.status(200).json({
-        message: "Actividad dada de baja.",
-        data: actividad,
       });
     } catch (error: any) {
       if (error instanceof HttpError) error.send(res);
@@ -105,11 +100,33 @@ export const controller = {
     }
   },
 
+  logicalDelete: async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      const actividad = await em.findOneOrFail(Actividad, {
+        id,
+        fecha_baja: { $eq: null },
+      });
+
+      actividad.fecha_baja = format(new Date(), "yyyy-MM-dd");
+      await em.flush();
+
+      res.status(200).json({
+        message: "Actividad dada de baja.",
+        data: actividad,
+      });
+    } catch (error: any) {
+      let errorCode = 500;
+      if (error.message.match("not found")) errorCode = 404;
+      res.status(errorCode).json({ message: error.message });
+    }
+  },
+
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
-        nombre: req.body.nombre?.trim(), //TODO falta validar que no sea empty
-        cant_jus: validatePrice(req.body.cant_jus, "cant_jus"), //TODO máx 3 decimales
+        nombre: req.body.nombre?.trim(),
+        cant_jus: validatePrice(req.body.cant_jus, 3, "cant_jus"),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {
