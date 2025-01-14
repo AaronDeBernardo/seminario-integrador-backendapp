@@ -8,6 +8,7 @@ import {
   Rel,
 } from "@mikro-orm/core";
 import { HorarioTurno } from "../../turno/horario-turno/horario-turno.entity.js";
+import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 import { Rol } from "../rol/rol.entity.js";
 import { Usuario } from "../usuario/usuario.entity.js";
 
@@ -22,6 +23,7 @@ export class Abogado {
   @Property({ type: "blob" })
   foto!: Buffer;
 
+  @NotEmptyAndMaxLength(20, "matricula")
   @Property({ type: "varchar", length: 20 })
   matricula!: string;
 

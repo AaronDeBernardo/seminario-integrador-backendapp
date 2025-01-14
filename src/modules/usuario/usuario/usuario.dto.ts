@@ -1,4 +1,3 @@
-import { format } from "date-fns";
 import { Usuario } from "../usuario/usuario.entity.js";
 
 export class UsuarioDTO {
@@ -21,7 +20,6 @@ export class UsuarioDTO {
     this.tipo_doc = input.tipo_doc;
     this.nro_doc = input.nro_doc;
     this.fecha_alta = input.fecha_alta;
-    if (input.fecha_baja != null)
-      this.fecha_baja = format(input.fecha_baja, "yyyy-MM-dd");
+    this.fecha_baja = input.fecha_baja;
   }
 }

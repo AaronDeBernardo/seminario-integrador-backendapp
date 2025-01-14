@@ -1,8 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
-import { Usuario } from "../usuario/usuario.entity.js";
+import { HttpError } from "../../../utils/http-error.js";
+import { sanitizeUsuario } from "../usuario/usuario.controller.js";
 import { Secretario } from "./secretario.entity.js";
 import { SecretarioDTO } from "./secretario.dto.js";
+import { Usuario } from "../usuario/usuario.entity.js";
+import { validateEntity } from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -36,7 +39,7 @@ export const controller = {
       const secretario = await em.findOneOrFail(
         Secretario,
         {
-          usuario: { id },
+          usuario: { id, fecha_baja: { $eq: null } },
         },
         { populate: ["usuario"] }
       );
@@ -57,12 +60,16 @@ export const controller = {
   add: async (req: Request, res: Response) => {
     try {
       const secretario = em.create(Secretario, req.body.sanitizedInput);
+      validateEntity(secretario.usuario);
+      validateEntity(secretario);
+
       await em.flush();
 
       const data = new SecretarioDTO(secretario);
       res.status(201).json({ message: "Secretario creado.", data });
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      if (error instanceof HttpError) error.send(res);
+      else res.status(500).json({ message: error.message });
     }
   },
 
@@ -73,7 +80,7 @@ export const controller = {
       const secretario = await em.findOneOrFail(
         Secretario,
         {
-          usuario: { id },
+          usuario: { id, fecha_baja: { $eq: null } },
         },
         { populate: ["usuario"] }
       );
@@ -81,6 +88,9 @@ export const controller = {
       em.assign(secretario, req.body.sanitizedInput, {
         updateByPrimaryKey: false,
       });
+
+      validateEntity(secretario.usuario);
+      validateEntity(secretario);
 
       await em.flush();
       const data = new SecretarioDTO(secretario);
@@ -90,25 +100,32 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      let errorCode = 500;
-      if (error.message.match("not found")) errorCode = 404;
-      res.status(errorCode).json({ message: error.message });
+      if (error instanceof HttpError) error.send(res);
+      else {
+        let errorCode = 500;
+        if (error.message.match("not found")) errorCode = 404;
+        res.status(errorCode).json({ message: error.message });
+      }
     }
   },
 
-  sanitize: (req: Request, _res: Response, next: NextFunction) => {
-    // llamar antes a sanitizeUsuario
-    req.body.sanitizedInput = {
-      ...req.body.sanitizedInput,
-      turno_trabajo: req.body.turno_trabajo,
-    };
+  sanitize: (req: Request, res: Response, next: NextFunction) => {
+    try {
+      sanitizeUsuario(req);
+      req.body.sanitizedInput = {
+        ...req.body.sanitizedInput,
+        turno_trabajo: req.body.turno_trabajo?.trim(),
+      };
 
-    Object.keys(req.body.sanitizedInput).forEach((key) => {
-      if (req.body.sanitizedInput[key] === undefined) {
-        delete req.body.sanitizedInput[key];
-      }
-    });
+      Object.keys(req.body.sanitizedInput).forEach((key) => {
+        if (req.body.sanitizedInput[key] === undefined) {
+          delete req.body.sanitizedInput[key];
+        }
+      });
 
-    next();
+      next();
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
   },
 };

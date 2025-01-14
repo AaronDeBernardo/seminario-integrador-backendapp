@@ -6,25 +6,7 @@ export const secretarioRouter = Router();
 
 secretarioRouter.get("/:id", controller.findOne);
 secretarioRouter.get("/", controller.findAll);
-secretarioRouter.post(
-  "/",
-  usuarioController.sanitize,
-  controller.sanitize,
-  controller.add
-);
-
-secretarioRouter.put(
-  "/:id",
-  usuarioController.sanitize,
-  controller.sanitize,
-  controller.update
-);
-
-secretarioRouter.patch(
-  "/:id",
-  usuarioController.sanitize,
-  controller.sanitize,
-  controller.update
-);
-
+secretarioRouter.post("/", controller.sanitize, controller.add);
+secretarioRouter.put("/:id", controller.sanitize, controller.update);
+secretarioRouter.patch("/:id", controller.sanitize, controller.update);
 secretarioRouter.patch("/deactivate/:id", usuarioController.logicalDelete);

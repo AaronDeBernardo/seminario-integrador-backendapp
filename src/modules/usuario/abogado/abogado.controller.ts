@@ -2,8 +2,13 @@ import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
 import { Abogado } from "./abogado.entity.js";
 import { AbogadoDTO } from "./abogado.dto.js";
+import { HttpError } from "../../../utils/http-error.js";
+import { sanitizeUsuario } from "../usuario/usuario.controller.js";
 import { Usuario } from "../usuario/usuario.entity.js";
-import { validateNumericId } from "../../../utils/validators.js";
+import {
+  validateEntity,
+  validateNumericId,
+} from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -37,7 +42,7 @@ export const controller = {
       const abogado = await em.findOneOrFail(
         Abogado,
         {
-          usuario: { id },
+          usuario: { id, fecha_baja: { $eq: null } },
         },
         { populate: ["usuario", "rol"] }
       );
@@ -58,13 +63,16 @@ export const controller = {
   add: async (req: Request, res: Response) => {
     try {
       const abogado = em.create(Abogado, req.body.sanitizedInput);
-      await em.flush();
+      validateEntity(abogado.usuario);
+      validateEntity(abogado);
 
+      await em.flush();
       const data = new AbogadoDTO(abogado);
 
       res.status(201).json({ message: "Abogado creado.", data });
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      if (error instanceof HttpError) error.send(res);
+      else res.status(500).json({ message: error.message });
     }
   },
 
@@ -73,13 +81,16 @@ export const controller = {
       const id = Number(req.params.id);
       const abogado = await em.findOneOrFail(
         Abogado,
-        { usuario: { id } },
+        { usuario: { id, fecha_baja: { $eq: null } } },
         { populate: ["usuario"] }
       );
 
       em.assign(abogado, req.body.sanitizedInput, {
         updateByPrimaryKey: false,
       });
+
+      validateEntity(abogado.usuario);
+      validateEntity(abogado);
 
       await em.flush();
       const data = new AbogadoDTO(abogado);
@@ -89,15 +100,18 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      let errorCode = 500;
-      if (error.message.match("not found")) errorCode = 404;
-      res.status(errorCode).json({ message: error.message });
+      if (error instanceof HttpError) error.send(res);
+      else {
+        let errorCode = 500;
+        if (error.message.match("not found")) errorCode = 404;
+        res.status(errorCode).json({ message: error.message });
+      }
     }
   },
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
-    // llamar antes a sanitizeUsuario
     try {
+      sanitizeUsuario(req);
       req.body.sanitizedInput = {
         ...req.body.sanitizedInput,
         foto: req.body.foto,
