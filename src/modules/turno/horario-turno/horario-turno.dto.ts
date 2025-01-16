@@ -1,9 +1,8 @@
-import { format } from "date-fns";
 import { HorarioTurno } from "./horario-turno.entity.js";
 
 export class HorarioTurnoDTO {
   id: number;
-  abogado: { nombre: string; apellido: string };
+  abogado: { id: number; nombre: string; apellido: string };
   hora_inicio: string;
   hora_fin: string;
   dia_semana: number;
@@ -12,14 +11,14 @@ export class HorarioTurnoDTO {
   constructor(input: HorarioTurno) {
     this.id = input.id;
     this.abogado = {
+      id: input.abogado.usuario.id,
       nombre: input.abogado.usuario.nombre,
       apellido: input.abogado.usuario.apellido,
     };
-    this.hora_inicio = input.hora_inicio;
-    this.hora_fin = input.hora_fin;
-    this.dia_semana = input.dia_semana;
 
-    if (input.fecha_baja != null)
-      this.fecha_baja = format(input.fecha_baja, "yyyy-MM-dd");
+    this.hora_inicio = input.hora_inicio.substring(0, 5);
+    this.hora_fin = input.hora_fin.substring(0, 5);
+    this.dia_semana = input.dia_semana;
+    this.fecha_baja = input.fecha_baja || undefined;
   }
 }

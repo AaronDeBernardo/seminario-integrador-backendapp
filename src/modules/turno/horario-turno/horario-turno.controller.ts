@@ -1,11 +1,16 @@
-import { addHours, getDay, isToday, startOfDay } from "date-fns";
+import { addHours, format, getDay, startOfDay } from "date-fns";
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
+import { handleError } from "../../../utils/error-handler.js";
 import { HorarioTurno } from "./horario-turno.entity.js";
 import { HorarioTurnoDTO } from "./horario-turno.dto.js";
-import { TurnoOtorgado } from "../turno-otorgado/turno-otorgado.entity.js";
-import { validateNumericId } from "../../../utils/validators.js";
 import { HttpError } from "../../../utils/http-error.js";
+import { TurnoOtorgado } from "../turno-otorgado/turno-otorgado.entity.js";
+import {
+  validateNumericId,
+  validateTime,
+  validateWeekDay,
+} from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -25,7 +30,7 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
@@ -76,30 +81,29 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      if (error instanceof HttpError) error.send(res);
-      else res.status(500).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
   add: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const input = req.body.sanitizedInput;
+      let horarioTurno = undefined;
+      let data;
 
       if (input.hora_inicio >= input.hora_fin)
-        throw new HttpError(400, "La hora de inicio es posterior a la de fin.");
+        throw new HttpError(400, "hora_inicio: debe ser anterior a hora_fin.");
 
-      if (input.dia_semana < 0 || input.dia_semana > 6)
-        throw new HttpError(400, "Día no válido.");
+      await em.transactional(async (em) => {
+        horarioTurno = em.create(HorarioTurno, req.body.sanitizedInput);
+        await checkScheduleConflict(horarioTurno);
+      });
 
-      const horarioTurno = em.create(HorarioTurno, req.body.sanitizedInput);
-      await em.flush();
+      if (horarioTurno) data = new HorarioTurnoDTO(horarioTurno);
 
-      res
-        .status(201)
-        .json({ message: "Horario de turno creado.", data: horarioTurno });
+      res.status(201).json({ message: "Horario de turno creado.", data });
     } catch (error: any) {
-      if (error instanceof HttpError) error.send(res);
-      else res.status(500).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
@@ -108,27 +112,27 @@ export const controller = {
       const id = Number(req.params.id);
       const input = req.body.sanitizedInput;
 
-      const horarioTurno = await em.findOneOrFail(HorarioTurno, id);
-      em.assign(horarioTurno, input);
+      const horarioTurno = await em.findOneOrFail(HorarioTurno, {
+        id,
+        fecha_baja: { $eq: null },
+      });
 
-      if (input.hora_inicio >= input.hora_fin)
-        throw new HttpError(400, "La hora de inicio es posterior a la de fin.");
+      await em.transactional(async (em) => {
+        em.assign(horarioTurno, input);
+        if (horarioTurno.hora_inicio >= horarioTurno.hora_fin)
+          throw new HttpError(
+            400,
+            "hora_inicio: debe ser anterior a hora_fin."
+          );
 
-      if (input.dia_semana < 0 || input.dia_semana > 6)
-        throw new HttpError(400, "Día no válido.");
+        await checkScheduleConflict(horarioTurno);
+      });
 
-      await em.flush();
+      const data = new HorarioTurnoDTO(horarioTurno);
 
-      res
-        .status(200)
-        .json({ message: "Horario de turno actualizado.", data: horarioTurno });
+      res.status(200).json({ message: "Horario de turno actualizado.", data });
     } catch (error: any) {
-      if (error instanceof HttpError) error.send(res);
-      else {
-        let errorCode = 500;
-        if (error.message.match("not found")) errorCode = 404;
-        res.status(errorCode).json({ message: error.message });
-      }
+      handleError(error, res);
     }
   },
 
@@ -136,8 +140,12 @@ export const controller = {
     try {
       const id = Number(req.params.id);
 
-      const horarioTurno = await em.findOneOrFail(HorarioTurno, id);
-      horarioTurno.fecha_baja = new Date();
+      const horarioTurno = await em.findOneOrFail(HorarioTurno, {
+        id,
+        fecha_baja: { $eq: null },
+      });
+
+      horarioTurno.fecha_baja = format(new Date(), "yyyy-MM-dd");
       await em.flush();
 
       const data = new HorarioTurnoDTO(horarioTurno);
@@ -146,9 +154,7 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      let errorCode = 500;
-      if (error.message.match("not found")) errorCode = 404;
-      res.status(errorCode).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
@@ -156,9 +162,9 @@ export const controller = {
     try {
       req.body.sanitizedInput = {
         abogado: validateNumericId(req.body.id_abogado, "id_abogado"),
-        hora_inicio: req.body.hora_inicio,
-        hora_fin: req.body.hora_fin,
-        dia_semana: req.body.dia_semana,
+        hora_inicio: validateTime(req.body.hora_inicio, "hora_inicio"),
+        hora_fin: validateTime(req.body.hora_fin, "hora_fin"),
+        dia_semana: validateWeekDay(req.body.dia_semana, "dia_semana"),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -169,7 +175,28 @@ export const controller = {
 
       next();
     } catch (error: any) {
-      res.status(400).json({ message: error.message });
+      handleError(error, res);
     }
   },
 };
+
+async function checkScheduleConflict(horarioTurno: HorarioTurno) {
+  const conflicts = await em.find(HorarioTurno, {
+    abogado: horarioTurno.abogado,
+    dia_semana: horarioTurno.dia_semana,
+    fecha_baja: { $eq: null },
+    $not: {
+      $or: [
+        { hora_inicio: { $gte: horarioTurno.hora_fin } },
+        { hora_fin: { $lte: horarioTurno.hora_inicio } },
+      ],
+    },
+  });
+
+  // Nota: si hay un solo conflicto, se trata del HorarioTurno que se está creando o modificando
+  if (conflicts.length > 1)
+    throw new HttpError(
+      409,
+      "El horario de turno se solapa con otro existente para el abogado en el mismo día."
+    );
+}

@@ -7,7 +7,7 @@ export function validateNumericId(id: any, field: string) {
   const convertedId = Number(id);
   if (Number.isInteger(convertedId)) return convertedId;
 
-  throw new Error(`${field}: debe ser un número entero.`);
+  throw new HttpError(400, `${field}: debe ser un número entero positivo.`);
 }
 
 export function validatePrice(price: any, maxDecimals: number, field: string) {
@@ -22,7 +22,7 @@ export function validatePrice(price: any, maxDecimals: number, field: string) {
     return roundedPrice;
   }
 
-  throw new Error(`${field}:debe ser un número mayor o igual que 0.`);
+  throw new HttpError(400, `${field}:debe ser un número mayor o igual que 0.`);
 }
 
 export function validatePassword(password: any, field: string) {
@@ -32,6 +32,30 @@ export function validatePassword(password: any, field: string) {
   if (password.length >= 4) return password;
 
   throw new Error(`${field}: debe ser un string con 4 caracteres como mínimo.`);
+}
+
+export function validateTime(time: any, field: string) {
+  if (time === undefined) return undefined;
+
+  const regex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
+  if (regex.test(time)) return time;
+
+  throw new HttpError(
+    400,
+    `${field}: debe ser un string en formato HH:MM. Valores admitidos entre las 00:00 y las 23:59.`
+  );
+}
+
+export function validateWeekDay(weekday: any, field: string) {
+  if (weekday === undefined) return undefined;
+
+  if (Number.isInteger(weekday) && weekday >= 0 && weekday <= 6) return weekday;
+
+  const convertedWeekday = Number(weekday);
+  if (Number.isInteger(convertedWeekday) && weekday >= 0 && weekday <= 6)
+    return convertedWeekday;
+
+  throw new HttpError(400, `${field}: debe ser un número entero entre 0 y 6.`);
 }
 
 export function NotEmptyAndMaxLength(maxLength: number, field: string) {
