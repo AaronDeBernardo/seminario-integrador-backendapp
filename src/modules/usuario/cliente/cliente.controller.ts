@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
 import { Cliente } from "./cliente.entity.js";
 import { ClienteDTO } from "./cliente.dto.js";
-import { HttpError } from "../../../utils/http-error.js";
+import { handleError } from "../../../utils/error-handler.js";
 import { sanitizeUsuario } from "../usuario/usuario.controller.js";
 import { Usuario } from "../usuario/usuario.entity.js";
 import { validateEntity } from "../../../utils/validators.js";
@@ -28,7 +28,7 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
@@ -51,9 +51,7 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      let errorCode = 500;
-      if (error.message.match("not found")) errorCode = 404;
-      res.status(errorCode).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
@@ -68,8 +66,7 @@ export const controller = {
       const data = new ClienteDTO(cliente);
       res.status(201).json({ message: "Cliente creado.", data });
     } catch (error: any) {
-      if (error instanceof HttpError) error.send(res);
-      else res.status(500).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
@@ -98,12 +95,7 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      if (error instanceof HttpError) error.send(res);
-      else {
-        let errorCode = 500;
-        if (error.message.match("not found")) errorCode = 404;
-        res.status(errorCode).json({ message: error.message });
-      }
+      handleError(error, res);
     }
   },
 
@@ -123,7 +115,7 @@ export const controller = {
 
       next();
     } catch (error: any) {
-      res.status(400).json({ message: error.message });
+      handleError(error, res);
     }
   },
 };

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { Rol } from "./rol.entity.js";
+import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
+import { Rol } from "./rol.entity.js";
 
 const em = orm.em;
 
@@ -14,7 +15,7 @@ export const controller = {
         data: roles,
       });
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      handleError(error, res);
     }
   },
 };

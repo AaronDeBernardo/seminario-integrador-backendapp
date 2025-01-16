@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
+import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
-import { HttpError } from "../../../utils/http-error.js";
 import { sanitizeUsuario } from "../usuario/usuario.controller.js";
 import { Secretario } from "./secretario.entity.js";
 import { SecretarioDTO } from "./secretario.dto.js";
@@ -28,7 +28,7 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
@@ -51,9 +51,7 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      let errorCode = 500;
-      if (error.message.match("not found")) errorCode = 404;
-      res.status(errorCode).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
@@ -68,8 +66,7 @@ export const controller = {
       const data = new SecretarioDTO(secretario);
       res.status(201).json({ message: "Secretario creado.", data });
     } catch (error: any) {
-      if (error instanceof HttpError) error.send(res);
-      else res.status(500).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
@@ -100,12 +97,7 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      if (error instanceof HttpError) error.send(res);
-      else {
-        let errorCode = 500;
-        if (error.message.match("not found")) errorCode = 404;
-        res.status(errorCode).json({ message: error.message });
-      }
+      handleError(error, res);
     }
   },
 
@@ -125,7 +117,7 @@ export const controller = {
 
       next();
     } catch (error: any) {
-      res.status(400).json({ message: error.message });
+      handleError(error, res);
     }
   },
 };

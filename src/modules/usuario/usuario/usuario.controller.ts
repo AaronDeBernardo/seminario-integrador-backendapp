@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { Request, Response } from "express";
+import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
 import { Usuario } from "./usuario.entity.js";
 import { UsuarioDTO } from "./usuario.dto.js";
@@ -25,9 +26,7 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      let errorCode = 500;
-      if (error.message.match("not found")) errorCode = 404;
-      res.status(errorCode).json({ message: error.message });
+      handleError(error, res);
     }
   },
 };
