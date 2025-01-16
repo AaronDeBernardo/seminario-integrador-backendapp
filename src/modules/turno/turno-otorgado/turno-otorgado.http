@@ -1,0 +1,26 @@
+### Obtener todos los turnos otorgados por un abogado para la fecha actual o futuras.
+GET http://localhost:3000/api/turnos/4
+
+
+### Reservar un turno como cliente
+POST http://localhost:3000/api/turnos/
+Content-Type: application/json
+
+{
+  "id_horario_turno": 7,
+  "fecha_turno": "2025-01-31",
+  "id_cliente": 5
+}
+
+
+### Reservar un turno como visitante
+POST http://localhost:3000/api/turnos/
+Content-Type: application/json
+
+{
+  "id_horario_turno": 7,
+  "fecha_turno": "2025-01-24",
+  "nombre": "Jorgelina",
+  "telefono": "21321",
+  "email": "asd"
+}

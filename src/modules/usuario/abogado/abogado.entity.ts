@@ -1,4 +1,13 @@
-import { Collection, Entity, ManyToOne, OneToMany, OneToOne, Property, Rel } from "@mikro-orm/core";
+import {
+  Collection,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  Property,
+  Rel,
+} from "@mikro-orm/core";
+import { HorarioTurno } from "../../turno/horario-turno/horario-turno.entity.js";
 import { Rol } from "../rol/rol.entity.js";
 import { Usuario } from "../usuario/usuario.entity.js";
 import { AbogadoEspecialidad } from "../../especialidad/abogado-especialidad/abogado-especialidad.entity.js";
@@ -22,4 +31,10 @@ export class Abogado {
 
   @OneToMany(() => AbogadoEspecialidad, (abogadoEspecialidad) => abogadoEspecialidad.abogado)
   especialidades = new Collection<AbogadoEspecialidad>(this);
+
+  @OneToMany({
+    entity: () => HorarioTurno,
+    mappedBy: "abogado",
+  })
+  horariosTurnos = new Collection<HorarioTurno>(this);
 }
