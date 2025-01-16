@@ -10,6 +10,7 @@ import {
 import { HorarioTurno } from "../../turno/horario-turno/horario-turno.entity.js";
 import { Rol } from "../rol/rol.entity.js";
 import { Usuario } from "../usuario/usuario.entity.js";
+import { AbogadoEspecialidad } from "../../especialidad/abogado-especialidad/abogado-especialidad.entity.js";
 
 @Entity({ tableName: "abogados" })
 export class Abogado {
@@ -27,6 +28,9 @@ export class Abogado {
 
   @ManyToOne(() => Rol, { fieldName: "id_rol" })
   rol!: Rol;
+
+  @OneToMany(() => AbogadoEspecialidad, (abogadoEspecialidad) => abogadoEspecialidad.abogado)
+  especialidades = new Collection<AbogadoEspecialidad>(this);
 
   @OneToMany({
     entity: () => HorarioTurno,
