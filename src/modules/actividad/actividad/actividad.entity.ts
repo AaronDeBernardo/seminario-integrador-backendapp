@@ -5,8 +5,8 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import { CostoActividad } from "./costo-actividad.entity.js";
-import { NotEmptyAndMaxLength } from "../../utils/validators.js";
+import { CostoActividad } from "../costo-actividad/costo-actividad.entity.js";
+import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 
 @Entity({ tableName: "actividades" })
 export class Actividad {

@@ -2,10 +2,14 @@ import { format } from "date-fns";
 import { NextFunction, Request, Response } from "express";
 import { Actividad } from "./actividad.entity.js";
 import { ActividadDTO } from "./actividad.dto.js";
-import { CostoActividad } from "./costo-actividad.entity.js";
-import { handleError } from "../../utils/error-handler.js";
-import { orm } from "../../config/db.config.js";
-import { validateEntity, validatePrice } from "../../utils/validators.js";
+import { CostoActividad } from "../costo-actividad/costo-actividad.entity.js";
+import { handleError } from "../../../utils/error-handler.js";
+import { orm } from "../../../config/db.config.js";
+import {
+  validateEntity,
+  validateNumericId,
+  validatePrice,
+} from "../../../utils/validators.js";
 
 const em = orm.em;
 

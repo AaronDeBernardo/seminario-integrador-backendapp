@@ -101,7 +101,7 @@ CREATE TABLE `actividades_realizadas` (
   `id_actividad` int unsigned NOT NULL,
   `id_abogado` int unsigned NOT NULL,
   `id_cliente` int unsigned NOT NULL,
-  `fecha_hora` datetime NOT NULL,
+  `fecha_hora` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `fk_actividades-realizadas_clientes_idx` (`id_cliente`),
   KEY `fk_actividades-realizadas_abogados_idx` (`id_abogado`),
@@ -550,4 +550,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-01-14 18:52:33
+-- Dump completed on 2025-01-17 10:24:48

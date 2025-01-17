@@ -1,0 +1,32 @@
+### Obtener las actividades realizadas en los últimos 60 días
+GET http://localhost:3000/api/actividades/realizadas/
+
+
+### Obtener las últimas 50 actividades realizadas por un abogado
+GET http://localhost:3000/api/actividades/realizadas/2
+
+
+### Registrar una actividad realizada
+POST http://localhost:3000/api/actividades/realizadas/
+Content-Type: application/json
+
+{
+  "id_actividad": 2,
+  "id_abogado": 2,
+  "id_cliente": 8
+}
+
+
+### Modificar una actividad realizada
+PUT http://localhost:3000/api/actividades/realizadas/10
+Content-Type: application/json
+
+{
+  "id_actividad": 4,
+  "id_abogado": 2,
+  "id_cliente": 8
+}
+
+
+### Eliminar una actividad realizada
+DELETE  http://localhost:3000/api/actividades/realizadas/18

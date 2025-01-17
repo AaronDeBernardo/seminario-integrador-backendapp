@@ -1,5 +1,5 @@
 import { Actividad } from "./actividad.entity";
-import { CostoActividad } from "./costo-actividad.entity";
+import { CostoActividad } from "../costo-actividad/costo-actividad.entity";
 
 export class ActividadDTO {
   id: number;
