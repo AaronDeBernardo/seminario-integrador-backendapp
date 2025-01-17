@@ -5,7 +5,7 @@ import { sanitizeUsuario } from "../usuario/usuario.controller.js";
 import { Secretario } from "./secretario.entity.js";
 import { SecretarioDTO } from "./secretario.dto.js";
 import { Usuario } from "../usuario/usuario.entity.js";
-import { validateEntity } from "../../../utils/validators.js";
+import { validateEntity, validateNumericId } from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -34,7 +34,7 @@ export const controller = {
 
   findOne: async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
+      const id = validateNumericId(req.params.id, "id");
 
       const secretario = await em.findOneOrFail(
         Secretario,
@@ -72,8 +72,7 @@ export const controller = {
 
   update: async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
-
+      const id = validateNumericId(req.params.id, "id");
       const secretario = await em.findOneOrFail(
         Secretario,
         {

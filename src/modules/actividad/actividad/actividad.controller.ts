@@ -58,7 +58,7 @@ export const controller = {
 
   update: async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
+      const id = validateNumericId(req.params.id, "id");
       const input = req.body.sanitizedInput;
 
       const actividad = await em.findOneOrFail(Actividad, {
@@ -100,7 +100,7 @@ export const controller = {
 
   logicalDelete: async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
+      const id = validateNumericId(req.params.id, "id");
       const actividad = await em.findOneOrFail(Actividad, {
         id,
         fecha_baja: { $eq: null },

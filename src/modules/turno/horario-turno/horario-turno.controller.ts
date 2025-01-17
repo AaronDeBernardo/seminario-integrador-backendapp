@@ -34,7 +34,7 @@ export const controller = {
     }
   },
 
-  findAvailable: async (req: Request, res: Response, next: NextFunction) => {
+  findAvailable: async (req: Request, res: Response) => {
     try {
       const id_abogado = Number(req.query.id_abogado) || undefined;
       const fecha = new Date(req.query.fecha as string);
@@ -85,7 +85,7 @@ export const controller = {
     }
   },
 
-  add: async (req: Request, res: Response, next: NextFunction) => {
+  add: async (req: Request, res: Response) => {
     try {
       const input = req.body.sanitizedInput;
       let horarioTurno = undefined;
@@ -107,9 +107,9 @@ export const controller = {
     }
   },
 
-  update: async (req: Request, res: Response, next: NextFunction) => {
+  update: async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
+      const id = validateNumericId(req.params.id, "id");
       const input = req.body.sanitizedInput;
 
       const horarioTurno = await em.findOneOrFail(HorarioTurno, {
@@ -138,7 +138,7 @@ export const controller = {
 
   logicalDelete: async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
+      const id = validateNumericId(req.params.id, "id");
 
       const horarioTurno = await em.findOneOrFail(HorarioTurno, {
         id,

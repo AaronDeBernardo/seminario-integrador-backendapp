@@ -37,7 +37,7 @@ export const controller = {
 
   findOne: async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
+      const id = validateNumericId(req.params.id, "id");
 
       const abogado = await em.findOneOrFail(
         Abogado,
@@ -75,7 +75,7 @@ export const controller = {
 
   update: async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
+      const id = validateNumericId(req.params.id, "id");
       const abogado = await em.findOneOrFail(
         Abogado,
         { usuario: { id, fecha_baja: { $eq: null } } },

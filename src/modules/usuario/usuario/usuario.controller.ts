@@ -4,14 +4,17 @@ import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
 import { Usuario } from "./usuario.entity.js";
 import { UsuarioDTO } from "./usuario.dto.js";
-import { validatePassword } from "../../../utils/validators.js";
+import {
+  validateNumericId,
+  validatePassword,
+} from "../../../utils/validators.js";
 
 const em = orm.em;
 
 export const controller = {
   logicalDelete: async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
+      const id = validateNumericId(req.params.id, "id");
       const usuario = await em.findOneOrFail(Usuario, {
         id,
         fecha_baja: { $eq: null },
