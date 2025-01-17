@@ -1,17 +1,26 @@
-import { NextFunction, Request, Response } from "express";
+import { format } from "date-fns";
+import { Request, Response } from "express";
+import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
 import { Usuario } from "./usuario.entity.js";
 import { UsuarioDTO } from "./usuario.dto.js";
+import {
+  validateNumericId,
+  validatePassword,
+} from "../../../utils/validators.js";
 
 const em = orm.em;
 
 export const controller = {
   logicalDelete: async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
+      const id = validateNumericId(req.params.id, "id");
+      const usuario = await em.findOneOrFail(Usuario, {
+        id,
+        fecha_baja: { $eq: null },
+      });
 
-      const usuario = await em.findOneOrFail(Usuario, id);
-      usuario.fecha_baja = new Date();
+      usuario.fecha_baja = format(new Date(), "yyyy-MM-dd");
       await em.flush();
 
       const data = new UsuarioDTO(usuario);
@@ -20,23 +29,22 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      let errorCode = 500;
-      if (error.message.match("not found")) errorCode = 404;
-      res.status(errorCode).json({ message: error.message });
+      handleError(error, res);
     }
   },
+};
 
-  sanitize: (req: Request, _res: Response, next: NextFunction) => {
+export function sanitizeUsuario(req: Request): void {
+  try {
     req.body.sanitizedInput = {
       usuario: {
         nombre: req.body.nombre?.trim(),
         apellido: req.body.apellido?.trim(),
         email: req.body.email?.trim(),
         telefono: req.body.telefono?.trim(),
-        contrasena: req.body.contrasena?.trim(),
+        contrasena: validatePassword(req.body.contrasena, "contrasena"),
         tipo_doc: req.body.tipo_doc?.trim(),
         nro_doc: req.body.nro_doc?.trim(),
-        fecha_baja: req.body.fecha_baja,
       },
     };
 
@@ -45,7 +53,7 @@ export const controller = {
         delete req.body.sanitizedInput.usuario[key];
       }
     });
-
-    next();
-  },
-};
+  } catch (error: any) {
+    throw error;
+  }
+}

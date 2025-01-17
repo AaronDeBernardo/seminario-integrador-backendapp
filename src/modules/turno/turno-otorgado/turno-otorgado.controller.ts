@@ -4,6 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
 import { startOfDay, subHours, addHours, format } from "date-fns";
 import { Cliente } from "../../usuario/cliente/cliente.entity.js";
+import { handleError } from "../../../utils/error-handler.js";
 import { HorarioTurno } from "../horario-turno/horario-turno.entity.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { TurnoOtorgado } from "./turno-otorgado.entity.js";
@@ -45,7 +46,7 @@ export const controller = {
         .status(200)
         .json({ message: "Todos los turnos han sido encontrados.", data });
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
@@ -104,12 +105,7 @@ export const controller = {
 
       res.status(201).json({ message: "Turno otorgado.", data });
     } catch (error: any) {
-      if (error instanceof HttpError) error.send(res);
-      else {
-        let errorCode = 500;
-        if (error.message.match("not found")) errorCode = 404;
-        res.status(errorCode).json({ message: error.message });
-      }
+      handleError(error, res);
     }
   },
 
@@ -174,8 +170,7 @@ export const controller = {
 
       next();
     } catch (error: any) {
-      if (error instanceof HttpError) error.send(res);
-      else res.status(400).json({ message: error.message });
+      handleError(error, res);
     }
   },
 };

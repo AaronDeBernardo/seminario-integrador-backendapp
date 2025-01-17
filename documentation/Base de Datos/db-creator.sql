@@ -101,7 +101,7 @@ CREATE TABLE `actividades_realizadas` (
   `id_actividad` int unsigned NOT NULL,
   `id_abogado` int unsigned NOT NULL,
   `id_cliente` int unsigned NOT NULL,
-  `fecha_hora` datetime NOT NULL,
+  `fecha_hora` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `fk_actividades-realizadas_clientes_idx` (`id_cliente`),
   KEY `fk_actividades-realizadas_abogados_idx` (`id_abogado`),
@@ -465,6 +465,81 @@ CREATE TABLE `usuarios` (
   UNIQUE KEY `email_UNIQUE` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'sistema_juridico'
+--
+/*!50003 DROP FUNCTION IF EXISTS `get_cant_jus_actividad` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `get_cant_jus_actividad`(v_id_actividad INT, v_fecha_hora DATETIME) RETURNS decimal(9,3)
+    READS SQL DATA
+BEGIN
+	DECLARE costo DECIMAL(9,3);
+	SELECT MAX(fecha_hora_desde) INTO @fecha_hora_desde
+	FROM costos_actividades
+    WHERE fecha_hora_desde <= v_fecha_hora
+		AND id_actividad = v_id_actividad;
+	
+	SELECT cost.cant_jus INTO costo
+	FROM costos_actividades cost
+    WHERE cost.id_actividad = v_id_actividad
+		AND @fecha_hora_desde = cost.fecha_hora_desde;
+        
+	RETURN costo;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `get_actividades` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `get_actividades`()
+BEGIN
+	SELECT MAX(fecha_hora_desde) INTO @fecha_hora_desde
+	FROM precios_jus
+	WHERE fecha_hora_desde <= NOW();
+
+	SELECT valor INTO @valor_jus
+	FROM precios_jus
+	WHERE fecha_hora_desde = @fecha_hora_desde;
+
+	WITH cte AS (
+	  SELECT id_actividad, MAX(fecha_hora_desde) fecha_hora_desde
+	  FROM costos_actividades
+	  WHERE fecha_hora_desde <= NOW()
+	  GROUP BY id_actividad
+	)
+	SELECT act.id, act.nombre, cost.cant_jus, ROUND(cost.cant_jus * @valor_jus, 3) precio_pesos
+	FROM actividades act
+	INNER JOIN costos_actividades cost
+	  ON cost.id_actividad = act.id
+	INNER JOIN cte
+	  ON cte.id_actividad = cost.id_actividad
+		AND cte.fecha_hora_desde = cost.fecha_hora_desde
+	WHERE fecha_baja IS NULL;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -475,4 +550,4 @@ CREATE TABLE `usuarios` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-16 19:15:07
+-- Dump completed on 2025-01-17 10:24:48

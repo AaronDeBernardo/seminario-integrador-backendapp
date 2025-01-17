@@ -28,7 +28,7 @@ export class HorarioTurno {
   dia_semana!: number;
 
   @Property({ type: "date", nullable: true })
-  fecha_baja?: Date;
+  fecha_baja?: string;
 
   @OneToMany({
     entity: () => TurnoOtorgado,

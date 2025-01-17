@@ -2,7 +2,10 @@ import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
 import { Cliente } from "./cliente.entity.js";
 import { ClienteDTO } from "./cliente.dto.js";
+import { handleError } from "../../../utils/error-handler.js";
+import { sanitizeUsuario } from "../usuario/usuario.controller.js";
 import { Usuario } from "../usuario/usuario.entity.js";
+import { validateEntity, validateNumericId } from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -25,18 +28,18 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
   findOne: async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
+      const id = validateNumericId(req.params.id, "id");
 
       const cliente = await em.findOneOrFail(
         Cliente,
         {
-          usuario: { id },
+          usuario: { id, fecha_baja: { $eq: null } },
         },
         { populate: ["usuario"] }
       );
@@ -48,37 +51,41 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      let errorCode = 500;
-      if (error.message.match("not found")) errorCode = 404;
-      res.status(errorCode).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
   add: async (req: Request, res: Response) => {
     try {
       const cliente = em.create(Cliente, req.body.sanitizedInput);
+      validateEntity(cliente.usuario);
+      validateEntity(cliente);
+
       await em.flush();
 
       const data = new ClienteDTO(cliente);
       res.status(201).json({ message: "Cliente creado.", data });
     } catch (error: any) {
-      res.status(500).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
   update: async (req: Request, res: Response) => {
     try {
-      const id = Number(req.params.id);
+      const id = validateNumericId(req.params.id, "id");
 
       const cliente = await em.findOneOrFail(
         Cliente,
-        { usuario: { id } },
+        { usuario: { id, fecha_baja: { $eq: null } } },
         { populate: ["usuario"] }
       );
 
       em.assign(cliente, req.body.sanitizedInput, {
         updateByPrimaryKey: false,
       });
+
+      validateEntity(cliente.usuario);
+      validateEntity(cliente);
 
       await em.flush();
       const data = new ClienteDTO(cliente);
@@ -88,25 +95,27 @@ export const controller = {
         data,
       });
     } catch (error: any) {
-      let errorCode = 500;
-      if (error.message.match("not found")) errorCode = 404;
-      res.status(errorCode).json({ message: error.message });
+      handleError(error, res);
     }
   },
 
-  sanitize: (req: Request, _res: Response, next: NextFunction) => {
-    // llamar antes a sanitizeUsuario
-    req.body.sanitizedInput = {
-      ...req.body.sanitizedInput,
-      es_empresa: req.body.es_empresa,
-    };
+  sanitize: (req: Request, res: Response, next: NextFunction) => {
+    try {
+      sanitizeUsuario(req);
+      req.body.sanitizedInput = {
+        ...req.body.sanitizedInput,
+        es_empresa: req.body.es_empresa,
+      };
 
-    Object.keys(req.body.sanitizedInput).forEach((key) => {
-      if (req.body.sanitizedInput[key] === undefined) {
-        delete req.body.sanitizedInput[key];
-      }
-    });
+      Object.keys(req.body.sanitizedInput).forEach((key) => {
+        if (req.body.sanitizedInput[key] === undefined) {
+          delete req.body.sanitizedInput[key];
+        }
+      });
 
-    next();
+      next();
+    } catch (error: any) {
+      handleError(error, res);
+    }
   },
 };
