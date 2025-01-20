@@ -1,14 +1,13 @@
 ###
-GET http://localhost:3000/api/misc/precio-jus
+GET http://localhost:3000/api/misc/precios-jus
 
 ###
-GET http://localhost:3000/api/misc/precio-jus/latest
+GET http://localhost:3000/api/misc/precios-jus/latest
 
 ###
-POST http://localhost:3000/api/misc/precio-jus
+POST http://localhost:3000/api/misc/precios-jus
 Content-Type: application/json
 
 {
-  "fecha_hora_desde": "2025-01-18",
-  "valor": 20000
+  "valor": 19000.34556
 }

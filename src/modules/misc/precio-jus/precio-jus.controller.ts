@@ -3,7 +3,7 @@ import { orm } from "../../../config/db.config.js";
 import { PrecioJus } from "./precio-jus.entity.js";
 import { PrecioJusDTO } from "./precio-jus.dto.js";
 import { handleError } from "../../../utils/error-handler.js";
-import { validateEntity } from "../../../utils/validators.js";
+import { validateEntity, validatePrice } from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -61,7 +61,12 @@ export const controller = {
 
   create: async (req: Request, res: Response) => {
     try {
-      const precioJus = em.create(PrecioJus, req.body.sanitizedInput);
+      const precioJusData = {
+        fecha_hora_desde: new Date(),
+        valor: req.body.sanitizedInput.valor,
+      };
+
+      const precioJus = em.create(PrecioJus, precioJusData);
       validateEntity(precioJus);
       await em.flush();
 
@@ -78,13 +83,9 @@ export const controller = {
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
-        fecha_hora_desde: req.body.fecha_hora_desde
-          ? new Date(req.body.fecha_hora_desde)
-          : undefined,
-        valor:
-          typeof req.body.valor === "string"
-            ? req.body.valor.trim()
-            : req.body.valor,
+        valor: req.body.valor
+          ? validatePrice(parseFloat(req.body.valor), 2, "valor")
+          : req.body.valor,
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {

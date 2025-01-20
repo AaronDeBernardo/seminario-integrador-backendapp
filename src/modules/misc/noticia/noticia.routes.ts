@@ -6,4 +6,5 @@ export const noticiaRouter = Router();
 noticiaRouter.get("/", controller.findAll);
 noticiaRouter.post("/", controller.sanitize, controller.create);
 noticiaRouter.get("/:id", controller.findOne);
-noticiaRouter.patch("/:id", controller.sanitize, controller.update);
+noticiaRouter.put("/:id", controller.sanitize, controller.update);
+noticiaRouter.patch("/desactivate/:id", controller.desactivate);

@@ -4,8 +4,8 @@ export class NoticiaDTO {
   id: number;
   titulo: string;
   cuerpo: string;
-  fecha_publicacion: Date;
-  fecha_vencimiento: Date;
+  fecha_publicacion: string;
+  fecha_vencimiento: string;
 
   constructor(input: Noticia) {
     this.id = input.id;

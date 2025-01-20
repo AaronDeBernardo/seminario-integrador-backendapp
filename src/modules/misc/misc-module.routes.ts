@@ -4,5 +4,5 @@ import { precioJusRouter } from "./precio-jus/precio-jus.routes.js";
 
 export const miscModuleRouter = Router();
 
-miscModuleRouter.use("/noticia", noticiaRouter);
-miscModuleRouter.use("/precio-jus", precioJusRouter);
+miscModuleRouter.use("/noticias", noticiaRouter);
+miscModuleRouter.use("/precios-jus", precioJusRouter);
