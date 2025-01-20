@@ -1,0 +1,27 @@
+###
+GET http://localhost:3000/api/misc/noticia
+
+###
+GET http://localhost:3000/api/misc/noticia/2
+
+###
+POST http://localhost:3000/api/misc/noticia
+Content-Type: application/json
+
+{
+  "titulo": "Título ejemplo de una noticia",
+  "cuerpo": "Cuerpo ejemplo de una noticia",
+  "fecha_publicacion": "2025-01-18",
+  "fecha_vencimiento": "2025-06-12"
+}
+
+###
+PATCH http://localhost:3000/api/misc/noticia/4
+Content-Type: application/json
+
+{
+  "titulo": "Título ejemplo de una noticia",
+  "cuerpo": "Cuerpo ejemplo de una noticia",
+  "fecha_publicacion": "2024-01-18",
+  "fecha_vencimiento": "2026-06-12"
+}
