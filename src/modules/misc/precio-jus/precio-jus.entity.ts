@@ -1,10 +1,10 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 
-@Entity()
+@Entity({ tableName: "precios_jus" })
 export class PrecioJus {
-    @PrimaryKey()
-    fecha_hora_desde: Date = new Date();
+  @PrimaryKey({ type: "date" })
+  fecha_hora_desde!: Date;
 
-    @Property({ type: 'decimal', precision: 9, scale: 3 })
-    valor: number = 0;
+  @Property({ type: "decimal", precision: 9, scale: 3 })
+  valor!: number;
 }
