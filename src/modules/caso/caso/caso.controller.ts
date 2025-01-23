@@ -20,9 +20,41 @@ type CasoUpdateData = {
 export const controller = {
   findAll: async (_req: Request, res: Response) => {
     try {
+      const sixtyDaysAgo = new Date();
+      sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
       const casos = await em.find(
         Caso,
-        {},
+        {
+          $or: [
+            {
+              fecha_inicio: { $gte: sixtyDaysAgo.toISOString().split("T")[0] },
+            },
+            {
+              fecha_inicio: { $lt: sixtyDaysAgo.toISOString().split("T")[0] },
+              estado: "En curso",
+            },
+          ],
+        },
+        { populate: ["cliente.usuario", "especialidad"] }
+      );
+
+      const data = casos.map((c) => new CasoDTO(c));
+
+      res.status(200).json({
+        message: "Todos los casos fueron encontrados.",
+        data,
+      });
+    } catch (error: any) {
+      handleError(error, res);
+    }
+  },
+
+  findCurrent: async (_req: Request, res: Response) => {
+    try {
+      const casos = await em.find(
+        Caso,
+        { estado: "En curso" },
         { populate: ["cliente.usuario", "especialidad"] }
       );
 
@@ -58,7 +90,7 @@ export const controller = {
     }
   },
 
-  create: async (req: Request, res: Response) => {
+  add: async (req: Request, res: Response) => {
     try {
       const casoData = {
         ...req.body.sanitizedInput,
@@ -71,6 +103,9 @@ export const controller = {
       validateEntity(caso);
 
       await em.flush();
+
+      await em.populate(caso, ["cliente.usuario", "especialidad"]);
+
       const data = new CasoDTO(caso);
 
       res.status(201).json({
@@ -127,6 +162,8 @@ export const controller = {
       validateEntity(caso);
       await em.flush();
 
+      await em.populate(caso, ["cliente.usuario", "especialidad"]);
+
       const data = new CasoDTO(caso);
 
       res.status(200).json({
@@ -138,7 +175,7 @@ export const controller = {
     }
   },
 
-  desactivate: async (req: Request, res: Response) => {
+  deactivate: async (req: Request, res: Response) => {
     try {
       const id = validateNumericId(req.params.id, "id");
 
@@ -152,7 +189,12 @@ export const controller = {
       em.assign(caso, updateData);
       await em.flush();
 
-      res.status(204).send();
+      await em.populate(caso, ["cliente", "especialidad"]);
+
+      res.status(200).json({
+        message: "Caso cancelado.",
+        data: caso,
+      });
     } catch (error: any) {
       handleError(error, res);
     }
