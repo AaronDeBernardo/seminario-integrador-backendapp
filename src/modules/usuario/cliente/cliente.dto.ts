@@ -9,7 +9,7 @@ export class ClienteDTO {
   telefono: string;
   tipo_doc: string;
   nro_doc: string;
-  fecha_alta: Date;
+  fecha_alta: string;
   es_empresa: boolean;
 
   constructor(input: Cliente | Usuario) {

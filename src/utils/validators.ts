@@ -10,7 +10,14 @@ export function validateNumericId(id: any, field: string) {
   throw new HttpError(400, `${field}: debe ser un número entero positivo.`);
 }
 
-export function validatePrice(price: any, maxDecimals: number, field: string) {
+export function validatePrice(
+  price: any,
+  maxDecimals: number,
+  field: string,
+  required: boolean
+) {
+  if (required === false && price === undefined) return undefined;
+
   if (typeof price === "number" && price >= 0) {
     const roundedPrice = parseFloat(price.toFixed(maxDecimals));
     return roundedPrice;
@@ -22,7 +29,7 @@ export function validatePrice(price: any, maxDecimals: number, field: string) {
     return roundedPrice;
   }
 
-  throw new HttpError(400, `${field}:debe ser un número mayor o igual que 0.`);
+  throw new HttpError(400, `${field}: debe ser un número mayor o igual que 0.`);
 }
 
 export function validatePassword(password: any, field: string) {

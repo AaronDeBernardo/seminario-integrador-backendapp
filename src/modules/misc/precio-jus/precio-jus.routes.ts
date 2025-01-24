@@ -5,4 +5,4 @@ export const precioJusRouter = Router();
 
 precioJusRouter.get("/", controller.findAll);
 precioJusRouter.get("/latest", controller.findLatest);
-precioJusRouter.post("/", controller.sanitize, controller.create);
+precioJusRouter.post("/", controller.sanitize, controller.add);

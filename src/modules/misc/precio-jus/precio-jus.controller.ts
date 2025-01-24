@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
+import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
 import { PrecioJus } from "./precio-jus.entity.js";
 import { PrecioJusDTO } from "./precio-jus.dto.js";
-import { handleError } from "../../../utils/error-handler.js";
-import { validateEntity, validatePrice } from "../../../utils/validators.js";
+import { validatePrice } from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -14,7 +14,7 @@ export const controller = {
       const data = preciosJus.map((p) => new PrecioJusDTO(p));
 
       res.status(200).json({
-        message: "Todos los precios Jus fueron encontrados.",
+        message: "Todos los precios del JUS fueron encontrados.",
         data,
       });
     } catch (error: any) {
@@ -41,7 +41,7 @@ export const controller = {
 
       if (!latestPrecioJus) {
         res.status(404).json({
-          message: "No se encontró ningún precio Jus vigente.",
+          message: "No se encontró ningún precio del JUS vigente.",
           timestamp: currentDate,
         });
         return;
@@ -49,7 +49,7 @@ export const controller = {
 
       const data = new PrecioJusDTO(latestPrecioJus);
       res.status(200).json({
-        message: "El precio Jus vigente fue encontrado.",
+        message: "El precio actual del JUS fue encontrado.",
         data,
         vigente_desde: latestPrecioJus.fecha_hora_desde,
         consultado_en: currentDate,
@@ -59,20 +59,14 @@ export const controller = {
     }
   },
 
-  create: async (req: Request, res: Response) => {
+  add: async (req: Request, res: Response) => {
     try {
-      const precioJusData = {
-        fecha_hora_desde: new Date(),
-        valor: req.body.sanitizedInput.valor,
-      };
-
-      const precioJus = em.create(PrecioJus, precioJusData);
-      validateEntity(precioJus);
+      const precioJus = em.create(PrecioJus, req.body.sanitizedInput);
       await em.flush();
 
       const data = new PrecioJusDTO(precioJus);
       res.status(201).json({
-        message: "El precio Jus fue creado.",
+        message: "El precio del JUS fue actualizado.",
         data,
       });
     } catch (error: any) {
@@ -83,9 +77,7 @@ export const controller = {
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
-        valor: req.body.valor
-          ? validatePrice(parseFloat(req.body.valor), 2, "valor")
-          : req.body.valor,
+        valor: validatePrice(req.body.valor, 3, "valor", true),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {
