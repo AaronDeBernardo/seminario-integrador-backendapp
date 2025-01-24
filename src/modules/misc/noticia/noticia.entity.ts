@@ -10,6 +10,7 @@ export class Noticia {
   @Property({ type: "varchar", length: 255 })
   titulo!: string;
 
+  @NotEmptyAndMaxLength(65535, "cuerpo")
   @Property({ type: "text" })
   cuerpo!: string;
 

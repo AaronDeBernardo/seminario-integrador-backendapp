@@ -1,9 +1,11 @@
+import { addDays, format } from "date-fns";
 import { NextFunction, Request, Response } from "express";
-import { orm } from "../../../config/db.config.js";
+import { handleError } from "../../../utils/error-handler.js";
 import { Noticia } from "./noticia.entity.js";
 import { NoticiaDTO } from "./noticia.dto.js";
-import { handleError } from "../../../utils/error-handler.js";
+import { orm } from "../../../config/db.config.js";
 import {
+  validateDate,
   validateEntity,
   validateNumericId,
 } from "../../../utils/validators.js";
@@ -13,9 +15,9 @@ const em = orm.em;
 export const controller = {
   findAll: async (_req: Request, res: Response) => {
     try {
-      const now = new Date();
+      const today = format(new Date(), "yyyy-MM-dd");
       const noticias = await em.find(Noticia, {
-        fecha_vencimiento: { $gt: now.toISOString() },
+        fecha_vencimiento: { $gt: today },
       });
       const data = noticias.map((n) => new NoticiaDTO(n));
 
@@ -30,10 +32,12 @@ export const controller = {
 
   findOne: async (req: Request, res: Response) => {
     try {
+      const today = format(new Date(), "yyyy-MM-dd");
       const id = validateNumericId(req.params.id, "id");
+
       const noticia = await em.findOneOrFail(Noticia, {
         id,
-        fecha_vencimiento: { $gt: new Date().toISOString() },
+        fecha_vencimiento: { $gt: today },
       });
       const data = new NoticiaDTO(noticia);
 
@@ -46,28 +50,29 @@ export const controller = {
     }
   },
 
-  create: async (req: Request, res: Response): Promise<void> => {
+  add: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { fecha_publicacion, fecha_vencimiento, ...rest } =
-        req.body.sanitizedInput;
+      const input = req.body.sanitizedInput;
+      const today = format(new Date(), "yyyy-MM-dd");
 
-      const now = new Date();
-      const defaultFechaPublicacion = fecha_publicacion
-        ? new Date(fecha_publicacion)
-        : now;
-      const defaultFechaVencimiento = fecha_vencimiento
-        ? new Date(fecha_vencimiento)
-        : new Date(now.setMonth(now.getMonth() + 1));
+      if (input.fecha_publicacion === undefined)
+        input.fecha_publicacion = today;
 
-      if (defaultFechaPublicacion > defaultFechaVencimiento) {
+      if (input.fecha_vencimiento === undefined)
+        input.fecha_vencimiento = format(
+          addDays(input.fecha_publicacion, 31),
+          "yyyy-MM-dd"
+        );
+
+      if (input.fecha_publicacion >= input.fecha_vencimiento) {
         res.status(400).json({
           message:
-            "La fecha de publicación no puede ser mayor que la fecha de vencimiento.",
+            "La fecha de publicación no puede ser mayor o igual a la fecha de vencimiento.",
         });
         return;
       }
 
-      if (defaultFechaPublicacion < now) {
+      if (input.fecha_publicacion < today) {
         res.status(400).json({
           message:
             "La fecha de publicación debe ser mayor o igual a la fecha actual.",
@@ -75,19 +80,7 @@ export const controller = {
         return;
       }
 
-      if (defaultFechaVencimiento < now) {
-        res.status(400).json({
-          message:
-            "La fecha de vencimiento debe ser mayor o igual a la fecha actual.",
-        });
-        return;
-      }
-
-      const noticia = em.create(Noticia, {
-        ...rest,
-        fecha_publicacion: defaultFechaPublicacion,
-        fecha_vencimiento: defaultFechaVencimiento,
-      });
+      const noticia = em.create(Noticia, input);
 
       validateEntity(noticia);
       await em.flush();
@@ -105,61 +98,33 @@ export const controller = {
   update: async (req: Request, res: Response): Promise<void> => {
     try {
       const id = validateNumericId(req.params.id, "id");
-      const noticia = await em.findOneOrFail(Noticia, { id });
+      const noticia = await em.findOneOrFail(Noticia, id);
+
+      const input = req.body.sanitizedInput;
+      const today = format(new Date(), "yyyy-MM-dd");
 
       if (
-        req.body.fecha_publicacion &&
-        isNaN(Date.parse(req.body.fecha_publicacion))
+        input.fecha_publicacion !== undefined &&
+        input.fecha_publicacion !== noticia.fecha_publicacion &&
+        input.fecha_publicacion < today
       ) {
-        res
-          .status(400)
-          .json({ message: "La fecha de publicación es inválida." });
-        return;
-      }
-
-      if (
-        req.body.fecha_vencimiento &&
-        isNaN(Date.parse(req.body.fecha_vencimiento))
-      ) {
-        res
-          .status(400)
-          .json({ message: "La fecha de vencimiento es inválida." });
-        return;
-      }
-
-      const sanitizedInput = {
-        titulo: req.body.titulo,
-        cuerpo: req.body.cuerpo,
-        fecha_publicacion: req.body.fecha_publicacion,
-        fecha_vencimiento: req.body.fecha_vencimiento,
-      };
-
-      if (!sanitizedInput.fecha_publicacion) {
-        res
-          .status(400)
-          .json({ message: "La fecha de publicación es requerida." });
-        return;
-      }
-
-      if (!sanitizedInput.fecha_vencimiento) {
-        res
-          .status(400)
-          .json({ message: "La fecha de vencimiento es requerida." });
-        return;
-      }
-
-      const pubDate = new Date(sanitizedInput.fecha_publicacion);
-      const expDate = new Date(sanitizedInput.fecha_vencimiento);
-
-      if (expDate < pubDate) {
         res.status(400).json({
           message:
-            "La fecha de vencimiento debe ser posterior a la fecha de publicación.",
+            "La fecha de publicación debe ser mayor o igual a la fecha actual, o no modificarse.",
         });
         return;
       }
 
-      em.assign(noticia, sanitizedInput);
+      em.assign(noticia, req.body.sanitizedInput);
+
+      if (noticia.fecha_publicacion >= noticia.fecha_vencimiento) {
+        res.status(400).json({
+          message:
+            "La fecha de publicación no puede ser mayor o igual a la fecha de vencimiento.",
+        });
+        return;
+      }
+
       validateEntity(noticia);
       await em.flush();
 
@@ -173,7 +138,7 @@ export const controller = {
     }
   },
 
-  desactivate: async (req: Request, res: Response): Promise<void> => {
+  deactivate: async (req: Request, res: Response): Promise<void> => {
     try {
       const id = validateNumericId(req.params.id, "id");
       const noticia = await em.findOneOrFail(Noticia, { id });
@@ -184,20 +149,17 @@ export const controller = {
         new Date(noticia.fecha_vencimiento) <= now
       ) {
         res.status(400).json({
-          message: "La noticia ya está desactivada.",
+          message: "La noticia ya está dada de baja.",
         });
         return;
       }
 
-      noticia.fecha_vencimiento = new Date()
-        .toISOString()
-        .slice(0, 19)
-        .replace("T", " ");
+      noticia.fecha_vencimiento = format(new Date(), "yyyy-MM-dd");
       await em.flush();
 
       const data = new NoticiaDTO(noticia);
       res.status(200).json({
-        message: "La noticia fue desactivada.",
+        message: "La noticia fue dada de baja.",
         data,
       });
     } catch (error: any) {
@@ -210,8 +172,16 @@ export const controller = {
       req.body.sanitizedInput = {
         titulo: req.body.titulo?.trim(),
         cuerpo: req.body.cuerpo?.trim(),
-        fecha_publicacion: new Date(req.body.fecha_publicacion),
-        fecha_vencimiento: new Date(req.body.fecha_vencimiento),
+
+        fecha_publicacion: validateDate(
+          req.body.fecha_publicacion,
+          "fecha_publicacion"
+        ),
+
+        fecha_vencimiento: validateDate(
+          req.body.fecha_vencimiento,
+          "fecha_vencimiento"
+        ),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {

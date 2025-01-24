@@ -27,4 +27,4 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:3000/api/misc/noticias/desactivate/6
+PATCH http://localhost:3000/api/misc/noticias/deactivate/3
