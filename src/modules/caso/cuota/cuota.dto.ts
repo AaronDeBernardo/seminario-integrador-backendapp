@@ -15,7 +15,8 @@ export class CuotaDTO {
       CuotaDTO.casoDTOCache = new CasoDTO(input.caso);
     }
 
-    this.caso = input.numero === 1 ? CuotaDTO.casoDTOCache : null;
+    this.caso =
+      forceShowCaso || input.numero === 1 ? CuotaDTO.casoDTOCache : null;
     this.numero = input.numero;
     this.cant_jus = input.cant_jus;
     this.fecha_vencimiento = input.fecha_vencimiento;
