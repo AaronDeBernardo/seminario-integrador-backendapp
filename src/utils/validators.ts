@@ -46,6 +46,18 @@ export function validateTime(time: any, field: string) {
   );
 }
 
+export function validateDate(date: any, field: string) {
+  if (date === undefined) return undefined;
+
+  const aux = new Date(date);
+  if (!isNaN(aux.getTime())) return date;
+
+  throw new HttpError(
+    400,
+    `${field}: debe ser un string en formato yyyy-MM-dd.`
+  );
+}
+
 export function validateWeekDay(weekday: any, field: string) {
   if (weekday === undefined) return undefined;
 

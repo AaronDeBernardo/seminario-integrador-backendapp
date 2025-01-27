@@ -28,6 +28,7 @@ export class Caso {
   @Property({ type: "date" })
   fecha_inicio!: string;
 
+  @NotEmptyAndMaxLength(65535, "cuerpo")
   @Property({ type: "text" })
   descripcion!: string;
 

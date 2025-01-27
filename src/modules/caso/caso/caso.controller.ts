@@ -1,14 +1,17 @@
-import { NextFunction, Request, Response } from "express";
-import { orm } from "../../../config/db.config.js";
 import { Caso } from "./caso.entity.js";
 import { CasoDTO } from "./caso.dto.js";
+import { Cliente } from "../../usuario/cliente/cliente.entity.js";
+import { Cuota } from "../cuota/cuota.entity.js";
+import { CuotaDTO } from "../cuota/cuota.dto.js";
+import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
 import { handleError } from "../../../utils/error-handler.js";
+import { NextFunction, Request, Response } from "express";
+import { orm } from "../../../config/db.config.js";
 import {
+  validateDate,
   validateEntity,
   validateNumericId,
 } from "../../../utils/validators.js";
-import { Cliente } from "../../usuario/cliente/cliente.entity.js";
-import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
 
 const em = orm.em;
 
@@ -128,9 +131,7 @@ export const controller = {
         updateData.estado = req.body.estado;
       }
 
-      if (req.body.fecha_estado) {
-        updateData.fecha_estado = req.body.fecha_estado;
-      } else if (req.body.estado) {
+      if (req.body.estado) {
         updateData.fecha_estado = new Date().toISOString().split("T")[0];
       }
 
@@ -175,6 +176,128 @@ export const controller = {
     }
   },
 
+  end: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const id = validateNumericId(req.params.id, "id");
+      const caso = await em.findOneOrFail(Caso, { id });
+
+      const {
+        cant_jus,
+        fecha_primer_cobro,
+        frecuencia_pago,
+        num_cuotas,
+        forma_cobro,
+      } = req.body;
+
+      if (
+        !cant_jus ||
+        !fecha_primer_cobro ||
+        !frecuencia_pago ||
+        !num_cuotas ||
+        !forma_cobro
+      ) {
+        res
+          .status(400)
+          .json({ message: "Faltan campos requeridos para finalizar el caso" });
+        return;
+      }
+
+      const valid_fecha_primer_cobro = validateDate(
+        fecha_primer_cobro,
+        "fecha_primer_cobro"
+      );
+
+      caso.estado = "Finalizado";
+      caso.fecha_estado = new Date().toISOString().split("T")[0];
+
+      const cuotas: Cuota[] = [];
+      const today = new Date(valid_fecha_primer_cobro);
+
+      for (let i = 0; i < num_cuotas; i++) {
+        const cuota = em.create(Cuota, {
+          caso,
+          numero: i + 1,
+          cant_jus: cant_jus / num_cuotas,
+          fecha_vencimiento: controller.calculateExpirationDate(
+            new Date(today),
+            frecuencia_pago
+          ),
+          fecha_hora_cobro: null,
+          forma_cobro: forma_cobro,
+        });
+        cuotas.push(cuota);
+        validateEntity(cuota);
+
+        controller.incrementDate(today, frecuencia_pago);
+      }
+
+      await em.flush();
+
+      const data = {
+        caso: new CasoDTO(caso),
+        cuotas: cuotas.map((c) => new CuotaDTO(c)),
+      };
+
+      res.status(200).json({
+        message: "Caso finalizado y cuotas generadas.",
+        data,
+      });
+    } catch (error: any) {
+      next(error);
+    }
+  },
+
+  calculateExpirationDate(date: Date, frequency: string): string {
+    switch (frequency) {
+      case "semanal":
+        date.setDate(date.getDate() + 7);
+        break;
+      case "quincenal":
+        date.setDate(date.getDate() + 15);
+        break;
+      case "mensual":
+        date.setMonth(date.getMonth() + 1);
+        break;
+      case "trimestral":
+        date.setMonth(date.getMonth() + 3);
+        break;
+      case "bimerstral":
+        date.setMonth(date.getMonth() + 6);
+        break;
+      case "anual":
+        date.setMonth(date.getMonth() + 12);
+        break;
+    }
+    return date.toISOString().split("T")[0];
+  },
+
+  incrementDate(date: Date, frequency: string): void {
+    switch (frequency) {
+      case "semanal":
+        date.setDate(date.getDate() + 7);
+        break;
+      case "quincenal":
+        date.setDate(date.getDate() + 15);
+        break;
+      case "mensual":
+        date.setMonth(date.getMonth() + 1);
+        break;
+      case "trimestral":
+        date.setMonth(date.getMonth() + 3);
+        break;
+      case "bimerstral":
+        date.setMonth(date.getMonth() + 6);
+        break;
+      case "anual":
+        date.setMonth(date.getMonth() + 12);
+        break;
+    }
+  },
+
   deactivate: async (req: Request, res: Response) => {
     try {
       const id = validateNumericId(req.params.id, "id");
@@ -202,21 +325,31 @@ export const controller = {
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
-      req.body.sanitizedInput = {
-        cliente: validateNumericId(req.body.id_cliente, "id_cliente"),
-        especialidad: validateNumericId(
+      const sanitizedInput: any = {};
+
+      if (req.body.id_cliente) {
+        sanitizedInput.cliente = validateNumericId(
+          req.body.id_cliente,
+          "id_cliente"
+        );
+      }
+
+      if (req.body.id_especialidad) {
+        sanitizedInput.especialidad = validateNumericId(
           req.body.id_especialidad,
           "id_especialidad"
-        ),
-        descripcion: req.body.descripcion?.trim(),
-        monto_caso: req.body.monto_caso,
-      };
+        );
+      }
 
-      Object.keys(req.body.sanitizedInput).forEach((key) => {
-        if (req.body.sanitizedInput[key] === undefined) {
-          delete req.body.sanitizedInput[key];
-        }
-      });
+      if (req.body.descripcion) {
+        sanitizedInput.descripcion = req.body.descripcion.trim();
+      }
+
+      if (req.body.monto_caso !== undefined) {
+        sanitizedInput.monto_caso = req.body.monto_caso;
+      }
+
+      req.body.sanitizedInput = sanitizedInput;
 
       next();
     } catch (error: any) {

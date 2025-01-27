@@ -20,7 +20,7 @@ Content-Type: application/json
 
 
 ###
-PUT http://localhost:3000/api/casos/casos/5
+PUT http://localhost:3000/api/casos/casos/update/5
 Content-Type: application/json
 
 {
@@ -29,6 +29,18 @@ Content-Type: application/json
   "descripcion": "Descripción de un caso de prueba con una actualización",
   "estado": "En curso",
   "monto_caso": null
+}
+
+###
+PUT http://localhost:3000/api/casos/casos/end/5
+Content-Type: application/json
+
+{
+  "cant_jus": 1000,
+  "num_cuotas": 10,
+  "fecha_primer_cobro": "2025-05-05",
+  "frecuencia_pago": "mensual",
+  "forma_cobro": "efectivo"
 }
 
 ###

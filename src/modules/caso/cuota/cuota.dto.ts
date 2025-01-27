@@ -2,15 +2,20 @@ import { CasoDTO } from "../../caso/caso/caso.dto.js";
 import { Cuota } from "./cuota.entity.js";
 
 export class CuotaDTO {
-  caso: CasoDTO;
+  static casoDTOCache: CasoDTO | null = null;
+  caso: CasoDTO | null;
   numero: number;
   cant_jus: number;
   fecha_vencimiento: string;
   fecha_hora_cobro: Date | undefined;
   forma_cobro: string | undefined;
 
-  constructor(input: Cuota) {
-    this.caso = new CasoDTO(input.caso);
+  constructor(input: Cuota, forceShowCaso: boolean = false) {
+    if (!CuotaDTO.casoDTOCache) {
+      CuotaDTO.casoDTOCache = new CasoDTO(input.caso);
+    }
+
+    this.caso = input.numero === 1 ? CuotaDTO.casoDTOCache : null;
     this.numero = input.numero;
     this.cant_jus = input.cant_jus;
     this.fecha_vencimiento = input.fecha_vencimiento;

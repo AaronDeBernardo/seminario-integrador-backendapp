@@ -1,9 +1,8 @@
-import { Router } from "express";
 import { controller } from "./cuota.controller.js";
+import { Router } from "express";
 
 export const cuotaRouter = Router();
 
 cuotaRouter.get("/", controller.findAll);
-cuotaRouter.get("/cercana", controller.findNearest);
-cuotaRouter.post("/", controller.sanitize, controller.add);
-cuotaRouter.patch("/:id", controller.collectFee);
+cuotaRouter.get("/nearest/:id_caso", controller.findNearest);
+cuotaRouter.patch("/:id_caso/:numero", controller.collectFee);
