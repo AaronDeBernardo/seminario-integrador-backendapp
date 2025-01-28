@@ -4,6 +4,7 @@ import { DocumentoDTO } from "./documento.dto.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
+import { Politica } from "../../misc/politica/politica.entity.js";
 import {
   validateEntity,
   validateNumericId,
@@ -18,6 +19,12 @@ export const controller = {
         Documento,
         { fecha_baja: null },
         { populate: ["caso"] }
+      );
+
+      console.log("Cantidad de documentos encontrados:", documentos.length);
+      console.log(
+        "Documentos:",
+        documentos.map((d) => ({ id: d.id, nombre: d.nombre }))
       );
 
       const data = documentos.map((d) => new DocumentoDTO(d));
@@ -81,17 +88,44 @@ export const controller = {
     }
   },
 
-  add: async (req: Request, res: Response) => {
+  add: async (req: Request, res: Response): Promise<void> => {
     try {
       const id_caso = validateNumericId(req.params.id_caso, "id_caso");
       const { nombre, archivo } = req.body.sanitizedInput;
+
+      const politica = await em.findOneOrFail(Politica, {});
+      const MAX_FILE_SIZE = politica.tam_max_archivo_mb * 1024 * 1024;
+
+      if (!archivo) {
+        res.status(400).json({
+          message: "El archivo es requerido",
+        });
+        return;
+      }
+
+      if (!nombre) {
+        res.status(400).json({
+          message: "El nombre es requerido",
+        });
+        return;
+      }
+
+      const buffer = Buffer.from(archivo, "base64");
+      const fileSize = buffer.length;
+
+      if (fileSize > MAX_FILE_SIZE) {
+        res.status(400).json({
+          message: `El archivo excede el tamaño máximo permitido (${politica.tam_max_archivo_mb}MB)`,
+        });
+        return;
+      }
 
       const caso = await em.findOneOrFail(Caso, { id: id_caso });
 
       const documentoData = {
         caso,
         nombre,
-        archivo: Buffer.from(archivo),
+        archivo: buffer,
         fecha_carga: new Date().toISOString().split("T")[0],
       };
 
@@ -112,7 +146,7 @@ export const controller = {
     }
   },
 
-  delete: async (req: Request, res: Response) => {
+  delete: async (req: Request, res: Response): Promise<void> => {
     try {
       const id = validateNumericId(req.params.id, "id");
       const id_caso = validateNumericId(req.params.id_caso, "id_caso");

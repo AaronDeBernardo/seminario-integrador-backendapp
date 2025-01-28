@@ -7,6 +7,7 @@ import { Especialidad } from "../../especialidad/especialidad/especialidad.entit
 import { handleError } from "../../../utils/error-handler.js";
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
+import { Politica } from "../../misc/politica/politica.entity.js";
 import {
   validateDate,
   validateEntity,
@@ -210,6 +211,25 @@ export const controller = {
         fecha_primer_cobro,
         "fecha_primer_cobro"
       );
+
+      const politica = await em.findOne(
+        Politica,
+        {},
+        { orderBy: { id: "DESC" } }
+      );
+      if (!politica) {
+        res.status(404).json({
+          message: "No se encontró ninguna política para validar las cuotas.",
+        });
+        return;
+      }
+
+      if (num_cuotas > politica.max_cuotas) {
+        res.status(400).json({
+          message: `El número de cuotas (${num_cuotas}) excede el máximo permitido (${politica.max_cuotas}).`,
+        });
+        return;
+      }
 
       caso.estado = "Finalizado";
       caso.fecha_estado = new Date().toISOString().split("T")[0];
