@@ -8,7 +8,7 @@ export class UsuarioDTO {
   telefono: string;
   tipo_doc: string;
   nro_doc: string;
-  fecha_alta: Date;
+  fecha_alta: string;
   fecha_baja: string | undefined;
 
   constructor(input: Usuario) {

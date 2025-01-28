@@ -10,7 +10,14 @@ export function validateNumericId(id: any, field: string) {
   throw new HttpError(400, `${field}: debe ser un número entero positivo.`);
 }
 
-export function validatePrice(price: any, maxDecimals: number, field: string) {
+export function validatePrice(
+  price: any,
+  maxDecimals: number,
+  field: string,
+  required: boolean
+) {
+  if (required === false && price === undefined) return undefined;
+
   if (typeof price === "number" && price >= 0) {
     const roundedPrice = parseFloat(price.toFixed(maxDecimals));
     return roundedPrice;
@@ -22,7 +29,7 @@ export function validatePrice(price: any, maxDecimals: number, field: string) {
     return roundedPrice;
   }
 
-  throw new HttpError(400, `${field}:debe ser un número mayor o igual que 0.`);
+  throw new HttpError(400, `${field}: debe ser un número mayor o igual que 0.`);
 }
 
 export function validatePassword(password: any, field: string) {
@@ -32,6 +39,18 @@ export function validatePassword(password: any, field: string) {
   if (password.length >= 4) return password;
 
   throw new Error(`${field}: debe ser un string con 4 caracteres como mínimo.`);
+}
+
+export function validateDate(date: any, field: string) {
+  if (date === undefined) return undefined;
+
+  const aux = new Date(date);
+  if (!isNaN(aux.getTime())) return date;
+
+  throw new HttpError(
+    400,
+    `${field}: debe ser un string en formato yyyy-MM-dd.`
+  );
 }
 
 export function validateTime(time: any, field: string) {

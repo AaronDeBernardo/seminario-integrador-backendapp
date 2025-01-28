@@ -9,7 +9,7 @@ export class SecretarioDTO {
   telefono: string;
   tipo_doc: string;
   nro_doc: string;
-  fecha_alta: Date;
+  fecha_alta: string;
   turno_trabajo: string;
 
   constructor(input: Secretario | Usuario) {
