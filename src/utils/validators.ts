@@ -41,18 +41,6 @@ export function validatePassword(password: any, field: string) {
   throw new Error(`${field}: debe ser un string con 4 caracteres como mínimo.`);
 }
 
-export function validateDate(date: any, field: string) {
-  if (date === undefined) return undefined;
-
-  const aux = new Date(date);
-  if (!isNaN(aux.getTime())) return date;
-
-  throw new HttpError(
-    400,
-    `${field}: debe ser un string en formato yyyy-MM-dd.`
-  );
-}
-
 export function validateTime(time: any, field: string) {
   if (time === undefined) return undefined;
 

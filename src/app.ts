@@ -21,7 +21,7 @@ app.use(express.json());
 app.use("/api/actividades/", actividadModuleRouter);
 app.use("/api/casos/", casoModuleRouter);
 app.use("/api/especialidades/", especialidadModuleRouter);
-app.use("/api/misc", miscModuleRouter);
+app.use("/api/misc/", miscModuleRouter);
 app.use("/api/turnos/", turnoModuleRoutes);
 app.use("/api/usuarios/", usuarioModuleRouter);
 
