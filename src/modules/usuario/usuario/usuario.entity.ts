@@ -38,8 +38,8 @@ export class Usuario {
   @Property({ type: "varchar", length: 20 })
   nro_doc!: string;
 
-  @Property({ type: "date" })
-  fecha_alta = new Date();
+  @Property({ type: "date", nullable: true })
+  fecha_alta!: string;
 
   @Property({ type: "date", nullable: true })
   fecha_baja?: string;

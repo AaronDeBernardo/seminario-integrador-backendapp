@@ -1,0 +1,13 @@
+###
+GET http://localhost:3000/api/misc/precios-jus
+
+###
+GET http://localhost:3000/api/misc/precios-jus/latest
+
+###
+POST http://localhost:3000/api/misc/precios-jus
+Content-Type: application/json
+
+{
+  "valor": 19000.34556
+}

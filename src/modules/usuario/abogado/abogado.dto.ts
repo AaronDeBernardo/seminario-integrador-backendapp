@@ -10,7 +10,7 @@ export class AbogadoDTO {
   telefono: string;
   tipo_doc: string;
   nro_doc: string;
-  fecha_alta: Date;
+  fecha_alta: string;
   foto: Buffer;
   matricula: string;
   rol: Rol;

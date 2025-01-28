@@ -122,7 +122,7 @@ export const controller = {
     try {
       req.body.sanitizedInput = {
         nombre: req.body.nombre?.trim(),
-        cant_jus: validatePrice(req.body.cant_jus, 3, "cant_jus"),
+        cant_jus: validatePrice(req.body.cant_jus, 3, "cant_jus", true),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {
