@@ -1,8 +1,24 @@
 import { Caso } from "../caso/caso.entity.js";
-import { Entity, ManyToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
+import {
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryKey,
+  Property,
+  Rel,
+} from "@mikro-orm/core";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 
+export enum FormaCobro {
+  EFECTIVO = "efectivo",
+  TRANSFERENCIA = "transferencia",
+  CHEQUE = "cheque",
+  CREDITO = "credito",
+  DEBITO = "debito",
+}
+
 @Entity({ tableName: "cuotas" })
+@Index({ properties: ["caso", "fecha_vencimiento"] })
 export class Cuota {
   @ManyToOne(() => Caso, {
     primary: true,
@@ -24,5 +40,5 @@ export class Cuota {
 
   @NotEmptyAndMaxLength(20, "forma_cobro")
   @Property({ type: "varchar", length: 20, nullable: true })
-  forma_cobro?: string;
+  forma_cobro?: FormaCobro;
 }

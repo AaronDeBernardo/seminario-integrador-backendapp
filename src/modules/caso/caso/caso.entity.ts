@@ -14,6 +14,12 @@ import { Especialidad } from "../../especialidad/especialidad/especialidad.entit
 // import { Nota } from "../nombre-modulo/nota/nota.entity.js";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 
+export enum EstadoCaso {
+  EN_CURSO = "En curso",
+  FINALIZADO = "Finalizado",
+  CANCELADO = "Cancelado",
+}
+
 @Entity({ tableName: "casos" })
 export class Caso {
   @PrimaryKey({ type: "int" })
@@ -34,7 +40,7 @@ export class Caso {
 
   @NotEmptyAndMaxLength(20, "estado")
   @Property({ type: "varchar", length: 20 })
-  estado!: string;
+  estado!: EstadoCaso;
 
   @Property({ type: "date" })
   fecha_estado!: string;

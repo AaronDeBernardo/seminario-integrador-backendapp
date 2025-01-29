@@ -1,9 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
-import { Cuota } from "./cuota.entity.js";
+import { Cuota, FormaCobro } from "./cuota.entity.js";
 import { CuotaDTO } from "./cuota.dto.js";
 import { handleError } from "../../../utils/error-handler.js";
-import { validateNumericId } from "../../../utils/validators.js";
+import {
+  validateDate,
+  validateEntity,
+  validateNumericId,
+} from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -29,6 +33,7 @@ export const controller = {
       const id_caso = validateNumericId(req.params.id_caso, "id_caso");
       const today = new Date().toISOString().split("T")[0];
 
+      const qb = em.createQueryBuilder(Cuota);
       const cuota = await em.findOneOrFail(
         Cuota,
         {
@@ -51,14 +56,39 @@ export const controller = {
       const id_caso = validateNumericId(req.params.id_caso, "id_caso");
       const numero = validateNumericId(req.params.numero, "numero");
 
-      const cuota = await em.findOneOrFail(Cuota, {
-        caso: id_caso,
-        numero: numero,
+      const cuota = await em.transactional(async (tem) => {
+        const cuota = await tem.findOneOrFail(
+          Cuota,
+          {
+            caso: id_caso,
+            numero: numero,
+          },
+          { populate: ["caso.cliente.usuario", "caso.especialidad"] }
+        );
+
+        if (cuota.fecha_hora_cobro) {
+          throw new Error("La cuota ya ha sido cobrada");
+        }
+
+        const cuotasAnteriores = await tem.find(Cuota, {
+          caso: id_caso,
+          numero: { $lt: numero },
+          fecha_hora_cobro: null,
+        });
+
+        if (cuotasAnteriores.length > 0) {
+          throw new Error(
+            "Existen cuotas anteriores sin cobrar. Debe cobrarlas primero."
+          );
+        }
+
+        cuota.fecha_hora_cobro = new Date();
+        cuota.forma_cobro = req.body.forma_cobro;
+
+        await tem.flush();
+        return cuota;
       });
 
-      cuota.fecha_hora_cobro = new Date();
-      cuota.forma_cobro = req.body.forma_cobro;
-      await em.flush();
       const data = new CuotaDTO(cuota);
       res.status(200).json({ message: "Cuota cobrada.", data });
     } catch (error: any) {
@@ -66,36 +96,47 @@ export const controller = {
     }
   },
 
-  /**  Es necesario este método? O con el anterior ya estaríamos? Me parece que no conviene ponerle "update" al anteriror porque es poco intuitivo.
+  /* Este método update sería para que se pueda cambiar algo de la cuota una vez creada, obviamente lo haría un rol con permisos especiales como admin.
+  La ruta no la agregué todavía, que opinás? @Cofla */
   update: async (req: Request, res: Response) => {
     try {
-      const id = validateNumericId(req.params.id, "id");
-      const cuota = await em.findOneOrFail(Cuota, { id });
-      const updateData: Partial<Cuota> = {};
+      const { id_caso, numero } = req.params;
 
-      if (req.body.cant_jus !== undefined) {
-        updateData.cant_jus = req.body.cant_jus;
-      }
-      if (req.body.fecha_vencimiento) {
-        updateData.fecha_vencimiento = req.body.fecha_vencimiento;
-      }
-      if (req.body.fecha_hora_cobro) {
-        updateData.fecha_hora_cobro = req.body.fecha_hora_cobro;
-      }
-      if (req.body.forma_cobro) {
-        updateData.forma_cobro = req.body.forma_cobro;
-      }
+      // Verificar permisos especiales aquí
 
-      em.assign(cuota, updateData);
-      validateEntity(cuota);
-      await em.flush();
-      const data = new CuotaDTO(cuota);
-      res.status(200).json({ message: "Cuota updated.", data });
+      const cuota = await em.transactional(async (tem) => {
+        const cuota = await tem.findOneOrFail(Cuota, {
+          caso: validateNumericId(id_caso, "id_caso"),
+          numero: validateNumericId(numero, "numero"),
+        });
+
+        if (req.body.fecha_vencimiento) {
+          cuota.fecha_vencimiento = validateDate(
+            req.body.fecha_vencimiento,
+            "fecha_vencimiento"
+          );
+        }
+
+        if (req.body.cant_jus !== undefined) {
+          if (req.body.cant_jus < 0) {
+            throw new Error("El monto no puede ser negativo");
+          }
+          cuota.cant_jus = req.body.cant_jus;
+        }
+
+        validateEntity(cuota);
+        await tem.flush();
+        return cuota;
+      });
+
+      res.status(200).json({
+        message: "Cuota modificada exitosamente",
+        data: new CuotaDTO(cuota),
+      });
     } catch (error: any) {
       handleError(error, res);
     }
   },
-  */
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {

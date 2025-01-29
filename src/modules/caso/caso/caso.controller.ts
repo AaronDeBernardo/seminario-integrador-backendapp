@@ -4,6 +4,7 @@ import { Cliente } from "../../usuario/cliente/cliente.entity.js";
 import { Cuota } from "../cuota/cuota.entity.js";
 import { CuotaDTO } from "../cuota/cuota.dto.js";
 import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
+import { EstadoCaso } from "./caso.entity.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
@@ -17,7 +18,7 @@ import {
 const em = orm.em;
 
 type CasoUpdateData = {
-  estado: string;
+  estado: EstadoCaso;
   fecha_estado: string;
 };
 
@@ -36,7 +37,7 @@ export const controller = {
             },
             {
               fecha_inicio: { $lt: sixtyDaysAgo.toISOString().split("T")[0] },
-              estado: "En curso",
+              estado: EstadoCaso.EN_CURSO,
             },
           ],
         },
@@ -58,7 +59,7 @@ export const controller = {
     try {
       const casos = await em.find(
         Caso,
-        { estado: "En curso" },
+        { estado: EstadoCaso.EN_CURSO },
         { populate: ["cliente.usuario", "especialidad"] }
       );
 
@@ -231,7 +232,7 @@ export const controller = {
         return;
       }
 
-      caso.estado = "Finalizado";
+      caso.estado = EstadoCaso.FINALIZADO;
       caso.fecha_estado = new Date().toISOString().split("T")[0];
 
       const cuotas: Cuota[] = [];
@@ -325,7 +326,7 @@ export const controller = {
       const caso = await em.findOneOrFail(Caso, { id });
 
       const updateData: CasoUpdateData = {
-        estado: "Cancelado",
+        estado: EstadoCaso.CANCELADO,
         fecha_estado: new Date().toISOString().split("T")[0],
       };
 
