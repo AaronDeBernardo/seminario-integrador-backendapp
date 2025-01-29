@@ -1,0 +1,22 @@
+###
+GET http://localhost:3000/api/appendix-caso/comentarios/2
+
+
+###
+POST http://localhost:3000/api/appendix-caso/comentarios/2/2
+Content-Type: application/json
+
+{
+  "comentario": "También hay que hacer un análisis de calidad del formato del documento"
+}
+
+###
+POST http://localhost:3000/api/appendix-caso/comentarios/2/2/2
+Content-Type: application/json
+
+{
+  "comentario": "Siempre deben coincidir conmigo"
+}
+
+###
+DELETE http://localhost:3000/api/appendix-caso/comentarios/2/2/5
