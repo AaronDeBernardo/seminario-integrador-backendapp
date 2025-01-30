@@ -1,3 +1,4 @@
+import { addDays, addMonths, addYears, format } from "date-fns";
 import { Caso } from "./caso.entity.js";
 import { CasoDTO } from "./caso.dto.js";
 import { Cliente } from "../../usuario/cliente/cliente.entity.js";
@@ -273,49 +274,56 @@ export const controller = {
   },
 
   calculateExpirationDate(date: Date, frequency: string): string {
+    let expirationDate: Date;
+
     switch (frequency) {
       case "semanal":
-        date.setDate(date.getDate() + 7);
+        expirationDate = addDays(date, 7);
         break;
       case "quincenal":
-        date.setDate(date.getDate() + 15);
+        expirationDate = addDays(date, 15);
         break;
       case "mensual":
-        date.setMonth(date.getMonth() + 1);
+        expirationDate = addMonths(date, 1);
         break;
       case "trimestral":
-        date.setMonth(date.getMonth() + 3);
+        expirationDate = addMonths(date, 3);
         break;
-      case "bimerstral":
-        date.setMonth(date.getMonth() + 6);
+      case "bimestral":
+        expirationDate = addMonths(date, 6);
         break;
       case "anual":
-        date.setMonth(date.getMonth() + 12);
+        expirationDate = addYears(date, 1);
         break;
+      default:
+        throw new Error(`Frecuencia no válida: ${frequency}`);
     }
-    return date.toISOString().split("T")[0];
+
+    return format(expirationDate, "yyyy-MM-dd");
   },
 
   incrementDate(date: Date, frequency: string): void {
     switch (frequency) {
       case "semanal":
-        date.setDate(date.getDate() + 7);
+        addDays(date, 7);
         break;
       case "quincenal":
-        date.setDate(date.getDate() + 15);
+        addDays(date, 15);
         break;
       case "mensual":
-        date.setMonth(date.getMonth() + 1);
+        addMonths(date, 1);
         break;
       case "trimestral":
-        date.setMonth(date.getMonth() + 3);
+        addMonths(date, 3);
         break;
-      case "bimerstral":
-        date.setMonth(date.getMonth() + 6);
+      case "bimestral":
+        addMonths(date, 6);
         break;
       case "anual":
-        date.setMonth(date.getMonth() + 12);
+        addYears(date, 1);
         break;
+      default:
+        throw new Error(`Frecuencia no válida: ${frequency}`);
     }
   },
 
