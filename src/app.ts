@@ -4,7 +4,7 @@ import express from "express";
 import { RequestContext } from "@mikro-orm/mysql";
 import { orm } from "./config/db.config.js";
 import { actividadModuleRouter } from "./modules/actividad/actividad-module.routes.js";
-import { appendixCasoRouter } from "./modules/appendix-caso/appendix-caso.routes.js";
+import { casoModuleRouter } from "./modules/caso/caso-module.routes.js";
 import { especialidadModuleRouter } from "./modules/especialidad/especialidad-module.routes.js";
 import { miscModuleRouter } from "./modules/misc/misc-module.routes.js";
 import { turnoModuleRoutes } from "./modules/turno/turno-module.routes.js";
@@ -26,7 +26,7 @@ app.use("/api/especialidades/", especialidadModuleRouter);
 app.use("/api/misc/", miscModuleRouter);
 app.use("/api/turnos/", turnoModuleRoutes);
 app.use("/api/usuarios/", usuarioModuleRouter);
-app.use("/api/appendix-caso/", appendixCasoRouter);
+app.use("/api/caso/", casoModuleRouter);
 
 app.use((_req, res) => {
   res.status(404).send({ message: "Resource not found" });

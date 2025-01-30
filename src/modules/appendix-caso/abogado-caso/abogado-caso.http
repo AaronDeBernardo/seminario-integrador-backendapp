@@ -1,0 +1,30 @@
+###
+GET http://localhost:3000/api/caso/abogados-casos/
+
+###
+GET http://localhost:3000/api/caso/abogados-casos/2
+
+###
+POST http://localhost:3000/api/caso/abogados-casos/
+Content-Type: application/json
+
+{
+    "id_abogado": 4,
+    "id_caso": 2
+}
+
+###
+PATCH http://localhost:3000/api/caso/abogados-casos/vincular/3
+Content-Type: application/json
+
+{
+    "id_abogado": 3
+}
+
+###
+PATCH http://localhost:3000/api/caso/abogados-casos/desvincular/2/4
+
+
+###
+PATCH http://localhost:3000/api/caso/abogados-casos/deactivate/10
+

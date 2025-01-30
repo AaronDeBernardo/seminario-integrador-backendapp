@@ -1,9 +1,9 @@
 ###
-GET http://localhost:3000/api/appendix-caso/comentarios/2
+GET http://localhost:3000/api/caso/comentarios/2
 
 
 ###
-POST http://localhost:3000/api/appendix-caso/comentarios/2/2
+POST http://localhost:3000/api/caso/comentarios/2/2
 Content-Type: application/json
 
 {
@@ -11,7 +11,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:3000/api/appendix-caso/comentarios/2/2/2
+POST http://localhost:3000/api/caso/comentarios/2/2/2
 Content-Type: application/json
 
 {
@@ -19,4 +19,4 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:3000/api/appendix-caso/comentarios/2/2/5
+DELETE http://localhost:3000/api/caso/comentarios/2/2/5

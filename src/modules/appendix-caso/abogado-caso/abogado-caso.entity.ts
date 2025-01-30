@@ -8,9 +8,8 @@ import {
 } from "@mikro-orm/core";
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 import { Caso } from "../../caso/caso/caso.entity.js";
-import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 
-@Entity({ tableName: "abogados-casos" })
+@Entity({ tableName: "abogados_casos" })
 export class AbogadoCaso {
   @PrimaryKey({ type: "int" })
   id!: number;
