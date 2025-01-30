@@ -1,6 +1,6 @@
+import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 import { AbogadoCaso } from "./abogado-caso.entity.js";
 import { AbogadoCasoDTO } from "./abogado-caso.dto.js";
-import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 import { Caso } from "../../caso/caso/caso.entity.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { NextFunction, Request, Response } from "express";

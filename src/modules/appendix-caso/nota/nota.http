@@ -1,0 +1,26 @@
+###
+GET http://localhost:3000/api/casos/notas/
+
+###
+GET http://localhost:3000/api/casos/notas/2
+
+###
+POST http://localhost:3000/api/casos/notas/2/3
+Content-Type: application/json
+
+{
+    "titulo": "Nota ejemplo 1",
+    "descripcion": "Descripción de nota ejemplo 1"
+}
+
+###
+PUT http://localhost:3000/api/casos/notas/2/3/2024-07-04T08:15:45
+Content-Type: application/json
+
+{
+    "titulo": "Entrevista con Testigo Clave"
+}
+
+###
+DELETE http://localhost:3000/api/casos/notas/2/3/2025-01-30T19:37:09
+
