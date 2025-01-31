@@ -1,0 +1,14 @@
+GET http://localhost:3000/api/feedbacks/
+
+
+GET http://localhost:3000/api/feedbacks/3
+
+
+POST http://localhost:3000/api/feedbacks/7/3
+Content-Type: application/json
+
+{
+  "descripcion": "Muy malo",
+  "puntuacion": 2
+}
+
