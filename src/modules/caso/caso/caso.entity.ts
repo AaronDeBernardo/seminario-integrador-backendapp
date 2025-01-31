@@ -51,12 +51,12 @@ export class Caso {
   @OneToMany(() => AbogadoCaso, (abogadoCaso) => abogadoCaso.caso)
   abogados = new Collection<AbogadoCaso>(this);
 
-  @OneToMany(() => Recordatorio, (recordatorio) => recordatorio.caso)
+  @OneToMany(() => Recordatorio, (recordatorio: any) => recordatorio.caso)
   recordatorios = new Collection<Recordatorio>(this);
 
-  @OneToMany(() => Nota, (nota) => nota.caso)
+  @OneToMany(() => Nota, (nota: any) => nota.caso)
   notas = new Collection<Nota>(this);
 
-  @OneToMany(() => Comentario, (comentario) => comentario.caso)
+  @OneToMany(() => "Comentario", (comentario: any) => comentario.caso)
   comentarios = new Collection<Comentario>(this);
 }

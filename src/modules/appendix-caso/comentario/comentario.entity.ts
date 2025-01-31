@@ -7,7 +7,6 @@ import {
   Property,
 } from "@mikro-orm/core";
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
-import { Caso } from "../../caso/caso/caso.entity.js";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 
 @Entity({ tableName: "comentarios" })
@@ -15,8 +14,8 @@ export class Comentario {
   @PrimaryKey({ type: "int" })
   id!: number;
 
-  @ManyToOne(() => Caso, { fieldName: "id_caso" })
-  caso!: Caso;
+  @ManyToOne(() => "Caso", { fieldName: "id_caso" })
+  caso!: any;
 
   @ManyToOne(() => Abogado, { fieldName: "id_abogado" })
   abogado!: Abogado;
