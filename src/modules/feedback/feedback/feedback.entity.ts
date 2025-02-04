@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, Property, Rel } from "@mikro-orm/core";
-import { NotEmptyAndMaxLength } from "../../utils/validators.js";
-import { Cliente } from "../usuario/cliente/cliente.entity.js";
-import { Abogado } from "../usuario/abogado/abogado.entity.js";
+import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
+import { Cliente } from "../../usuario/cliente/cliente.entity.js";
+import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 
 @Entity({ tableName: "feedbacks" })
 export class Feedback {
@@ -17,8 +17,8 @@ export class Feedback {
   })
   abogado!: Rel<Abogado>;
 
-  @Property({ type: "datetime" })
-  fecha_hora!: Date;
+  @Property({ type: "datetime", primary: true })
+  fecha_hora: Date = new Date();
 
   @NotEmptyAndMaxLength(65535, "descripcion")
   @Property({ type: "text" })

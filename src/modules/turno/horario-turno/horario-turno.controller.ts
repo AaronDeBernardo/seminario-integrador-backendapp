@@ -7,9 +7,9 @@ import { HorarioTurnoDTO } from "./horario-turno.dto.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { TurnoOtorgado } from "../turno-otorgado/turno-otorgado.entity.js";
 import {
+  validateIntegerInRange,
   validateNumericId,
   validateTime,
-  validateWeekDay,
 } from "../../../utils/validators.js";
 
 const em = orm.em;
@@ -164,7 +164,12 @@ export const controller = {
         abogado: validateNumericId(req.body.id_abogado, "id_abogado"),
         hora_inicio: validateTime(req.body.hora_inicio, "hora_inicio"),
         hora_fin: validateTime(req.body.hora_fin, "hora_fin"),
-        dia_semana: validateWeekDay(req.body.dia_semana, "dia_semana"),
+        dia_semana: validateIntegerInRange(
+          req.body.dia_semana,
+          0,
+          6,
+          "dia_semana"
+        ),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {

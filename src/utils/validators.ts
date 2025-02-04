@@ -65,16 +65,29 @@ export function validateTime(time: any, field: string) {
   );
 }
 
-export function validateWeekDay(weekday: any, field: string) {
-  if (weekday === undefined) return undefined;
+export function validateIntegerInRange(
+  number: any,
+  minValue: number,
+  maxValue: number,
+  field: string
+) {
+  if (number === undefined) return undefined;
 
-  if (Number.isInteger(weekday) && weekday >= 0 && weekday <= 6) return weekday;
+  if (Number.isInteger(number) && number >= minValue && number <= maxValue)
+    return number;
 
-  const convertedWeekday = Number(weekday);
-  if (Number.isInteger(convertedWeekday) && weekday >= 0 && weekday <= 6)
-    return convertedWeekday;
+  const convertedNumber = Number(number);
+  if (
+    Number.isInteger(convertedNumber) &&
+    convertedNumber >= minValue &&
+    convertedNumber <= maxValue
+  )
+    return convertedNumber;
 
-  throw new HttpError(400, `${field}: debe ser un número entero entre 0 y 6.`);
+  throw new HttpError(
+    400,
+    `${field}: debe ser un número entero entre ${minValue} y ${maxValue}.`
+  );
 }
 
 export function NotEmptyAndMaxLength(maxLength: number, field: string) {

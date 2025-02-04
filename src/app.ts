@@ -5,7 +5,7 @@ import { RequestContext } from "@mikro-orm/mysql";
 import { orm } from "./config/db.config.js";
 import { actividadModuleRouter } from "./modules/actividad/actividad-module.routes.js";
 import { especialidadModuleRouter } from "./modules/especialidad/especialidad-module.routes.js";
-import { feedbackRouter } from "./modules/feedback/feedback.routes.js";
+import { feedbackRouter } from "./modules/feedback/feedback/feedback.routes.js";
 import { miscModuleRouter } from "./modules/misc/misc-module.routes.js";
 import { turnoModuleRoutes } from "./modules/turno/turno-module.routes.js";
 import { usuarioModuleRouter } from "./modules/usuario/usuario-module.routes.js";
