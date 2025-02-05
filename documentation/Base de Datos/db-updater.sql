@@ -58,3 +58,16 @@ BEGIN
     SET NEW.fecha_alta = CURRENT_DATE;
 END $$
 DELIMITER ;
+
+
+-- Update to V5.0 - 2025-02-05 17:26:17
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` TRIGGER `casos_BEFORE_INSERT` BEFORE INSERT ON `casos` FOR EACH ROW BEGIN
+	SET NEW.fecha_inicio = CURRENT_DATE;
+    SET NEW.fecha_estado = CURRENT_DATE;
+END
+DELIMITER ;
+
+ALTER TABLE `sistema_juridico`.`notas` 
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`id_caso`, `id_abogado`, `fecha_hora`);

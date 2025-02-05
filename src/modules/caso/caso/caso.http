@@ -1,34 +1,31 @@
 ###
-GET http://localhost:3000/api/casos/casos/
+GET http://localhost:3000/api/casos/
 
 ###
-GET http://localhost:3000/api/casos/casos/encurso/
+GET http://localhost:3000/api/casos/encurso/
 
 ###
-GET http://localhost:3000/api/casos/casos/2
+GET http://localhost:3000/api/casos/2
 
 ###
-POST http://localhost:3000/api/casos/casos/
+POST http://localhost:3000/api/casos/
 Content-Type: application/json
 
 {
   "id_cliente": 7,
   "id_especialidad": 4,
   "descripcion": "Descripción de un caso de prueba",
-  "monto_caso": null
 }
 
 
 ###
-PUT http://localhost:3000/api/casos/casos/update/5
+PUT http://localhost:3000/api/casos/5
 Content-Type: application/json
 
 {
   "id_cliente": 5,
   "id_especialidad": 3,
-  "descripcion": "Descripción de un caso de prueba con una actualización",
-  "estado": "En curso",
-  "monto_caso": null
+  "descripcion": "Descripción de un caso de prueba con una actualización"
 }
 
 ###
@@ -44,4 +41,4 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:3000/api/casos/casos/deactivate/7
+PATCH http://localhost:3000/api/casos/deactivate/1

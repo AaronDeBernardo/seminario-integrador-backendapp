@@ -5,6 +5,6 @@ import { documentoRouter } from "./documento/documento.routes.js";
 
 export const casoModuleRouter = Router();
 
-casoModuleRouter.use("/casos/", casoRouter);
 casoModuleRouter.use("/cuotas/", cuotaRouter);
 casoModuleRouter.use("/documentos/", documentoRouter);
+casoModuleRouter.use("/", casoRouter);

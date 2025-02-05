@@ -31,18 +31,17 @@ export class Caso {
   @ManyToOne(() => Especialidad, { fieldName: "id_especialidad" })
   especialidad!: Especialidad;
 
-  @Property({ type: "date" })
+  @Property({ type: "date", nullable: true })
   fecha_inicio!: string;
 
-  @NotEmptyAndMaxLength(65535, "cuerpo")
+  @NotEmptyAndMaxLength(65535, "descripcion")
   @Property({ type: "text" })
   descripcion!: string;
 
-  @NotEmptyAndMaxLength(20, "estado")
   @Property({ type: "varchar", length: 20 })
   estado!: EstadoCaso;
 
-  @Property({ type: "date" })
+  @Property({ type: "date", nullable: true })
   fecha_estado!: string;
 
   @Property({ type: "decimal", nullable: true })
