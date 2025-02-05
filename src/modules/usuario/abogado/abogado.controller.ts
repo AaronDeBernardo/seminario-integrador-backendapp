@@ -8,7 +8,9 @@ import { Usuario } from "../usuario/usuario.entity.js";
 import {
   validateEntity,
   validateNumericId,
+  validateNumericIdArray,
 } from "../../../utils/validators.js";
+import { HttpError } from "../../../utils/http-error.js";
 
 const em = orm.em;
 
@@ -61,6 +63,13 @@ export const controller = {
   add: async (req: Request, res: Response) => {
     try {
       const abogado = em.create(Abogado, req.body.sanitizedInput);
+
+      if (abogado.especialidades.length === 0)
+        throw new HttpError(
+          400,
+          "El abogado debe tener por lo menos 1 especialidad."
+        );
+
       validateEntity(abogado.usuario);
       validateEntity(abogado);
 
@@ -79,12 +88,18 @@ export const controller = {
       const abogado = await em.findOneOrFail(
         Abogado,
         { usuario: { id, fecha_baja: { $eq: null } } },
-        { populate: ["usuario"] }
+        { populate: ["usuario", "especialidades:ref"] }
       );
-
+      console.log(abogado);
       em.assign(abogado, req.body.sanitizedInput, {
         updateByPrimaryKey: false,
       });
+
+      if (abogado.especialidades.length === 0)
+        throw new HttpError(
+          400,
+          "El abogado debe tener por lo menos 1 especialidad."
+        );
 
       validateEntity(abogado.usuario);
       validateEntity(abogado);
@@ -109,6 +124,10 @@ export const controller = {
         foto: req.body.foto,
         matricula: req.body.matricula?.trim(),
         rol: validateNumericId(req.body.id_rol, "id_rol"),
+        especialidades: validateNumericIdArray(
+          req.body.especialidades,
+          "especialidades"
+        ),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {
