@@ -1,8 +1,14 @@
+###
 GET http://localhost:3000/api/casos/cuotas/
 
-
+###
 GET http://localhost:3000/api/casos/cuotas/nearest/5
 
+###
+PATCH http://localhost:3000/api/casos/cuotas/5/7
+Content-Type: application/json
 
-PATCH http://localhost:3000/api/casos/cuotas/5/3
+{
+  "forma_cobro": "Efectivo"
+}
 

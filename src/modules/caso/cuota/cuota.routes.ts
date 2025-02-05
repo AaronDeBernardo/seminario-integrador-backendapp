@@ -5,4 +5,8 @@ export const cuotaRouter = Router();
 
 cuotaRouter.get("/", controller.findAll);
 cuotaRouter.get("/nearest/:id_caso", controller.findNearest);
-cuotaRouter.patch("/:id_caso/:numero", controller.collectFee);
+cuotaRouter.patch(
+  "/:id_caso/:numero",
+  controller.sanitize,
+  controller.collectFee
+);

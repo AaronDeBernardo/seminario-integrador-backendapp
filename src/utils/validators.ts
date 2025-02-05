@@ -102,3 +102,26 @@ export function validateEntity(entity: any) {
     }
   }
 }
+
+export function validateEnum(
+  value: any,
+  enumType: any,
+  fieldName: string,
+  required: boolean = false
+): any {
+  if (required && !value) {
+    throw new Error(`El campo ${fieldName} es requerido`);
+  }
+
+  if (!required && !value) {
+    return undefined;
+  }
+
+  const normalizedValue = value.toLowerCase();
+
+  if (!Object.values(enumType).includes(normalizedValue)) {
+    throw new Error(`El valor ingresado para ${fieldName} no es válido`);
+  }
+
+  return value;
+}

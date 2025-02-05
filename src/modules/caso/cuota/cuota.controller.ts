@@ -3,11 +3,7 @@ import { orm } from "../../../config/db.config.js";
 import { Cuota, FormaCobro } from "./cuota.entity.js";
 import { CuotaDTO } from "./cuota.dto.js";
 import { handleError } from "../../../utils/error-handler.js";
-import {
-  validateDate,
-  validateEntity,
-  validateNumericId,
-} from "../../../utils/validators.js";
+import { validateEnum, validateNumericId } from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -83,7 +79,7 @@ export const controller = {
         }
 
         cuota.fecha_hora_cobro = new Date();
-        cuota.forma_cobro = req.body.forma_cobro;
+        tem.assign(cuota, { forma_cobro: req.body.sanitizedInput.forma_cobro });
 
         await tem.flush();
         return cuota;
@@ -96,56 +92,18 @@ export const controller = {
     }
   },
 
-  /* Este método update sería para que se pueda cambiar algo de la cuota una vez creada, obviamente lo haría un rol con permisos especiales como admin.
-  La ruta no la agregué todavía, que opinás? @Cofla */
-  update: async (req: Request, res: Response) => {
-    try {
-      const { id_caso, numero } = req.params;
-
-      // Verificar permisos especiales aquí
-
-      const cuota = await em.transactional(async (tem) => {
-        const cuota = await tem.findOneOrFail(Cuota, {
-          caso: validateNumericId(id_caso, "id_caso"),
-          numero: validateNumericId(numero, "numero"),
-        });
-
-        if (req.body.fecha_vencimiento) {
-          cuota.fecha_vencimiento = validateDate(
-            req.body.fecha_vencimiento,
-            "fecha_vencimiento"
-          );
-        }
-
-        if (req.body.cant_jus !== undefined) {
-          if (req.body.cant_jus < 0) {
-            throw new Error("El monto no puede ser negativo");
-          }
-          cuota.cant_jus = req.body.cant_jus;
-        }
-
-        validateEntity(cuota);
-        await tem.flush();
-        return cuota;
-      });
-
-      res.status(200).json({
-        message: "Cuota modificada exitosamente",
-        data: new CuotaDTO(cuota),
-      });
-    } catch (error: any) {
-      handleError(error, res);
-    }
-  },
+  /* El método update sería para que se pueda cambiar algo de la cuota una vez creada, obviamente lo haría un rol con permisos especiales como admin.
+  Dejo este método como posible implementación posterior en caso de verla necesaria. */
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
-        id_caso: validateNumericId(req.body.id_caso, "id_caso"),
-        cant_jus: req.body.cant_jus,
-        fecha_vencimiento: req.body.fecha_vencimiento,
-        fecha_hora_cobro: req.body.fecha_hora_cobro,
-        forma_cobro: req.body.forma_cobro?.trim(),
+        forma_cobro: validateEnum(
+          req.body.forma_cobro?.trim(),
+          FormaCobro,
+          "forma_cobro",
+          true
+        ),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {
