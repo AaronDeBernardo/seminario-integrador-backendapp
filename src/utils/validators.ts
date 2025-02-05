@@ -2,12 +2,39 @@ import { IsNotEmpty, MaxLength, validateSync } from "class-validator";
 import { HttpError } from "./http-error.js";
 
 export function validateNumericId(id: any, field: string) {
-  if (Number.isInteger(id)) return id;
+  if (Number.isInteger(id) && id > 0) return id;
 
   const convertedId = Number(id);
-  if (Number.isInteger(convertedId)) return convertedId;
+  if (Number.isInteger(convertedId) && convertedId > 0) return convertedId;
 
   throw new HttpError(400, `${field}: debe ser un número entero positivo.`);
+}
+
+export function validateNumericIdArray(array: any, field: string) {
+  if (array === undefined) return undefined;
+
+  if (!Array.isArray(array))
+    throw new HttpError(
+      400,
+      `${field}: debe ser un array de números enteros positivos.`
+    );
+
+  const result = array.every((id, index, array) => {
+    if (Number.isInteger(id) && id > 0) return true;
+
+    const convertedId = Number(id);
+    if (Number.isNaN(convertedId) || convertedId <= 0) return false;
+
+    array[index] = convertedId;
+    return true;
+  });
+
+  if (result) return array;
+  else
+    throw new HttpError(
+      400,
+      `${field}: debe ser un array de números enteros positivos.`
+    );
 }
 
 export function validatePrice(
