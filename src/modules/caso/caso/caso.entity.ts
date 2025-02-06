@@ -13,12 +13,7 @@ import { Especialidad } from "../../especialidad/especialidad/especialidad.entit
 // import { Recordatorio } from "../nombre-modulo/recordatorio/recordatorio.entity.js";
 // import { Nota } from "../nombre-modulo/nota/nota.entity.js";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
-
-export enum EstadoCaso {
-  EN_CURSO = "En curso",
-  FINALIZADO = "Finalizado",
-  CANCELADO = "Cancelado",
-}
+import { EstadoCasoEnum } from "../../../utils/enums.js";
 
 @Entity({ tableName: "casos" })
 export class Caso {
@@ -39,7 +34,7 @@ export class Caso {
   descripcion!: string;
 
   @Property({ type: "varchar", length: 20 })
-  estado!: EstadoCaso;
+  estado!: EstadoCasoEnum;
 
   @Property({ type: "date", nullable: true })
   fecha_estado!: string;

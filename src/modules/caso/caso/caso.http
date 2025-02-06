@@ -14,7 +14,7 @@ Content-Type: application/json
 {
   "id_cliente": 7,
   "id_especialidad": 4,
-  "descripcion": "Descripción de un caso de prueba",
+  "descripcion": "Descripción de un caso de prueba"
 }
 
 
@@ -29,15 +29,14 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:3000/api/casos/casos/end/5
+PATCH http://localhost:3000/api/casos/finalizar/7
 Content-Type: application/json
 
 {
-  "cant_jus": 1000,
-  "num_cuotas": 10,
-  "fecha_primer_cobro": "2025-05-05",
-  "frecuencia_pago": "mensual",
-  "forma_cobro": "efectivo"
+  "cant_jus": 1,
+  "num_cuotas": 3,
+  "fecha_primer_cobro": "2025-02-10",
+  "frecuencia_cobro": "mensual"
 }
 
 ###

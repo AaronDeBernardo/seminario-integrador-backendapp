@@ -14,22 +14,34 @@ export function validatePrice(
   price: any,
   maxDecimals: number,
   field: string,
-  required: boolean
+  required: boolean,
+  allowZero: boolean
 ) {
   if (required === false && price === undefined) return undefined;
 
   if (typeof price === "number" && price >= 0) {
+    if (!allowZero && price === 0)
+      throw new HttpError(400, `${field}: no se permite el valor 0.`);
+
     const roundedPrice = parseFloat(price.toFixed(maxDecimals));
     return roundedPrice;
   }
 
   const convertedPrice = Number(price);
   if (!isNaN(convertedPrice) && convertedPrice >= 0) {
+    if (!allowZero && price === 0)
+      throw new HttpError(400, `${field}: no se permite el valor 0.`);
+
     const roundedPrice = parseFloat(convertedPrice.toFixed(maxDecimals));
     return roundedPrice;
   }
 
-  throw new HttpError(400, `${field}: debe ser un número mayor o igual que 0.`);
+  if (allowZero)
+    throw new HttpError(
+      400,
+      `${field}: debe ser un número mayor o igual que 0.`
+    );
+  else throw new HttpError(400, `${field}: debe ser un número mayor que 0.`);
 }
 
 export function validatePassword(password: any, field: string) {
@@ -110,18 +122,22 @@ export function validateEnum(
   required: boolean = false
 ): any {
   if (required && !value) {
-    throw new Error(`El campo ${fieldName} es requerido`);
+    throw new HttpError(400, `El campo ${fieldName} es requerido.`);
   }
 
   if (!required && !value) {
     return undefined;
   }
 
-  const normalizedValue = value.toLowerCase();
+  const normalizedValue =
+    value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 
   if (!Object.values(enumType).includes(normalizedValue)) {
-    throw new Error(`El valor ingresado para ${fieldName} no es válido`);
+    throw new HttpError(
+      400,
+      `El valor ingresado para ${fieldName} no es válido.`
+    );
   }
 
-  return value;
+  return normalizedValue;
 }

@@ -7,11 +7,12 @@ casoRouter.get("/", controller.findAll);
 casoRouter.get("/encurso", controller.findCurrent);
 casoRouter.get("/:id", controller.findOne);
 
-casoRouter.post("/", controller.sanitize, controller.add);
-casoRouter.put("/:id", controller.sanitize, controller.update);
+casoRouter.post("/", controller.sanitizeCaso, controller.add);
+casoRouter.put("/:id", controller.sanitizeCaso, controller.update);
 
 casoRouter.patch(
   "/finalizar/:id",
-  controller.end
+  controller.sanitizeFinalizarCaso,
+  controller.finalizar
 );
 casoRouter.patch("/cancelar/:id", controller.deactivate);

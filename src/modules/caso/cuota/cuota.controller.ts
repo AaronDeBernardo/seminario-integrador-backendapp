@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
-import { Cuota, FormaCobro } from "./cuota.entity.js";
+import { Cuota } from "./cuota.entity.js";
 import { CuotaDTO } from "./cuota.dto.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { validateEnum, validateNumericId } from "../../../utils/validators.js";
+import { FormaCobroEnum } from "../../../utils/enums.js";
 
 const em = orm.em;
 
@@ -100,7 +101,7 @@ export const controller = {
       req.body.sanitizedInput = {
         forma_cobro: validateEnum(
           req.body.forma_cobro?.trim(),
-          FormaCobro,
+          FormaCobroEnum,
           "forma_cobro",
           true
         ),

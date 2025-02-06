@@ -8,14 +8,7 @@ import {
   Rel,
 } from "@mikro-orm/core";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
-
-export enum FormaCobro {
-  EFECTIVO = "efectivo",
-  TRANSFERENCIA = "transferencia",
-  CHEQUE = "cheque",
-  CREDITO = "credito",
-  DEBITO = "debito",
-}
+import { FormaCobroEnum } from "../../../utils/enums.js";
 
 @Entity({ tableName: "cuotas" })
 @Index({ properties: ["caso", "fecha_vencimiento"] })
@@ -40,5 +33,5 @@ export class Cuota {
 
   @NotEmptyAndMaxLength(20, "forma_cobro")
   @Property({ type: "varchar", length: 20, nullable: true })
-  forma_cobro?: FormaCobro;
+  forma_cobro?: FormaCobroEnum;
 }
