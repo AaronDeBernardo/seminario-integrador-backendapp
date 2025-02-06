@@ -77,7 +77,7 @@ export const controller = {
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
-        valor: validatePrice(req.body.valor, 3, "valor", true),
+        valor: validatePrice(req.body.valor, 3, "valor", true, false),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {
