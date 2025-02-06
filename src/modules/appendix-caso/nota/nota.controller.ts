@@ -134,17 +134,19 @@ export const controller = {
 
   sanitize: (req: Request, res: Response, next: Function) => {
     try {
-      const sanitizedInput: any = {};
+      req.body.sanitizedInput = {
+        titulo: req.body.titulo ? req.body.titulo.trim() : undefined,
+        descripcion: req.body.descripcion
+          ? req.body.descripcion.trim()
+          : undefined,
+      };
 
-      if (req.body.titulo) {
-        sanitizedInput.titulo = req.body.titulo.trim();
-      }
+      Object.keys(req.body.sanitizedInput).forEach((key) => {
+        if (req.body.sanitizedInput[key] === undefined) {
+          delete req.body.sanitizedInput[key];
+        }
+      });
 
-      if (req.body.descripcion) {
-        sanitizedInput.descripcion = req.body.descripcion.trim();
-      }
-
-      req.body.sanitizedInput = sanitizedInput;
       next();
     } catch (error: any) {
       handleError(error, res);

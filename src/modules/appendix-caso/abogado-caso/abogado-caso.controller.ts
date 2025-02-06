@@ -257,23 +257,27 @@ export const controller = {
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
-      const sanitizedInput: any = {};
+      req.body.sanitizedInput = {
+        id_abogado:
+          req.body.id_abogado !== undefined
+            ? validateNumericId(req.body.id_abogado, "id_abogado")
+            : undefined,
+        id_nuevo_abogado:
+          req.body.id_nuevo_abogado !== undefined
+            ? validateNumericId(req.body.id_nuevo_abogado, "id_nuevo_abogado")
+            : undefined,
+        id_caso:
+          req.body.id_caso !== undefined
+            ? validateNumericId(req.body.id_caso, "id_caso")
+            : undefined,
+      };
 
-      if (req.body.id_abogado !== undefined) {
-        sanitizedInput.id_abogado = validateNumericId(
-          req.body.id_abogado,
-          "id_abogado"
-        );
-      }
+      Object.keys(req.body.sanitizedInput).forEach((key) => {
+        if (req.body.sanitizedInput[key] === undefined) {
+          delete req.body.sanitizedInput[key];
+        }
+      });
 
-      if (req.body.id_nuevo_abogado !== undefined) {
-        sanitizedInput.id_nuevo_abogado = validateNumericId(
-          req.body.id_nuevo_abogado,
-          "id_nuevo_abogado"
-        );
-      }
-
-      req.body.sanitizedInput = sanitizedInput;
       next();
     } catch (error: any) {
       handleError(error, res);
