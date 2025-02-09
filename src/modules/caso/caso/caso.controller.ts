@@ -14,7 +14,7 @@ import { EstadoCasoEnum, FrecuenciaPagoEnum } from "../../../utils/enums.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
-import { Politica } from "../../misc/politica/politica.entity.js";
+import { Politicas } from "../../misc/politicas/politicas.entity.js";
 import {
   validateDate,
   validateEntity,
@@ -22,6 +22,7 @@ import {
   validateNumericId,
   validatePrice,
 } from "../../../utils/validators.js";
+import { politicasService } from "../../misc/politicas/politicas.service.js";
 
 const em = orm.em;
 
@@ -156,25 +157,11 @@ export const controller = {
         return;
       }
 
-      const politica = await em.findOne(
-        Politica,
-        { id: { $ne: 0 } },
-        {
-          orderBy: { id: "DESC" },
-        }
-      );
+      const politicas = await politicasService.loadPoliticas();
 
-      if (!politica) {
-        res.status(404).json({
-          message:
-            "No se encontró ninguna política para validar la cantidad máxima de cuotas.",
-        });
-        return;
-      }
-
-      if (req.body.sanitizedInput.num_cuotas > politica.max_cuotas) {
+      if (req.body.sanitizedInput.num_cuotas > politicas.max_cuotas) {
         res.status(400).json({
-          message: `El número de cuotas (${req.body.sanitizedInput.num_cuotas}) excede el máximo permitido (${politica.max_cuotas}).`,
+          message: `El número de cuotas (${req.body.sanitizedInput.num_cuotas}) excede el máximo permitido (${politicas.max_cuotas}).`,
         });
         return;
       }

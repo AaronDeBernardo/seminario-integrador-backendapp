@@ -1,13 +1,16 @@
-
+### Obtener datos de todos los documentos, sin los atributos de tipo blob
 GET http://localhost:3000/api/casos/documentos/
 
 
+### Obtener datos de todos los documentos de un caso, sin los atributos de tipo blob
+GET http://localhost:3000/api/casos/documentos/por-caso/2
+
+
+### Obtener un documento por id
 GET http://localhost:3000/api/casos/documentos/2
 
 
-GET http://localhost:3000/api/casos/documentos/2/1
-
-
+### Guardar un nuevo documento
 POST http://localhost:3000/api/casos/documentos/2
 Content-Type: application/json
 
@@ -17,4 +20,5 @@ Content-Type: application/json
 }
 
 
-PATCH http://localhost:3000/api/casos/documentos/2/4
+### Dar de baja un documento
+PATCH http://localhost:3000/api/casos/documentos/deactivate/2

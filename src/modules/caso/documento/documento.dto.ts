@@ -1,20 +1,31 @@
-import { CasoDTO } from "../../caso/caso/caso.dto.js";
 import { Documento } from "./documento.entity.js";
 
 export class DocumentoDTO {
-  caso: CasoDTO;
   id: number;
   nombre: string;
-  archivo: Buffer;
+  archivo: Buffer | undefined;
   fecha_carga: string;
-  fecha_baja?: string;
 
-  constructor(input: Documento) {
-    this.caso = new CasoDTO(input.caso);
+  caso: { especialidad: string; descripcion: string } | undefined;
+  cliente: { id: number; nombre: string; apellido: string } | undefined;
+
+  constructor(input: Documento, includesCaso: boolean) {
     this.id = input.id;
     this.nombre = input.nombre;
     this.archivo = input.archivo;
     this.fecha_carga = input.fecha_carga;
-    this.fecha_baja = input.fecha_baja;
+
+    if (includesCaso) {
+      this.caso = {
+        especialidad: input.caso.especialidad.nombre,
+        descripcion: input.caso.descripcion,
+      };
+
+      this.cliente = {
+        id: input.caso.cliente.usuario.id,
+        nombre: input.caso.cliente.usuario.nombre,
+        apellido: input.caso.cliente.usuario.apellido,
+      };
+    }
   }
 }

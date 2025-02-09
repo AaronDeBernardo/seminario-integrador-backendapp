@@ -1,10 +1,10 @@
-import { Caso } from "../caso/caso.entity.js";
+import { format } from "date-fns";
+import { NextFunction, Request, Response } from "express";
 import { Documento } from "./documento.entity.js";
 import { DocumentoDTO } from "./documento.dto.js";
 import { handleError } from "../../../utils/error-handler.js";
-import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
-import { Politica } from "../../misc/politica/politica.entity.js";
+import { politicasService } from "../../misc/politicas/politicas.service.js";
 import {
   validateEntity,
   validateNumericId,
@@ -18,16 +18,24 @@ export const controller = {
       const documentos = await em.find(
         Documento,
         { fecha_baja: null },
-        { populate: ["caso"] }
+        {
+          populate: ["caso.cliente.usuario", "caso.especialidad"],
+          fields: [
+            "id",
+            "nombre",
+            "fecha_carga",
+            "caso.descripcion",
+            "caso.especialidad.nombre",
+            "caso.cliente.usuario.id",
+            "caso.cliente.usuario.nombre",
+            "caso.cliente.usuario.apellido",
+          ],
+        }
       );
 
-      console.log("Cantidad de documentos encontrados:", documentos.length);
-      console.log(
-        "Documentos:",
-        documentos.map((d) => ({ id: d.id, nombre: d.nombre }))
+      const data = documentos.map(
+        (d) => new DocumentoDTO(d as Documento, true)
       );
-
-      const data = documentos.map((d) => new DocumentoDTO(d));
 
       res.status(200).json({
         message: "Todos los documentos fueron encontrados.",
@@ -44,17 +52,18 @@ export const controller = {
 
       const documentos = await em.find(
         Documento,
+        { caso: id_caso, fecha_baja: null },
         {
-          caso: id_caso,
-          fecha_baja: null,
-        },
-        { populate: ["caso"] }
+          fields: ["id", "nombre", "fecha_carga"],
+        }
       );
 
-      const data = documentos.map((d) => new DocumentoDTO(d));
+      const data = documentos.map(
+        (d) => new DocumentoDTO(d as Documento, false)
+      );
 
       res.status(200).json({
-        message: "Documentos del caso encontrados.",
+        message: "Todos los documentos del caso fueron encontrados.",
         data,
       });
     } catch (error: any) {
@@ -65,19 +74,13 @@ export const controller = {
   findOne: async (req: Request, res: Response) => {
     try {
       const id = validateNumericId(req.params.id, "id");
-      const id_caso = validateNumericId(req.params.id_caso, "id_caso");
 
-      const documento = await em.findOneOrFail(
-        Documento,
-        {
-          id,
-          caso: id_caso,
-          fecha_baja: null,
-        },
-        { populate: ["caso"] }
-      );
-
-      const data = new DocumentoDTO(documento);
+      const documento = await em.findOneOrFail(Documento, {
+        id,
+        fecha_baja: null,
+      });
+      console.log(documento);
+      const data = new DocumentoDTO(documento, false);
 
       res.status(200).json({
         message: "El documento fue encontrado.",
@@ -146,27 +149,25 @@ export const controller = {
     }
   },
 
-  delete: async (req: Request, res: Response): Promise<void> => {
+  logicalDelete: async (req: Request, res: Response): Promise<void> => {
     try {
       const id = validateNumericId(req.params.id, "id");
-      const id_caso = validateNumericId(req.params.id_caso, "id_caso");
 
-      const documento = await em.findOneOrFail(Documento, {
-        id,
-        caso: id_caso,
-        fecha_baja: null,
-      });
+      const documento = await em.findOneOrFail(
+        Documento,
+        {
+          id,
+          fecha_baja: null,
+        },
+        { fields: ["id", "nombre", "fecha_carga", "fecha_baja"] }
+      );
 
-      documento.fecha_baja = new Date().toISOString().split("T")[0];
-
+      documento.fecha_baja = format(new Date(), "yyyy-MM-dd");
       await em.flush();
-      await em.populate(documento, ["caso"]);
-
-      const data = new DocumentoDTO(documento);
 
       res.status(200).json({
         message: "Documento dado de baja.",
-        data,
+        data: documento,
       });
     } catch (error: any) {
       handleError(error, res);
