@@ -1,0 +1,43 @@
+###
+GET http://localhost:3000/api/casos/
+
+###
+GET http://localhost:3000/api/casos/encurso/
+
+###
+GET http://localhost:3000/api/casos/2
+
+###
+POST http://localhost:3000/api/casos/
+Content-Type: application/json
+
+{
+  "id_cliente": 7,
+  "id_especialidad": 4,
+  "descripcion": "Descripción de un caso de prueba"
+}
+
+
+###
+PUT http://localhost:3000/api/casos/5
+Content-Type: application/json
+
+{
+  "id_cliente": 5,
+  "id_especialidad": 3,
+  "descripcion": "Descripción de un caso de prueba con una actualización"
+}
+
+###
+PATCH http://localhost:3000/api/casos/finalizar/7
+Content-Type: application/json
+
+{
+  "cant_jus": 1,
+  "num_cuotas": 3,
+  "fecha_primer_cobro": "2025-02-10",
+  "frecuencia_cobro": "mensual"
+}
+
+###
+PATCH http://localhost:3000/api/casos/deactivate/1
