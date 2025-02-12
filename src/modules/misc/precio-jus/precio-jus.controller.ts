@@ -4,6 +4,7 @@ import { orm } from "../../../config/db.config.js";
 import { PrecioJus } from "./precio-jus.entity.js";
 import { PrecioJusDTO } from "./precio-jus.dto.js";
 import { validatePrice } from "../../../utils/validators.js";
+import { precioJusService } from "./precio-jus.service.js";
 
 const em = orm.em;
 
@@ -24,35 +25,12 @@ export const controller = {
 
   findLatest: async (_req: Request, res: Response): Promise<void> => {
     try {
-      const currentDate = new Date();
+      const precioJus = await precioJusService.findLatest();
+      const data = new PrecioJusDTO(precioJus);
 
-      const latestPrecioJus = await em.findOne(
-        PrecioJus,
-        {
-          fecha_hora_desde: { $lte: currentDate },
-        },
-        {
-          orderBy: {
-            fecha_hora_desde: "DESC",
-          },
-          cache: 5000,
-        }
-      );
-
-      if (!latestPrecioJus) {
-        res.status(404).json({
-          message: "No se encontró ningún precio del JUS vigente.",
-          timestamp: currentDate,
-        });
-        return;
-      }
-
-      const data = new PrecioJusDTO(latestPrecioJus);
       res.status(200).json({
         message: "El precio actual del JUS fue encontrado.",
         data,
-        vigente_desde: latestPrecioJus.fecha_hora_desde,
-        consultado_en: currentDate,
       });
     } catch (error: any) {
       handleError(error, res);
