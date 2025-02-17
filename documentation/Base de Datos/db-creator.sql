@@ -27,7 +27,7 @@ DROP TABLE IF EXISTS `abogados`;
 CREATE TABLE `abogados` (
   `id_usuario` int unsigned NOT NULL,
   `id_rol` int unsigned NOT NULL,
-  `foto` blob NOT NULL,
+  `foto` mediumblob NOT NULL,
   `matricula` varchar(20) NOT NULL,
   PRIMARY KEY (`id_usuario`),
   KEY `fk_abogados_roles_idx` (`id_rol`),
@@ -239,7 +239,7 @@ CREATE TABLE `documentos` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `id_caso` int unsigned NOT NULL,
   `nombre` varchar(255) NOT NULL,
-  `archivo` blob NOT NULL,
+  `archivo` mediumblob NOT NULL,
   `fecha_carga` date NOT NULL,
   `fecha_baja` date DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -247,6 +247,24 @@ CREATE TABLE `documentos` (
   CONSTRAINT `fk_documentos_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `documentos_BEFORE_INSERT` BEFORE INSERT ON `documentos` FOR EACH ROW BEGIN
+	SET NEW.fecha_carga = CURRENT_DATE;
+    SET NEW.fecha_carga = CURRENT_DATE;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `especialidades`
@@ -585,4 +603,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-02-05 17:26:17
+-- Dump completed on 2025-02-17  8:41:23

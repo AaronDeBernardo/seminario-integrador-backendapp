@@ -19,7 +19,7 @@ export class Documento {
   @Property({ type: "blob" })
   archivo!: Buffer;
 
-  @Property({ type: "date" })
+  @Property({ type: "date", nullable: true })
   fecha_carga!: string;
 
   @Property({ type: "date", nullable: true })

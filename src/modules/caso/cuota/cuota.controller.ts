@@ -160,8 +160,6 @@ export const controller = {
 
         cuota.fecha_hora_cobro = new Date();
         tem.assign(cuota, req.body.sanitizedInput);
-
-        await tem.flush();
         return cuota;
       });
 

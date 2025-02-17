@@ -63,8 +63,7 @@ export const controller = {
         });
       }
 
-      let turnoOtorgado;
-      await orm.em.transactional(async (em) => {
+      const turnoOtorgado = await orm.em.transactional(async (em) => {
         const horarioTurno = await em.findOneOrFail(
           HorarioTurno,
           {
@@ -89,20 +88,16 @@ export const controller = {
         if (turnoExistente)
           throw new HttpError(409, "El turno fue reservado por otro cliente.");
 
-        turnoOtorgado = em.create(TurnoOtorgado, input);
-        em.flush();
+        const aux = em.create(TurnoOtorgado, input);
 
-        turnoOtorgado = await em.findOneOrFail(TurnoOtorgado, turnoOtorgado, {
+        return await em.findOneOrFail(TurnoOtorgado, aux, {
           populate: ["horarioTurno.abogado.usuario", "cliente.usuario"],
         });
       });
 
       //TODO send email
 
-      const data = new TurnoOtorgadoDTO(
-        turnoOtorgado as unknown as TurnoOtorgado
-      );
-
+      const data = new TurnoOtorgadoDTO(turnoOtorgado);
       res.status(201).json({ message: "Turno otorgado.", data });
     } catch (error: any) {
       handleError(error, res);

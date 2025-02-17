@@ -3,8 +3,8 @@ import { NextFunction, Request, Response } from "express";
 import { Documento } from "./documento.entity.js";
 import { DocumentoDTO } from "./documento.dto.js";
 import { handleError } from "../../../utils/error-handler.js";
+import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
-import { politicasService } from "../../misc/politicas/politicas.service.js";
 import {
   validateEntity,
   validateNumericId,
@@ -93,56 +93,14 @@ export const controller = {
 
   add: async (req: Request, res: Response): Promise<void> => {
     try {
-      const id_caso = validateNumericId(req.params.id_caso, "id_caso");
-      const { nombre, archivo } = req.body.sanitizedInput;
-
-      const politica = await em.findOneOrFail(Politica, {});
-      const MAX_FILE_SIZE = politica.tam_max_archivo_mb * 1024 * 1024;
-
-      if (!archivo) {
-        res.status(400).json({
-          message: "El archivo es requerido",
-        });
-        return;
-      }
-
-      if (!nombre) {
-        res.status(400).json({
-          message: "El nombre es requerido",
-        });
-        return;
-      }
-
-      const buffer = Buffer.from(archivo, "base64");
-      const fileSize = buffer.length;
-
-      if (fileSize > MAX_FILE_SIZE) {
-        res.status(400).json({
-          message: `El archivo excede el tamaño máximo permitido (${politica.tam_max_archivo_mb}MB)`,
-        });
-        return;
-      }
-
-      const caso = await em.findOneOrFail(Caso, { id: id_caso });
-
-      const documentoData = {
-        caso,
-        nombre,
-        archivo: buffer,
-        fecha_carga: new Date().toISOString().split("T")[0],
-      };
-
-      const documento = em.create(Documento, documentoData);
+      const em = orm.em.fork();
+      const documento = em.create(Documento, req.body.sanitizedInput);
       validateEntity(documento);
 
       await em.flush();
-      await em.populate(documento, ["caso"]);
-
-      const data = new DocumentoDTO(documento);
 
       res.status(201).json({
-        message: "Documento creado.",
-        data,
+        message: "Documento guardado.",
       });
     } catch (error: any) {
       handleError(error, res);
@@ -176,17 +134,14 @@ export const controller = {
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
-      const sanitizedInput: any = {};
+      req.body.sanitizedInput = {
+        caso: validateNumericId(req.body.id_caso, "id_caso"),
+        nombre: req.body.nombre?.trim(),
+        archivo: req.file,
+      };
 
-      if (req.body.nombre) {
-        sanitizedInput.nombre = req.body.nombre.trim();
-      }
+      if (!req.file) throw new HttpError(400, "archivo: es requerido.");
 
-      if (req.body.archivo) {
-        sanitizedInput.archivo = req.body.archivo;
-      }
-
-      req.body.sanitizedInput = sanitizedInput;
       next();
     } catch (error: any) {
       handleError(error, res);

@@ -71,3 +71,16 @@ DELIMITER ;
 ALTER TABLE `sistema_juridico`.`notas` 
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id_caso`, `id_abogado`, `fecha_hora`);
+
+
+-- Update to V6.0 - 2025-02-17  8:41:23
+ALTER TABLE `sistema_juridico`.`documentos` 
+CHANGE COLUMN `archivo` `archivo` MEDIUMBLOB NOT NULL ;
+ALTER TABLE `sistema_juridico`.`abogados` 
+CHANGE COLUMN `foto` `foto` MEDIUMBLOB NOT NULL ;
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` TRIGGER `documentos_BEFORE_INSERT` BEFORE INSERT ON `documentos` FOR EACH ROW BEGIN
+	SET NEW.fecha_carga = CURRENT_DATE;
+    SET NEW.fecha_carga = CURRENT_DATE;
+END
+DELIMITER ;
