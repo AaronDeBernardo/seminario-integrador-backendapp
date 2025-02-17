@@ -22,11 +22,13 @@
   "dependencies": {
     "@mikro-orm/core": "^6.4.1",
     "@mikro-orm/mysql": "^6.4.1",
+    "@types/multer": "^1.4.12",
     "class-validator": "^0.14.1",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1",
     "reflect-metadata": "^0.2.2"
   }
 }

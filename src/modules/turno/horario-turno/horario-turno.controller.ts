@@ -88,19 +88,20 @@ export const controller = {
   add: async (req: Request, res: Response) => {
     try {
       const input = req.body.sanitizedInput;
-      let horarioTurno = undefined;
-      let data;
 
       if (input.hora_inicio >= input.hora_fin)
         throw new HttpError(400, "hora_inicio: debe ser anterior a hora_fin.");
 
-      await em.transactional(async (em) => {
-        horarioTurno = em.create(HorarioTurno, req.body.sanitizedInput);
-        await checkScheduleConflict(horarioTurno);
+      const horarioTurno = await em.transactional(async (em) => {
+        const horarioTurnoAux = em.create(
+          HorarioTurno,
+          req.body.sanitizedInput
+        );
+        await checkScheduleConflict(horarioTurnoAux);
+        return horarioTurnoAux;
       });
 
-      if (horarioTurno) data = new HorarioTurnoDTO(horarioTurno);
-
+      const data = new HorarioTurnoDTO(horarioTurno);
       res.status(201).json({ message: "Horario de turno creado.", data });
     } catch (error: any) {
       handleError(error, res);
@@ -129,7 +130,6 @@ export const controller = {
       });
 
       const data = new HorarioTurnoDTO(horarioTurno);
-
       res.status(200).json({ message: "Horario de turno actualizado.", data });
     } catch (error: any) {
       handleError(error, res);

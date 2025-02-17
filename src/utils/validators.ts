@@ -41,22 +41,34 @@ export function validatePrice(
   price: any,
   maxDecimals: number,
   field: string,
-  required: boolean
+  required: boolean,
+  allowZero: boolean
 ) {
   if (required === false && price === undefined) return undefined;
 
   if (typeof price === "number" && price >= 0) {
+    if (!allowZero && price === 0)
+      throw new HttpError(400, `${field}: no se permite el valor 0.`);
+
     const roundedPrice = parseFloat(price.toFixed(maxDecimals));
     return roundedPrice;
   }
 
   const convertedPrice = Number(price);
   if (!isNaN(convertedPrice) && convertedPrice >= 0) {
+    if (!allowZero && price === 0)
+      throw new HttpError(400, `${field}: no se permite el valor 0.`);
+
     const roundedPrice = parseFloat(convertedPrice.toFixed(maxDecimals));
     return roundedPrice;
   }
 
-  throw new HttpError(400, `${field}: debe ser un número mayor o igual que 0.`);
+  if (allowZero)
+    throw new HttpError(
+      400,
+      `${field}: debe ser un número mayor o igual que 0.`
+    );
+  else throw new HttpError(400, `${field}: debe ser un número mayor que 0.`);
 }
 
 export function validatePassword(password: any, field: string) {
@@ -68,18 +80,6 @@ export function validatePassword(password: any, field: string) {
   throw new Error(`${field}: debe ser un string con 4 caracteres como mínimo.`);
 }
 
-export function validateDate(date: any, field: string) {
-  if (date === undefined) return undefined;
-
-  const aux = new Date(date);
-  if (!isNaN(aux.getTime())) return date;
-
-  throw new HttpError(
-    400,
-    `${field}: debe ser un string en formato yyyy-MM-dd.`
-  );
-}
-
 export function validateTime(time: any, field: string) {
   if (time === undefined) return undefined;
 
@@ -89,6 +89,18 @@ export function validateTime(time: any, field: string) {
   throw new HttpError(
     400,
     `${field}: debe ser un string en formato HH:MM. Valores admitidos entre las 00:00 y las 23:59.`
+  );
+}
+
+export function validateDate(date: any, field: string) {
+  if (date === undefined) return undefined;
+
+  const aux = new Date(date);
+  if (!isNaN(aux.getTime())) return date;
+
+  throw new HttpError(
+    400,
+    `${field}: debe ser un string en formato yyyy-MM-dd.`
   );
 }
 
@@ -141,4 +153,31 @@ export function validateEntity(entity: any) {
       throw new HttpError(400, "Error en la petición.");
     }
   }
+}
+
+export function validateEnum(
+  value: any,
+  enumType: any,
+  fieldName: string,
+  required: boolean = false
+): any {
+  if (required && !value) {
+    throw new HttpError(400, `El campo ${fieldName} es requerido.`);
+  }
+
+  if (!required && !value) {
+    return undefined;
+  }
+
+  const normalizedValue =
+    value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+
+  if (!Object.values(enumType).includes(normalizedValue)) {
+    throw new HttpError(
+      400,
+      `El valor ingresado para ${fieldName} no es válido.`
+    );
+  }
+
+  return normalizedValue;
 }

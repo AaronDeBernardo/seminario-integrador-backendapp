@@ -2,7 +2,7 @@
 GET http://localhost:3000/api/misc/noticias
 
 ###
-GET http://localhost:3000/api/misc/noticias/6
+GET http://localhost:3000/api/misc/noticias/7
 
 ###
 POST http://localhost:3000/api/misc/noticias
@@ -11,7 +11,7 @@ Content-Type: application/json
 {
   "titulo": "Título ejemplo de una noticia",
   "cuerpo": "Cuerpo ejemplo de una noticia",
-  "fecha_publicacion": "2025-01-25",
+  "fecha_publicacion": "2025-01-30",
   "fecha_vencimiento": "2025-02-26"
 }
 
@@ -23,8 +23,8 @@ Content-Type: application/json
   "titulo": "Título ejemplo de una noticia",
   "cuerpo": "Cuerpo ejemplo de una noticia",
   "fecha_publicacion": "2024-01-18",
-  "fecha_vencimiento": "2027-06-12"
+  "fecha_vencimiento": "2027-06-13"
 }
 
 ###
-PATCH http://localhost:3000/api/misc/noticias/deactivate/3
+PATCH http://localhost:3000/api/misc/noticias/deactivate/7
