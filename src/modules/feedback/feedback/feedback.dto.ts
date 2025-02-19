@@ -1,4 +1,3 @@
-import { AbogadoDTO } from "../../usuario/abogado/abogado.dto.js";
 import { Feedback } from "./feedback.entity.js";
 
 export class FeedbackDTO {
@@ -20,9 +19,9 @@ export class FeedbackDTO {
     };
 
     this.cliente = {
-      id: input.cliente.usuario.id,
-      nombre: input.cliente.usuario.nombre,
-      apellido: input.cliente.usuario.apellido || undefined,
+      id: input.caso.cliente.usuario.id,
+      nombre: input.caso.cliente.usuario.nombre,
+      apellido: input.caso.cliente.usuario.apellido || undefined,
     };
 
     this.fecha_hora = input.fecha_hora;

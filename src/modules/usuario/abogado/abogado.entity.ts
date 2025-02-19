@@ -8,6 +8,7 @@ import {
   Property,
   Rel,
 } from "@mikro-orm/core";
+import { Caso } from "../../caso/caso/caso.entity.js";
 import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
 import { HorarioTurno } from "../../turno/horario-turno/horario-turno.entity.js";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
@@ -40,4 +41,9 @@ export class Abogado {
 
   @OneToMany(() => HorarioTurno, (horarioTurno) => horarioTurno.abogado)
   horariosTurnos = new Collection<HorarioTurno>(this);
+
+  @ManyToMany(() => Caso, (caso) => caso.abogados, {
+    pivotEntity: "AbogadoCaso",
+  })
+  casos = new Collection<Caso>(this);
 }

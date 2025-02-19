@@ -84,3 +84,21 @@ CREATE DEFINER=`root`@`localhost` TRIGGER `documentos_BEFORE_INSERT` BEFORE INSE
     SET NEW.fecha_carga = CURRENT_DATE;
 END
 DELIMITER ;
+
+
+-- Update to V7.0 - 2025-02-19 17:58:48
+ALTER TABLE `sistema_juridico`.`abogados_casos` 
+ADD COLUMN `es_principal` TINYINT NOT NULL DEFAULT 0 AFTER `fecha_alta`;
+
+ALTER TABLE `feedbacks`
+  DROP FOREIGN KEY `fk_feedbacks_abogados`, 
+  DROP FOREIGN KEY `fk_feedbacks_clientes`,
+  DROP COLUMN `id_cliente`,
+  ADD COLUMN `id_caso` int unsigned NOT NULL,
+  DROP PRIMARY KEY,
+  ADD PRIMARY KEY (`id_abogado`, `id_caso`),
+  ADD CONSTRAINT `FK_feedbacks_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_feedbacks_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON UPDATE CASCADE;
+
+ALTER TABLE `feedbacks`
+  DROP INDEX `fk_feedbacks_abogados_idx`;

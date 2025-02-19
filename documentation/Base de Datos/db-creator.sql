@@ -48,6 +48,7 @@ CREATE TABLE `abogados_casos` (
   `id_abogado` int unsigned NOT NULL,
   `id_caso` int unsigned NOT NULL,
   `fecha_alta` date NOT NULL,
+  `es_principal` tinyint NOT NULL DEFAULT '0',
   `fecha_baja` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_abogados-casos_casos_idx` (`id_caso`),
@@ -289,15 +290,15 @@ DROP TABLE IF EXISTS `feedbacks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `feedbacks` (
-  `id_cliente` int unsigned NOT NULL,
   `id_abogado` int unsigned NOT NULL,
+  `id_caso` int unsigned NOT NULL,
   `fecha_hora` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `descripcion` text NOT NULL,
   `puntuacion` int NOT NULL,
-  PRIMARY KEY (`id_cliente`,`id_abogado`,`fecha_hora`),
-  KEY `fk_feedbacks_abogados_idx` (`id_abogado`),
-  CONSTRAINT `fk_feedbacks_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_feedbacks_clientes` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE
+  PRIMARY KEY (`id_abogado`,`id_caso`),
+  KEY `FK_feedbacks_casos_idx` (`id_caso`),
+  CONSTRAINT `FK_feedbacks_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_feedbacks_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -603,4 +604,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-02-17  8:41:23
+-- Dump completed on 2025-02-19 18:06:08
