@@ -1,5 +1,5 @@
 import { Entity, OneToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty, ValidateIf } from "class-validator";
 import { Abogado } from "../abogado/abogado.entity.js";
 import { Cliente } from "../cliente/cliente.entity.js";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
@@ -14,8 +14,9 @@ export class Usuario {
   @Property({ type: "varchar", length: 50 })
   nombre!: string;
 
+  @ValidateIf((u) => u.cliente === undefined)
   @NotEmptyAndMaxLength(50, "apellido")
-  @Property({ type: "varchar", length: 50 })
+  @Property({ type: "varchar", length: 50, nullable: true })
   apellido!: string;
 
   @NotEmptyAndMaxLength(255, "email")

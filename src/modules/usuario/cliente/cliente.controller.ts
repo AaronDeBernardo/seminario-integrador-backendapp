@@ -3,9 +3,13 @@ import { orm } from "../../../config/db.config.js";
 import { Cliente } from "./cliente.entity.js";
 import { ClienteDTO } from "./cliente.dto.js";
 import { handleError } from "../../../utils/error-handler.js";
+import { HttpError } from "../../../utils/http-error.js";
 import { sanitizeUsuario } from "../usuario/usuario.controller.js";
 import { Usuario } from "../usuario/usuario.entity.js";
-import { validateEntity, validateNumericId } from "../../../utils/validators.js";
+import {
+  validateEntity,
+  validateNumericId,
+} from "../../../utils/validators.js";
 
 const em = orm.em;
 
@@ -61,6 +65,15 @@ export const controller = {
       validateEntity(cliente.usuario);
       validateEntity(cliente);
 
+      if (
+        (cliente.es_empresa && cliente.usuario.apellido) ||
+        (!cliente.es_empresa && !cliente.usuario.apellido)
+      )
+        throw new HttpError(
+          400,
+          "Una persona debe tener apellido. En una empresa debe ser null o undefined."
+        );
+
       await em.flush();
 
       const data = new ClienteDTO(cliente);
@@ -86,6 +99,15 @@ export const controller = {
 
       validateEntity(cliente.usuario);
       validateEntity(cliente);
+
+      if (
+        (cliente.es_empresa && cliente.usuario.apellido) ||
+        (!cliente.es_empresa && !cliente.usuario.apellido)
+      )
+        throw new HttpError(
+          400,
+          "Una persona debe tener apellido. En una empresa debe ser null o undefined."
+        );
 
       await em.flush();
       const data = new ClienteDTO(cliente);
