@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import cors from "cors";
 import express from "express";
 import { RequestContext } from "@mikro-orm/mysql";
 import { orm } from "./config/db.config.js";
@@ -11,6 +12,8 @@ import { usuarioModuleRouter } from "./modules/usuario/usuario-module.routes.js"
 
 const PORT = 3000;
 const app = express();
+
+app.use(cors({ origin: "http://localhost:4200", optionsSuccessStatus: 200 }));
 
 app.use((_req, _res, next) => {
   RequestContext.create(orm.em, next);
