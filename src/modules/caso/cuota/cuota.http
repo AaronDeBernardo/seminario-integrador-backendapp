@@ -1,0 +1,30 @@
+### Devuelve:
+### 1) todas las cuotas cobradas en los últimos 3 meses
+### 2) todas las cuotas que vencieron en los 3 meses anteriores
+### 3) todas las cuotas que vencen en el siguiente mes
+GET http://localhost:3000/api/casos/cuotas/
+
+
+### Obtener todas las cuotas que vencieron y no fueron cobradas
+GET http://localhost:3000/api/casos/cuotas/impagas
+
+
+### Obtener todas las cuotas de un caso
+GET http://localhost:3000/api/casos/3/cuotas/
+
+
+### Obtener la siguiente cuota pendiente de cobro de un caso
+GET http://localhost:3000/api/casos/3/cuotas/siguiente
+
+
+### Cobrar una cuota
+PATCH http://localhost:3000/api/casos/3/cuotas/1
+Content-Type: application/json
+
+{
+  "forma_cobro": "Efectivo"
+}
+
+
+### Eliminar el cobro de una cuota
+PATCH http://localhost:3000/api/casos/3/cuotas/cancelar
