@@ -12,5 +12,3 @@ notaRouter.put(
   controller.update
 );
 notaRouter.delete("/:id_caso/:id_abogado/:fecha_hora", controller.delete);
-
-export default notaRouter;

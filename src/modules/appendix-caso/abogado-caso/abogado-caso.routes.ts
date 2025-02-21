@@ -13,5 +13,3 @@ abogadoCasoRouter.patch(
 );
 abogadoCasoRouter.patch("/desvincular/:id_caso/:id_abogado", controller.unlink);
 abogadoCasoRouter.patch("/deactivate/:id", controller.deactivate);
-
-export default abogadoCasoRouter;

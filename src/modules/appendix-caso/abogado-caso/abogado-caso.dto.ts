@@ -6,7 +6,7 @@ export class AbogadoCasoDTO {
   id: number;
   abogado: AbogadoDTO | null;
   caso: CasoDTO | null;
-  fecha_alta: string;
+  fecha_alta?: string;
   fecha_baja?: string;
 
   constructor(input: AbogadoCaso) {

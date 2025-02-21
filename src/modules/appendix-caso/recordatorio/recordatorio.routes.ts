@@ -12,5 +12,3 @@ recordatorioRouter.post(
 );
 recordatorioRouter.put("/:id", controller.sanitize, controller.update);
 recordatorioRouter.delete("/:id", controller.delete);
-
-export default recordatorioRouter;

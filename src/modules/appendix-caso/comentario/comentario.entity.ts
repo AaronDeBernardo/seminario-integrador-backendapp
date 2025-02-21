@@ -5,6 +5,7 @@ import {
   OneToMany,
   PrimaryKey,
   Property,
+  Rel,
 } from "@mikro-orm/core";
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
@@ -18,7 +19,7 @@ export class Comentario {
   caso!: any;
 
   @ManyToOne(() => Abogado, { fieldName: "id_abogado" })
-  abogado!: Abogado;
+  abogado!: Rel<Abogado>;
 
   @ManyToOne(() => Comentario, { nullable: true, fieldName: "id_padre" })
   padre?: Comentario;

@@ -1,7 +1,7 @@
 import { format, subMonths } from "date-fns";
 import { NextFunction, Request, Response } from "express";
-import { AbogadoCaso } from "../abogado-caso/abogado-caso.entity.js";
-import { abogadoCasoService } from "../abogado-caso/abogado-caso.service.js";
+import { AbogadoCaso } from "../../appendix-caso/abogado-caso/abogado-caso.entity.js";
+import { abogadoCasoService } from "../../appendix-caso/abogado-caso/abogado-caso.service.js";
 import { Caso } from "./caso.entity.js";
 import { CasoDTO } from "./caso.dto.js";
 import { casoService } from "./caso.service.js";
