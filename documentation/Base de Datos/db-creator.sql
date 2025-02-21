@@ -48,6 +48,7 @@ CREATE TABLE `abogados_casos` (
   `id_abogado` int unsigned NOT NULL,
   `id_caso` int unsigned NOT NULL,
   `fecha_alta` date NOT NULL,
+  `es_principal` tinyint NOT NULL DEFAULT '0',
   `fecha_baja` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_abogados-casos_casos_idx` (`id_caso`),
@@ -56,6 +57,23 @@ CREATE TABLE `abogados_casos` (
   CONSTRAINT `fk_abogados-casos_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `abogados_casos_BEFORE_INSERT` BEFORE INSERT ON `abogados_casos` FOR EACH ROW BEGIN
+	SET NEW.fecha_alta = CURRENT_DATE;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `abogados_especialidades`
@@ -289,15 +307,15 @@ DROP TABLE IF EXISTS `feedbacks`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `feedbacks` (
-  `id_cliente` int unsigned NOT NULL,
   `id_abogado` int unsigned NOT NULL,
+  `id_caso` int unsigned NOT NULL,
   `fecha_hora` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `descripcion` text NOT NULL,
   `puntuacion` int NOT NULL,
-  PRIMARY KEY (`id_cliente`,`id_abogado`,`fecha_hora`),
-  KEY `fk_feedbacks_abogados_idx` (`id_abogado`),
-  CONSTRAINT `fk_feedbacks_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_feedbacks_clientes` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE
+  PRIMARY KEY (`id_abogado`,`id_caso`),
+  KEY `FK_feedbacks_casos_idx` (`id_caso`),
+  CONSTRAINT `FK_feedbacks_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_feedbacks_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -603,4 +621,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-02-17  8:41:23
+-- Dump completed on 2025-02-21 10:11:17

@@ -1,12 +1,12 @@
 import {
   Collection,
   Entity,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-// import { AbogadoCaso } from "../nombre-modulo/abogado-caso/abogado-caso.entity.js";
 import { Cliente } from "../../usuario/cliente/cliente.entity.js";
 // import { Comentario } from "../nombre-modulo/comentario/comentario.entity.js";
 import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
@@ -14,6 +14,7 @@ import { Especialidad } from "../../especialidad/especialidad/especialidad.entit
 // import { Nota } from "../nombre-modulo/nota/nota.entity.js";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 import { EstadoCasoEnum } from "../../../utils/enums.js";
+import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 
 @Entity({ tableName: "casos" })
 export class Caso {
@@ -42,10 +43,13 @@ export class Caso {
   @Property({ type: "decimal", nullable: true })
   monto_caso?: number;
 
-  /*
-  @OneToMany(() => AbogadoCaso, (abogadoCaso) => abogadoCaso.caso)
-  abogados = new Collection<AbogadoCaso>(this);
+  @ManyToMany(() => Abogado, (abogado) => abogado.casos, {
+    pivotEntity: "AbogadoCaso",
+    owner: true,
+  })
+  abogados = new Collection<Abogado>(this);
 
+  /*
   @OneToMany(() => Recordatorio, (recordatorio) => recordatorio.caso)
   recordatorios = new Collection<Recordatorio>(this);
 
