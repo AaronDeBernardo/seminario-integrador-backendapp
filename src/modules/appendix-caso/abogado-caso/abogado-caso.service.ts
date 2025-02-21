@@ -39,6 +39,20 @@ export const abogadoCasoService = {
       );
   },
 
+  isAbogadoWorkingOnCaso: async (
+    id_abogado: number,
+    id_caso: number
+  ): Promise<boolean> => {
+    const abogado = await em.findOne(AbogadoCaso, {
+      caso: { id: id_caso, estado: EstadoCasoEnum.EN_CURSO },
+      fecha_baja: null,
+      abogado: id_abogado as any,
+    });
+
+    if (abogado) return true;
+    else return false;
+  },
+
   updateAbogadoPrincipal: async (
     id_caso: number,
     id_abogado_principal: number,
