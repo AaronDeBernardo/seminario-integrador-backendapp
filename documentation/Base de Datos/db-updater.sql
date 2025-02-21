@@ -102,3 +102,12 @@ ALTER TABLE `feedbacks`
 
 ALTER TABLE `feedbacks`
   DROP INDEX `fk_feedbacks_abogados_idx`;
+
+
+-- Update to V8.0 - 2025-02-21 10:11:17
+DELIMITER $$
+CREATE DEFINER = CURRENT_USER TRIGGER `sistema_juridico`.`abogados_casos_BEFORE_INSERT` BEFORE INSERT ON `abogados_casos` FOR EACH ROW
+BEGIN
+	SET NEW.fecha_alta = CURRENT_DATE;
+END
+DELIMITER ;

@@ -18,11 +18,11 @@ export class AbogadoCaso {
   caso!: Caso;
 
   @Property({ type: "date", nullable: true })
-  fecha_alta!: string;
+  fecha_alta?: string;
 
   @Property({ type: "boolean", nullable: true })
-  es_principal!: boolean;
+  es_principal?: boolean;
 
-  @Property({ type: "date" })
+  @Property({ type: "date", nullable: true })
   fecha_baja?: string;
 }

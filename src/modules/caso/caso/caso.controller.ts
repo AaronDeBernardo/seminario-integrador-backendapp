@@ -7,6 +7,8 @@ import {
   subMonths,
 } from "date-fns";
 import { NextFunction, Request, Response } from "express";
+import { AbogadoCaso } from "../abogado-caso/abogado-caso.entity.js";
+import { abogadoCasoService } from "../abogado-caso/abogado-caso.service.js";
 import { Caso } from "./caso.entity.js";
 import { CasoDTO } from "./caso.dto.js";
 import { Cuota } from "../cuota/cuota.entity.js";
@@ -14,7 +16,7 @@ import { EstadoCasoEnum, FrecuenciaPagoEnum } from "../../../utils/enums.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
-import { Politicas } from "../../misc/politicas/politicas.entity.js";
+import { politicasService } from "../../misc/politicas/politicas.service.js";
 import {
   validateDate,
   validateEntity,
@@ -22,7 +24,6 @@ import {
   validateNumericId,
   validatePrice,
 } from "../../../utils/validators.js";
-import { politicasService } from "../../misc/politicas/politicas.service.js";
 
 const em = orm.em;
 
@@ -99,11 +100,22 @@ export const controller = {
 
   add: async (req: Request, res: Response) => {
     try {
+      await abogadoCasoService.checkAbogadoAvailability(
+        req.body.sanitizedInput.abogado_principal,
+        req.body.sanitizedInput.especialidad,
+        false
+      );
+
       const caso = em.create(Caso, req.body.sanitizedInput);
       caso.estado = EstadoCasoEnum.EN_CURSO;
-
-      //TODO validar que el abogado principal tenga asociada la especialidad del caso
       validateEntity(caso);
+
+      em.create(AbogadoCaso, {
+        abogado: req.body.sanitizedInput.abogado_principal,
+        caso: caso,
+        es_principal: true,
+      });
+
       await em.flush();
       await em.refresh(caso);
 
@@ -129,11 +141,18 @@ export const controller = {
           'El caso no se encuentra con estado "en curso"'
         );
 
-      em.assign(caso, req.body.sanitizedInput);
-      validateEntity(caso);
-      //TODO validar que el abogado principal tenga asociada la especialidad del caso
+      await em.transactional(async (tem) => {
+        await abogadoCasoService.updateAbogadoPrincipal(
+          id,
+          req.body.sanitizedInput.abogado_principal,
+          req.body.sanitizedInput.especialidad,
+          caso.especialidad
+        );
 
-      await em.flush();
+        tem.assign(caso, req.body.sanitizedInput);
+        validateEntity(caso);
+      });
+
       const data = new CasoDTO(caso);
 
       res.status(200).json({
@@ -214,6 +233,10 @@ export const controller = {
         especialidad: validateNumericId(
           req.body.id_especialidad,
           "id_especialidad"
+        ),
+        abogado_principal: validateNumericId(
+          req.body.id_abogado_principal,
+          "id_abogado_principal"
         ),
         descripcion: req.body.descripcion?.trim(),
       };
