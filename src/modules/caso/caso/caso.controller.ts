@@ -1,16 +1,10 @@
-import {
-  addDays,
-  addHours,
-  addMonths,
-  addYears,
-  format,
-  subMonths,
-} from "date-fns";
+import { format, subMonths } from "date-fns";
 import { NextFunction, Request, Response } from "express";
 import { AbogadoCaso } from "../abogado-caso/abogado-caso.entity.js";
 import { abogadoCasoService } from "../abogado-caso/abogado-caso.service.js";
 import { Caso } from "./caso.entity.js";
 import { CasoDTO } from "./caso.dto.js";
+import { casoService } from "./caso.service.js";
 import { Cuota } from "../cuota/cuota.entity.js";
 import { EstadoCasoEnum, FrecuenciaPagoEnum } from "../../../utils/enums.js";
 import { handleError } from "../../../utils/error-handler.js";
@@ -187,7 +181,10 @@ export const controller = {
 
       caso.estado = EstadoCasoEnum.FINALIZADO;
       caso.fecha_estado = format(new Date(), "yyyy-MM-dd");
-      const cuotas: Cuota[] = generateCuotas(caso, req.body.sanitizedInput);
+      const cuotas: Cuota[] = casoService.generateCuotas(
+        caso,
+        req.body.sanitizedInput
+      );
 
       await em.flush();
 
@@ -291,57 +288,3 @@ export const controller = {
     }
   },
 };
-
-function generateCuotas(caso: Caso, input: any): Cuota[] {
-  let cuotas: Cuota[] = [];
-  let nextDate = input.fecha_primer_cobro;
-  const jusCuota = parseFloat((input.cant_jus / input.num_cuotas).toFixed(3));
-
-  for (let i = 0; i < input.num_cuotas; i++) {
-    const cuota = em.create(Cuota, {
-      caso,
-      numero: i + 1,
-      cant_jus: jusCuota,
-      fecha_vencimiento: nextDate,
-    });
-
-    cuotas.push(cuota);
-    nextDate = calculateNextExpirationDate(nextDate, input.frecuencia_cobro);
-  }
-
-  let difference = input.cant_jus - jusCuota * input.num_cuotas;
-  difference = parseFloat(difference.toFixed(3));
-  cuotas[0].cant_jus += difference;
-
-  return cuotas;
-}
-
-function calculateNextExpirationDate(date: string, frequency: string): string {
-  const utcDate = addHours(new Date(date), 3);
-  let expirationDate: Date;
-
-  switch (frequency) {
-    case FrecuenciaPagoEnum.SEMANAL:
-      expirationDate = addDays(utcDate, 7);
-      break;
-    case FrecuenciaPagoEnum.QUINCENAL:
-      expirationDate = addDays(utcDate, 15);
-      break;
-    case FrecuenciaPagoEnum.MENSUAL:
-      expirationDate = addMonths(utcDate, 1);
-      break;
-    case FrecuenciaPagoEnum.TRIMESTRAL:
-      expirationDate = addMonths(utcDate, 3);
-      break;
-    case FrecuenciaPagoEnum.SEMESTRAL:
-      expirationDate = addMonths(utcDate, 6);
-      break;
-    case FrecuenciaPagoEnum.ANUAL:
-      expirationDate = addYears(utcDate, 1);
-      break;
-    default:
-      throw new HttpError(400, `Frecuencia no válida: ${frequency}`);
-  }
-
-  return format(expirationDate, "yyyy-MM-dd");
-}
