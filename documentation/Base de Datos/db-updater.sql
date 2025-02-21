@@ -58,3 +58,56 @@ BEGIN
     SET NEW.fecha_alta = CURRENT_DATE;
 END $$
 DELIMITER ;
+
+
+-- Update to V5.0 - 2025-02-05 17:26:17
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` TRIGGER `casos_BEFORE_INSERT` BEFORE INSERT ON `casos` FOR EACH ROW BEGIN
+	SET NEW.fecha_inicio = CURRENT_DATE;
+    SET NEW.fecha_estado = CURRENT_DATE;
+END
+DELIMITER ;
+
+ALTER TABLE `sistema_juridico`.`notas` 
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`id_caso`, `id_abogado`, `fecha_hora`);
+
+
+-- Update to V6.0 - 2025-02-17  8:41:23
+ALTER TABLE `sistema_juridico`.`documentos` 
+CHANGE COLUMN `archivo` `archivo` MEDIUMBLOB NOT NULL ;
+ALTER TABLE `sistema_juridico`.`abogados` 
+CHANGE COLUMN `foto` `foto` MEDIUMBLOB NOT NULL ;
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` TRIGGER `documentos_BEFORE_INSERT` BEFORE INSERT ON `documentos` FOR EACH ROW BEGIN
+	SET NEW.fecha_carga = CURRENT_DATE;
+    SET NEW.fecha_carga = CURRENT_DATE;
+END
+DELIMITER ;
+
+
+-- Update to V7.0 - 2025-02-19 17:58:48
+ALTER TABLE `sistema_juridico`.`abogados_casos` 
+ADD COLUMN `es_principal` TINYINT NOT NULL DEFAULT 0 AFTER `fecha_alta`;
+
+ALTER TABLE `feedbacks`
+  DROP FOREIGN KEY `fk_feedbacks_abogados`, 
+  DROP FOREIGN KEY `fk_feedbacks_clientes`,
+  DROP COLUMN `id_cliente`,
+  ADD COLUMN `id_caso` int unsigned NOT NULL,
+  DROP PRIMARY KEY,
+  ADD PRIMARY KEY (`id_abogado`, `id_caso`),
+  ADD CONSTRAINT `FK_feedbacks_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_feedbacks_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON UPDATE CASCADE;
+
+ALTER TABLE `feedbacks`
+  DROP INDEX `fk_feedbacks_abogados_idx`;
+
+
+-- Update to V8.0 - 2025-02-21 10:11:17
+DELIMITER $$
+CREATE DEFINER = CURRENT_USER TRIGGER `sistema_juridico`.`abogados_casos_BEFORE_INSERT` BEFORE INSERT ON `abogados_casos` FOR EACH ROW
+BEGIN
+	SET NEW.fecha_alta = CURRENT_DATE;
+END
+DELIMITER ;

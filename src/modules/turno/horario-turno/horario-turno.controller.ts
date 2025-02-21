@@ -7,9 +7,9 @@ import { HorarioTurnoDTO } from "./horario-turno.dto.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { TurnoOtorgado } from "../turno-otorgado/turno-otorgado.entity.js";
 import {
+  validateIntegerInRange,
   validateNumericId,
   validateTime,
-  validateWeekDay,
 } from "../../../utils/validators.js";
 
 const em = orm.em;
@@ -88,19 +88,20 @@ export const controller = {
   add: async (req: Request, res: Response) => {
     try {
       const input = req.body.sanitizedInput;
-      let horarioTurno = undefined;
-      let data;
 
       if (input.hora_inicio >= input.hora_fin)
         throw new HttpError(400, "hora_inicio: debe ser anterior a hora_fin.");
 
-      await em.transactional(async (em) => {
-        horarioTurno = em.create(HorarioTurno, req.body.sanitizedInput);
-        await checkScheduleConflict(horarioTurno);
+      const horarioTurno = await em.transactional(async (em) => {
+        const horarioTurnoAux = em.create(
+          HorarioTurno,
+          req.body.sanitizedInput
+        );
+        await checkScheduleConflict(horarioTurnoAux);
+        return horarioTurnoAux;
       });
 
-      if (horarioTurno) data = new HorarioTurnoDTO(horarioTurno);
-
+      const data = new HorarioTurnoDTO(horarioTurno);
       res.status(201).json({ message: "Horario de turno creado.", data });
     } catch (error: any) {
       handleError(error, res);
@@ -129,7 +130,6 @@ export const controller = {
       });
 
       const data = new HorarioTurnoDTO(horarioTurno);
-
       res.status(200).json({ message: "Horario de turno actualizado.", data });
     } catch (error: any) {
       handleError(error, res);
@@ -164,7 +164,12 @@ export const controller = {
         abogado: validateNumericId(req.body.id_abogado, "id_abogado"),
         hora_inicio: validateTime(req.body.hora_inicio, "hora_inicio"),
         hora_fin: validateTime(req.body.hora_fin, "hora_fin"),
-        dia_semana: validateWeekDay(req.body.dia_semana, "dia_semana"),
+        dia_semana: validateIntegerInRange(
+          req.body.dia_semana,
+          0,
+          6,
+          "dia_semana"
+        ),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {

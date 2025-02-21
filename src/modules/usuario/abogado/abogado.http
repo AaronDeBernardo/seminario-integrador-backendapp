@@ -20,7 +20,8 @@ Content-Type: application/json
   "nro_doc": "12345678",
   "foto": "datos-archivo",
   "matricula": "55889",
-  "id_rol": 1
+  "id_rol": 1,
+  "especialidades": [2]
 }
 
 
@@ -33,5 +34,6 @@ Content-Type: application/json
   "apellido": "Rodriguez",
   "matricula": "62358",
   "id_rol": 1,
-  "telefono": "1234"
+  "telefono": "1234",
+  "especialidades": [1,2,3]
 }
