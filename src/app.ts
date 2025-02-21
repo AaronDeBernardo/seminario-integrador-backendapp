@@ -14,7 +14,7 @@ import { usuarioModuleRouter } from "./modules/usuario/usuario-module.routes.js"
 const PORT = 3000;
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: "http://localhost:4200", optionsSuccessStatus: 200 }));
 
 app.use((_req, _res, next) => {
   RequestContext.create(orm.em, next);
