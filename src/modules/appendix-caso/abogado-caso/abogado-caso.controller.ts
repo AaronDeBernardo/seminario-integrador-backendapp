@@ -1,34 +1,16 @@
-import { Abogado } from "../../usuario/abogado/abogado.entity.js";
+import { NextFunction, Request, Response } from "express";
 import { AbogadoCaso } from "./abogado-caso.entity.js";
 import { AbogadoCasoDTO } from "./abogado-caso.dto.js";
+import { abogadoCasoService } from "./abogado-caso.service.js";
 import { Caso } from "../../caso/caso/caso.entity.js";
+import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { handleError } from "../../../utils/error-handler.js";
-import { NextFunction, Request, Response } from "express";
 import { orm } from "../../../config/db.config.js";
 import { validateNumericId } from "../../../utils/validators.js";
 
 const em = orm.em;
 
 export const controller = {
-  findAll: async (_req: Request, res: Response) => {
-    try {
-      const abogadoCasos = await em.find(
-        AbogadoCaso,
-        {},
-        { populate: ["abogado.usuario", "caso"] }
-      );
-
-      const data = abogadoCasos.map((ac) => new AbogadoCasoDTO(ac));
-
-      res.status(200).json({
-        message: "Todas las relaciones abogado-caso fueron encontradas.",
-        data,
-      });
-    } catch (error: any) {
-      handleError(error, res);
-    }
-  },
-
   findByCaso: async (req: Request, res: Response) => {
     try {
       const id_caso = validateNumericId(req.params.id_caso, "id_caso");
@@ -54,109 +36,40 @@ export const controller = {
     }
   },
 
-  add: async (req: Request, res: Response): Promise<void> => {
+  link: async (req: Request, res: Response): Promise<void> => {
     try {
-      const id_abogado = validateNumericId(req.body.id_abogado, "id_abogado");
-      const id_caso = validateNumericId(req.body.id_caso, "id_caso");
+      const caso = await em.findOneOrFail(Caso, {
+        id: req.body.sanitizedInput.caso,
+        estado: EstadoCasoEnum.EN_CURSO,
+      });
 
       const existingRelation = await em.findOne(AbogadoCaso, {
-        abogado: id_abogado,
-        caso: id_caso,
+        abogado: req.body.sanitizedInput.abogado,
+        caso: caso,
         fecha_baja: null,
       });
 
       if (existingRelation) {
         res.status(400).json({
-          message: "Ya existe una relación activa entre este abogado y caso.",
+          message: "El abogado ya se encuentra asociado al caso.",
         });
         return;
       }
 
-      const [abogado, caso] = await Promise.all([
-        em.findOneOrFail(Abogado, { usuario: id_abogado }),
-        em.findOneOrFail(Caso, { id: id_caso }),
-      ]);
+      await abogadoCasoService.checkAbogadoAvailability(
+        req.body.sanitizedInput.abogado,
+        caso.especialidad,
+        false
+      );
 
-      const abogadoCaso = em.create(AbogadoCaso, {
-        abogado,
-        caso,
-        fecha_alta: new Date().toISOString().split("T")[0],
-      });
-
+      const abogadoCaso = em.create(AbogadoCaso, req.body.sanitizedInput);
       await em.flush();
-      await em.populate(abogadoCaso, ["abogado.usuario", "caso"]);
 
+      //TODO enviar email al abogado con el detalle
       const data = new AbogadoCasoDTO(abogadoCaso);
 
       res.status(201).json({
-        message: "Relación abogado-caso creada.",
-        data,
-      });
-    } catch (error: any) {
-      handleError(error, res);
-    }
-  },
-
-  link: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const id_caso = validateNumericId(req.params.id_caso, "id_caso");
-      const id_nuevo_abogado = validateNumericId(
-        req.body.id_abogado,
-        "id_abogado"
-      );
-
-      const relacionExistente = await em.findOne(AbogadoCaso, {
-        caso: id_caso,
-        abogado: id_nuevo_abogado,
-        fecha_baja: null,
-      });
-
-      if (relacionExistente) {
-        res.status(400).json({
-          message: "El abogado ya está vinculado activamente a este caso.",
-        });
-        return;
-      }
-
-      const relacionInactiva = await em.findOne(AbogadoCaso, {
-        caso: id_caso,
-        abogado: id_nuevo_abogado,
-        fecha_baja: { $ne: null },
-      });
-
-      if (relacionInactiva) {
-        relacionInactiva.fecha_alta = new Date().toISOString().split("T")[0];
-        relacionInactiva.fecha_baja = undefined;
-        await em.flush();
-
-        await em.populate(relacionInactiva, ["abogado.usuario", "caso"]);
-        const data = new AbogadoCasoDTO(relacionInactiva);
-
-        res.status(200).json({
-          message: "El abogado fue reactivado en el caso exitosamente.",
-          data,
-        });
-        return;
-      }
-
-      const [caso, nuevoAbogado] = await Promise.all([
-        em.findOneOrFail(Caso, { id: id_caso }),
-        em.findOneOrFail(Abogado, { usuario: id_nuevo_abogado }),
-      ]);
-
-      const nuevaRelacion = em.create(AbogadoCaso, {
-        abogado: nuevoAbogado,
-        caso,
-        fecha_alta: new Date().toISOString().split("T")[0],
-      });
-
-      await em.flush();
-      await em.populate(nuevaRelacion, ["abogado.usuario", "caso"]);
-
-      const data = new AbogadoCasoDTO(nuevaRelacion);
-
-      res.status(201).json({
-        message: "Nuevo abogado vinculado al caso exitosamente.",
+        message: "El abogado fue asociado al caso.",
         data,
       });
     } catch (error: any) {
@@ -258,18 +171,10 @@ export const controller = {
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
-        id_abogado:
-          req.body.id_abogado !== undefined
-            ? validateNumericId(req.body.id_abogado, "id_abogado")
-            : undefined,
-        id_nuevo_abogado:
-          req.body.id_nuevo_abogado !== undefined
-            ? validateNumericId(req.body.id_nuevo_abogado, "id_nuevo_abogado")
-            : undefined,
-        id_caso:
-          req.body.id_caso !== undefined
-            ? validateNumericId(req.body.id_caso, "id_caso")
-            : undefined,
+        abogado: validateNumericId(req.body.id_abogado, "id_abogado"),
+        caso: validateNumericId(req.body.id_caso, "id_caso"),
+        es_principal: req.body.es_principal,
+        detalle: req.body.detalle?.trim(),
       };
 
       Object.keys(req.body.sanitizedInput).forEach((key) => {
