@@ -5,22 +5,26 @@ GET http://localhost:3000/api/casos/recordatorios/
 GET http://localhost:3000/api/casos/recordatorios/2
 
 ###
-POST http://localhost:3000/api/casos/recordatorios/2/2
+POST http://localhost:3000/api/casos/recordatorios/
 Content-Type: application/json
 
 {
-    "fecha_hora_limite": "2025-02-23T12:00:00",
-    "descripcion": "Descripción de recordatorio ejemplo 1"
+  "id_caso": 2,
+  "id_abogado": 2,
+  "descripcion": "Descripción de recordatorio.",
+  "fecha_hora_limite": "2025-03-28T12:00:00Z"
 }
 
 ###
-PUT http://localhost:3000/api/casos/recordatorios/4
+PUT http://localhost:3000/api/casos/recordatorios/6
 Content-Type: application/json
 
 {
-    "descripcion": "Descripción de recordatorio actualizada ejemplo 1"
+  "id_caso": 2,
+  "id_abogado": 2,
+  "descripcion": "Descripción de recordatorio actualizada ejemplo 1",
+  "fecha_hora_limite": "2025-05-15T12:00:00Z"
 }
 
 ###
-DELETE http://localhost:3000/api/casos/recordatorios/4
-
+DELETE http://localhost:3000/api/casos/recordatorios/3

@@ -1,7 +1,9 @@
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 
-import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, ManyToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
+import { Caso } from "../../caso/caso/caso.entity.js";
+import { IsNotEmpty } from "class-validator";
 
 @Entity({ tableName: "recordatorios" })
 export class Recordatorio {
@@ -9,15 +11,16 @@ export class Recordatorio {
   id!: number;
 
   @ManyToOne(() => "Caso", { fieldName: "id_caso" })
-  caso!: any;
+  caso!: Rel<Caso>;
 
   @ManyToOne(() => Abogado, { fieldName: "id_abogado" })
-  abogado!: Abogado;
+  abogado!: Rel<Abogado>;
 
   @NotEmptyAndMaxLength(65535, "descripcion")
   @Property({ type: "text" })
   descripcion!: string;
 
-  @PrimaryKey({ type: "datetime" })
+  @IsNotEmpty({ message: "fecha_hora_limite: atributo faltante." })
+  @Property({ type: "datetime" })
   fecha_hora_limite!: Date;
 }
