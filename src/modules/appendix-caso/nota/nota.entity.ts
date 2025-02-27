@@ -1,6 +1,6 @@
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 
-import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, ManyToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 
 @Entity({ tableName: "notas" })
@@ -10,7 +10,7 @@ export class Nota {
     primary: true,
     fieldName: "id_abogado",
   })
-  abogado!: Abogado;
+  abogado!: Rel<Abogado>;
 
   @ManyToOne({
     entity: () => "Caso",

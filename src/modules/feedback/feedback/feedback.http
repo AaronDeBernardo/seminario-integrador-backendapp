@@ -1,0 +1,23 @@
+###
+GET http://localhost:3000/api/feedbacks/
+
+
+###
+GET http://localhost:3000/api/feedbacks/2
+
+
+###
+GET http://localhost:3000/api/feedbacks/abogados-calificables/2
+
+
+###
+POST http://localhost:3000/api/feedbacks/
+Content-Type: application/json
+
+{
+  "id_abogado": 2,
+  "id_caso": 2,
+  "descripcion": "Muy Bueno",
+  "puntuacion": 10
+}
+

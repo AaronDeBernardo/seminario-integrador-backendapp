@@ -15,5 +15,3 @@ comentarioRouter.post(
   controller.reply
 );
 comentarioRouter.delete("/:id_caso/:id_abogado/:id", controller.delete);
-
-export default comentarioRouter;

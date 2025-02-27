@@ -1,17 +1,19 @@
 import {
   Collection,
   Entity,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
   Property,
   Rel,
 } from "@mikro-orm/core";
+import { Caso } from "../../caso/caso/caso.entity.js";
+import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
 import { HorarioTurno } from "../../turno/horario-turno/horario-turno.entity.js";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 import { Rol } from "../rol/rol.entity.js";
 import { Usuario } from "../usuario/usuario.entity.js";
-import { AbogadoEspecialidad } from "../../especialidad/abogado-especialidad/abogado-especialidad.entity.js";
 
 @Entity({ tableName: "abogados" })
 export class Abogado {
@@ -31,12 +33,17 @@ export class Abogado {
   @ManyToOne(() => Rol, { fieldName: "id_rol" })
   rol!: Rol;
 
-  @OneToMany(() => AbogadoEspecialidad, (abogadoEspecialidad) => abogadoEspecialidad.abogado)
-  especialidades = new Collection<AbogadoEspecialidad>(this);
-
-  @OneToMany({
-    entity: () => HorarioTurno,
-    mappedBy: "abogado",
+  @ManyToMany(() => Especialidad, (especialidad) => especialidad.abogados, {
+    pivotEntity: "AbogadoEspecialidad",
+    owner: true,
   })
+  especialidades = new Collection<Especialidad>(this);
+
+  @OneToMany(() => HorarioTurno, (horarioTurno) => horarioTurno.abogado)
   horariosTurnos = new Collection<HorarioTurno>(this);
+
+  @ManyToMany(() => Caso, (caso) => caso.abogados, {
+    pivotEntity: "AbogadoCaso",
+  })
+  casos = new Collection<Caso>(this);
 }

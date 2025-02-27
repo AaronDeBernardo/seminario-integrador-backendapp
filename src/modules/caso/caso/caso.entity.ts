@@ -1,24 +1,20 @@
 import {
   Collection,
   Entity,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import { AbogadoCaso } from "../../appendix-caso/abogado-caso/abogado-caso.entity.js";
+import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 import { Cliente } from "../../usuario/cliente/cliente.entity.js";
 import { Comentario } from "../../appendix-caso/comentario/comentario.entity.js";
 import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
-import { Recordatorio } from "../../appendix-caso/recordatorio/recordatorio.entity.js";
+import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { Nota } from "../../appendix-caso/nota/nota.entity.js";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
-
-export enum EstadoCaso {
-  EN_CURSO = "En curso",
-  FINALIZADO = "Finalizado",
-  CANCELADO = "Cancelado",
-}
+import { Recordatorio } from "../../appendix-caso/recordatorio/recordatorio.entity.js";
 
 @Entity({ tableName: "casos" })
 export class Caso {
@@ -31,32 +27,36 @@ export class Caso {
   @ManyToOne(() => Especialidad, { fieldName: "id_especialidad" })
   especialidad!: Especialidad;
 
-  @Property({ type: "date" })
+  @Property({ type: "date", nullable: true })
   fecha_inicio!: string;
 
-  @NotEmptyAndMaxLength(65535, "cuerpo")
+  @NotEmptyAndMaxLength(65535, "descripcion")
   @Property({ type: "text" })
   descripcion!: string;
 
-  @NotEmptyAndMaxLength(20, "estado")
   @Property({ type: "varchar", length: 20 })
-  estado!: EstadoCaso;
+  estado!: EstadoCasoEnum;
 
-  @Property({ type: "date" })
+  @Property({ type: "date", nullable: true })
   fecha_estado!: string;
 
   @Property({ type: "decimal", nullable: true })
   monto_caso?: number;
 
-  @OneToMany(() => AbogadoCaso, (abogadoCaso) => abogadoCaso.caso)
-  abogados = new Collection<AbogadoCaso>(this);
+  @ManyToMany(() => Abogado, (abogado) => abogado.casos, {
+    pivotEntity: "AbogadoCaso",
+    owner: true,
+  })
+  abogados = new Collection<Abogado>(this);
 
-  @OneToMany(() => Recordatorio, (recordatorio: any) => recordatorio.caso)
+  @OneToMany(() => Recordatorio, (recordatorio) => recordatorio.caso)
   recordatorios = new Collection<Recordatorio>(this);
 
-  @OneToMany(() => Nota, (nota: any) => nota.caso)
+  @OneToMany(() => Nota, (nota) => nota.caso)
   notas = new Collection<Nota>(this);
 
-  @OneToMany(() => "Comentario", (comentario: any) => comentario.caso)
+  @OneToMany(() => Comentario, (comentario) => comentario.caso)
   comentarios = new Collection<Comentario>(this);
 }
+
+export { EstadoCasoEnum };

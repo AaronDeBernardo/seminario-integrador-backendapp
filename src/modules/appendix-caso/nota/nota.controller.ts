@@ -1,5 +1,5 @@
 import { AbogadoCaso } from "../abogado-caso/abogado-caso.entity.js";
-import { EstadoCaso } from "../../caso/caso/caso.entity.js";
+import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { Nota } from "./nota.entity.js";
 import { NotaDTO } from "./nota.dto.js";
@@ -52,7 +52,7 @@ export const controller = {
       const abogadoCaso = await em.findOneOrFail(
         AbogadoCaso,
         {
-          caso: { id: id_caso, estado: EstadoCaso.EN_CURSO },
+          caso: { id: id_caso, estado: EstadoCasoEnum.EN_CURSO },
           abogado: { usuario: id_abogado },
           fecha_baja: { $eq: null },
         },

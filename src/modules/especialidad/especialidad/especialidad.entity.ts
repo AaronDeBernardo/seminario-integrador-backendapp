@@ -1,11 +1,11 @@
 import {
   Collection,
   Entity,
-  OneToMany,
+  ManyToMany,
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import { AbogadoEspecialidad } from "../abogado-especialidad/abogado-especialidad.entity.js";
+import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 
 @Entity({ tableName: "especialidades" })
 export class Especialidad {
@@ -15,9 +15,8 @@ export class Especialidad {
   @Property({ type: "varchar", length: 20 })
   nombre!: string;
 
-  @OneToMany(
-    () => AbogadoEspecialidad,
-    (abogadoEspecialidad) => abogadoEspecialidad.especialidad
-  )
-  abogados = new Collection<AbogadoEspecialidad>(this);
+  @ManyToMany(() => Abogado, (abogado) => abogado.especialidades, {
+    pivotEntity: "AbogadoEspecialidad",
+  })
+  abogados = new Collection<Abogado>(this);
 }

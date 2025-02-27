@@ -1,19 +1,21 @@
 import { AbogadoCaso } from "./abogado-caso.entity.js";
-import { CasoDTO } from "../../caso/caso/caso.dto.js";
-import { AbogadoDTO } from "../../usuario/abogado/abogado.dto.js";
 
 export class AbogadoCasoDTO {
   id: number;
-  abogado: AbogadoDTO | null;
-  caso: CasoDTO | null;
   fecha_alta: string;
+  es_principal: boolean;
   fecha_baja?: string;
+  abogado: { id: number; nombre: string; apellido: string };
 
   constructor(input: AbogadoCaso) {
     this.id = input.id;
-    this.abogado = input.abogado ? new AbogadoDTO(input.abogado) : null;
-    this.caso = input.caso ? new CasoDTO(input.caso) : null;
-    this.fecha_alta = input.fecha_alta;
+    this.fecha_alta = input.fecha_alta!;
+    this.es_principal = input.es_principal!;
     this.fecha_baja = input.fecha_baja;
+    this.abogado = {
+      id: input.abogado.usuario.id,
+      nombre: input.abogado.usuario.nombre,
+      apellido: input.abogado.usuario.apellido,
+    };
   }
 }
