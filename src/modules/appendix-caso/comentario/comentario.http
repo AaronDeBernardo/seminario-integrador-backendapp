@@ -3,20 +3,24 @@ GET http://localhost:3000/api/casos/comentarios/2
 
 
 ###
-POST http://localhost:3000/api/casos/comentarios/2/2
+POST http://localhost:3000/api/casos/comentarios/
 Content-Type: application/json
 
 {
+  "id_caso": 6,
+  "id_abogado": 4,
   "comentario": "También hay que hacer un análisis de calidad del formato del documento"
 }
 
 ###
-POST http://localhost:3000/api/casos/comentarios/2/2/2
+POST http://localhost:3000/api/casos/comentarios/7
 Content-Type: application/json
 
 {
-  "comentario": "Siempre deben coincidir conmigo"
+  "id_caso": 6,
+  "id_abogado": 3,
+  "comentario": "Si, estoy de acuerdo"
 }
 
 ###
-DELETE http://localhost:3000/api/casos/comentarios/2/2/5
+DELETE http://localhost:3000/api/casos/comentarios/8
