@@ -1,0 +1,22 @@
+###
+GET http://localhost:3000/api/casos/abogados-casos/2
+
+
+###
+POST http://localhost:3000/api/casos/abogados-casos/
+Content-Type: application/json
+
+{
+  "id_abogado": 4,
+  "id_caso": 2,
+  "detalle": "Bienvenido al caso. Comuníquese con ... para que le asigne una tarea."
+}
+
+
+###
+PATCH http://localhost:3000/api/casos/abogados-casos/desvincular/5
+Content-Type: application/json
+
+{
+  "detalle": "Fue desvinculado por las siguientes razones..."
+}

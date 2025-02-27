@@ -1,6 +1,6 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
-import { Caso } from "../caso/caso.entity.js";
+import { Caso } from "../../caso/caso/caso.entity.js";
 
 @Entity({ tableName: "abogados_casos" })
 export class AbogadoCaso {

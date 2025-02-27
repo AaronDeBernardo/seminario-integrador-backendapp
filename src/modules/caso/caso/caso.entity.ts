@@ -7,14 +7,14 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import { Cliente } from "../../usuario/cliente/cliente.entity.js";
-// import { Comentario } from "../nombre-modulo/comentario/comentario.entity.js";
-import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
-// import { Recordatorio } from "../nombre-modulo/recordatorio/recordatorio.entity.js";
-// import { Nota } from "../nombre-modulo/nota/nota.entity.js";
-import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
-import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
+import { Cliente } from "../../usuario/cliente/cliente.entity.js";
+import { Comentario } from "../../appendix-caso/comentario/comentario.entity.js";
+import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
+import { EstadoCasoEnum } from "../../../utils/enums.js";
+import { Nota } from "../../appendix-caso/nota/nota.entity.js";
+import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
+import { Recordatorio } from "../../appendix-caso/recordatorio/recordatorio.entity.js";
 
 @Entity({ tableName: "casos" })
 export class Caso {
@@ -49,7 +49,6 @@ export class Caso {
   })
   abogados = new Collection<Abogado>(this);
 
-  /*
   @OneToMany(() => Recordatorio, (recordatorio) => recordatorio.caso)
   recordatorios = new Collection<Recordatorio>(this);
 
@@ -58,5 +57,6 @@ export class Caso {
 
   @OneToMany(() => Comentario, (comentario) => comentario.caso)
   comentarios = new Collection<Comentario>(this);
-  */
 }
+
+export { EstadoCasoEnum };
