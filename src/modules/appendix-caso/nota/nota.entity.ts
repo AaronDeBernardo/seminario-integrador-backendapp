@@ -1,5 +1,6 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
+
+import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 
 @Entity({ tableName: "notas" })

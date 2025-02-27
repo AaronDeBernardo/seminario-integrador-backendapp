@@ -1,6 +1,6 @@
-import { Comentario } from "./comentario.entity.js";
-import { CasoDTO } from "../../caso/caso/caso.dto.js";
 import { AbogadoDTO } from "../../usuario/abogado/abogado.dto.js";
+import { CasoDTO } from "../../caso/caso/caso.dto.js";
+import { Comentario } from "./comentario.entity.js";
 
 export class ComentarioDTO {
   id: number;

@@ -3,8 +3,8 @@ import { Caso } from "../../caso/caso/caso.entity.js";
 import { Comentario } from "./comentario.entity.js";
 import { ComentarioDTO } from "./comentario.dto.js";
 import { handleError } from "../../../utils/error-handler.js";
-import { Request, Response, NextFunction } from "express";
 import { orm } from "../../../config/db.config.js";
+import { Request, Response, NextFunction } from "express";
 import { validateNumericId } from "../../../utils/validators.js";
 
 const em = orm.em;

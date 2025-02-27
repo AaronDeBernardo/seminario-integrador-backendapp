@@ -1,3 +1,5 @@
+import { Abogado } from "../../usuario/abogado/abogado.entity.js";
+
 import {
   Collection,
   Entity,
@@ -6,7 +8,6 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 
 @Entity({ tableName: "comentarios" })

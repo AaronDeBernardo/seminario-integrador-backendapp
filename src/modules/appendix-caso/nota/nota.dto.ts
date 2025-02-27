@@ -1,18 +1,38 @@
-import { AbogadoDTO } from "../../usuario/abogado/abogado.dto.js";
-import { CasoDTO } from "../../caso/caso/caso.dto.js";
 import { Nota } from "./nota.entity.js";
 
 export class NotaDTO {
-  abogado: AbogadoDTO | null;
-  caso: CasoDTO | null;
-  fecha_hora: string;
+  abogado: { nombre: string; apellido: string } | undefined;
+  caso:
+    | {
+        id: number;
+        descripcion: string;
+        especialidad: string;
+        cliente: { nombre: string; apellido: string | undefined };
+      }
+    | undefined;
+  fecha_hora: Date;
   titulo: string;
   descripcion: string;
 
   constructor(input: Nota) {
-    this.abogado = input.abogado ? new AbogadoDTO(input.abogado) : null;
-    this.caso = input.caso ? new CasoDTO(input.caso) : null;
-    this.fecha_hora = input.fecha_hora.toISOString();
+    if (input.abogado.matricula) {
+      this.abogado = {
+        nombre: input.abogado.usuario.nombre,
+        apellido: input.abogado.usuario.apellido,
+      };
+    }
+    if (input.caso.descripcion) {
+      this.caso = {
+        id: input.caso.id,
+        descripcion: input.caso.descripcion,
+        especialidad: input.caso.especialidad.nombre,
+        cliente: {
+          nombre: input.caso.cliente.usuario.nombre,
+          apellido: input.caso.cliente.usuario.apellido,
+        },
+      };
+    }
+    this.fecha_hora = input.fecha_hora;
     this.titulo = input.titulo;
     this.descripcion = input.descripcion;
   }
