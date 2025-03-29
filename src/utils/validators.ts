@@ -95,12 +95,32 @@ export function validateTime(time: any, field: string) {
 export function validateDate(date: any, field: string) {
   if (date === undefined) return undefined;
 
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!regex.test(date)) {
+    throw new HttpError(
+      400,
+      `${field}: debe ser un string en formato YYYY-MM-DD`
+    );
+  }
+
   const aux = new Date(date);
   if (!isNaN(aux.getTime())) return date;
 
   throw new HttpError(
     400,
-    `${field}: debe ser un string en formato yyyy-MM-dd.`
+    `${field}: debe ser un string en formato YYYY-MM-DD`
+  );
+}
+
+export function validateDateTime(dateTime: any, field: string) {
+  if (dateTime === undefined) return undefined;
+
+  const aux = new Date(dateTime);
+  if (!isNaN(aux.getTime())) return aux;
+
+  throw new HttpError(
+    400,
+    `${field}: debe ser un string en formato YYYY-MM-DDTHH:mm:ss.sssZ`
   );
 }
 

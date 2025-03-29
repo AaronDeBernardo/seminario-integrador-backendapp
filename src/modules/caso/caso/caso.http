@@ -1,3 +1,5 @@
+@id = id
+
 ###
 GET http://localhost:3000/api/casos/
 
@@ -5,39 +7,44 @@ GET http://localhost:3000/api/casos/
 GET http://localhost:3000/api/casos/encurso/
 
 ###
-GET http://localhost:3000/api/casos/2
+GET http://localhost:3000/api/casos/{{id}}/abogados
+
+###
+GET http://localhost:3000/api/casos/{{id}}
 
 ###
 POST http://localhost:3000/api/casos/
 Content-Type: application/json
 
 {
-  "id_cliente": 7,
-  "id_especialidad": 4,
+  "id_cliente": {{id}},
+  "id_especialidad": {{id}},
+  "id_abogado_principal": {{id}},
   "descripcion": "Descripción de un caso de prueba"
 }
 
 
 ###
-PUT http://localhost:3000/api/casos/5
+PUT http://localhost:3000/api/casos/{{id}}
 Content-Type: application/json
 
 {
-  "id_cliente": 5,
-  "id_especialidad": 3,
+  "id_cliente": {{id}},
+  "id_especialidad": {{id}},
+  "id_abogado_principal": {{id}},
   "descripcion": "Descripción de un caso de prueba con una actualización"
 }
 
 ###
-PATCH http://localhost:3000/api/casos/finalizar/7
+PATCH http://localhost:3000/api/casos/{{id}}/finalizar/
 Content-Type: application/json
 
 {
-  "cant_jus": 1,
-  "num_cuotas": 3,
-  "fecha_primer_cobro": "2025-02-10",
+  "cant_jus": {{id}},
+  "num_cuotas": {{id}},
+  "fecha_primer_cobro": "2025-09-10",
   "frecuencia_cobro": "mensual"
 }
 
 ###
-PATCH http://localhost:3000/api/casos/deactivate/1
+PATCH http://localhost:3000/api/casos/{{id}}/cancelar/
