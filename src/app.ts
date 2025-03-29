@@ -29,7 +29,6 @@ app.use("/api/feedbacks/", feedbackRouter);
 app.use("/api/misc", miscModuleRouter);
 app.use("/api/turnos/", turnoModuleRoutes);
 app.use("/api/usuarios/", usuarioModuleRouter);
-app.use("/api/casos/", casoModuleRouter);
 
 app.use((_req, res) => {
   res.status(404).send({ message: "Resource not found" });

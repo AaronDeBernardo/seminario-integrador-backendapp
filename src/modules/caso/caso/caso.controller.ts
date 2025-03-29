@@ -1,16 +1,6 @@
+import { EstadoCasoEnum, FrecuenciaPagoEnum } from "../../../utils/enums.js";
 import { format, subMonths } from "date-fns";
 import { NextFunction, Request, Response } from "express";
-import { AbogadoCaso } from "../../appendix-caso/abogado-caso/abogado-caso.entity.js";
-import { abogadoCasoService } from "../../appendix-caso/abogado-caso/abogado-caso.service.js";
-import { Caso } from "./caso.entity.js";
-import { CasoDTO } from "./caso.dto.js";
-import { casoService } from "./caso.service.js";
-import { Cuota } from "../cuota/cuota.entity.js";
-import { EstadoCasoEnum, FrecuenciaPagoEnum } from "../../../utils/enums.js";
-import { handleError } from "../../../utils/error-handler.js";
-import { HttpError } from "../../../utils/http-error.js";
-import { orm } from "../../../config/db.config.js";
-import { politicasService } from "../../misc/politicas/politicas.service.js";
 import {
   validateDate,
   validateEntity,
@@ -18,6 +8,17 @@ import {
   validateNumericId,
   validatePrice,
 } from "../../../utils/validators.js";
+import { AbogadoCaso } from "../../appendix-caso/abogado-caso/abogado-caso.entity.js";
+import { AbogadoCasoDTO } from "../../appendix-caso/abogado-caso/abogado-caso.dto.js";
+import { abogadoCasoService } from "../../appendix-caso/abogado-caso/abogado-caso.service.js";
+import { Caso } from "./caso.entity.js";
+import { CasoDTO } from "./caso.dto.js";
+import { casoService } from "./caso.service.js";
+import { Cuota } from "../cuota/cuota.entity.js";
+import { handleError } from "../../../utils/error-handler.js";
+import { HttpError } from "../../../utils/http-error.js";
+import { orm } from "../../../config/db.config.js";
+import { politicasService } from "../../misc/politicas/politicas.service.js";
 
 const em = orm.em;
 
@@ -47,7 +48,7 @@ export const controller = {
         message: "Todos los casos fueron encontrados.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -66,7 +67,7 @@ export const controller = {
         message: "Todos los casos en curso fueron encontrados.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -87,7 +88,32 @@ export const controller = {
         message: "El caso fue encontrado.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      handleError(error, res);
+    }
+  },
+
+  findAbogadosByCaso: async (req: Request, res: Response) => {
+    try {
+      const id_caso = validateNumericId(req.params.id, "id");
+
+      const abogados = await em.find(
+        AbogadoCaso,
+        {
+          caso: id_caso,
+          fecha_baja: null,
+        },
+        { populate: ["abogado.rol", "abogado.usuario"] }
+      );
+
+      const data = abogados.map((a) => new AbogadoCasoDTO(a));
+
+      res.status(200).json({
+        message:
+          "Todos los abogados que se encuentran trabajando en el caso fueron encontrados.",
+        data,
+      });
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -119,7 +145,7 @@ export const controller = {
         message: "Caso creado.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -153,7 +179,7 @@ export const controller = {
         message: "Caso actualizado.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -194,7 +220,7 @@ export const controller = {
         message: "Caso finalizado y cuotas generadas.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -218,7 +244,7 @@ export const controller = {
         message: "Caso cancelado.",
         data: caso,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -245,7 +271,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -283,7 +309,7 @@ export const controller = {
       }
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

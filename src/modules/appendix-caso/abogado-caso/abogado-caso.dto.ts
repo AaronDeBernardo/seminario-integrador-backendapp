@@ -5,7 +5,13 @@ export class AbogadoCasoDTO {
   fecha_alta: string;
   es_principal: boolean;
   fecha_baja?: string;
-  abogado: { id: number; nombre: string; apellido: string };
+  abogado: {
+    id: number;
+    nombre: string;
+    apellido: string;
+    matricula: string;
+    rol: { id: number; nombre: string };
+  };
 
   constructor(input: AbogadoCaso) {
     this.id = input.id;
@@ -16,6 +22,8 @@ export class AbogadoCasoDTO {
       id: input.abogado.usuario.id,
       nombre: input.abogado.usuario.nombre,
       apellido: input.abogado.usuario.apellido,
+      matricula: input.abogado.matricula,
+      rol: { id: input.abogado.rol.id, nombre: input.abogado.rol.nombre },
     };
   }
 }

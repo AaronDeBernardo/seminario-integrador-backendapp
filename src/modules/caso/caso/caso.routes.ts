@@ -1,18 +1,19 @@
-import { Router } from "express";
 import { controller } from "./caso.controller.js";
+import { Router } from "express";
 
 export const casoRouter = Router();
 
 casoRouter.get("/", controller.findAll);
 casoRouter.get("/encurso", controller.findCurrent);
+casoRouter.get("/:id/abogados", controller.findAbogadosByCaso);
 casoRouter.get("/:id", controller.findOne);
 
 casoRouter.post("/", controller.sanitizeCaso, controller.add);
 casoRouter.put("/:id", controller.sanitizeCaso, controller.update);
 
 casoRouter.patch(
-  "/finalizar/:id",
+  "/:id/finalizar/",
   controller.sanitizeFinalizarCaso,
   controller.finalizar
 );
-casoRouter.patch("/cancelar/:id", controller.deactivate);
+casoRouter.patch("/:id/cancelar/", controller.deactivate);
