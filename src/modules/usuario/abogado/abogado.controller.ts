@@ -1,18 +1,20 @@
 import { NextFunction, Request, Response } from "express";
-import { orm } from "../../../config/db.config.js";
-import { Abogado } from "./abogado.entity.js";
-import { AbogadoDTO } from "./abogado.dto.js";
-import { handleError } from "../../../utils/error-handler.js";
-import { sanitizeUsuario } from "../usuario/usuario.controller.js";
-import { Usuario } from "../usuario/usuario.entity.js";
 import {
   validateEntity,
   validateNumericId,
   validateNumericIdArray,
 } from "../../../utils/validators.js";
+import { Abogado } from "./abogado.entity.js";
+import { AbogadoDTO } from "./abogado.dto.js";
+import { EstadoCasoEnum } from "../../../utils/enums.js";
+import { handleError } from "../../../utils/error-handler.js";
 import { HttpError } from "../../../utils/http-error.js";
+import { orm } from "../../../config/db.config.js";
+import { sanitizeUsuario } from "../usuario/usuario.controller.js";
+import { Usuario } from "../usuario/usuario.entity.js";
 
 const em = orm.em;
+//TODO revisar el otro endpoint q me pidio milton, que no este daod de baka
 
 export const controller = {
   findAll: async (_req: Request, res: Response) => {
@@ -32,7 +34,7 @@ export const controller = {
         message: "Todos los abogados fueron encontrados.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -55,7 +57,96 @@ export const controller = {
         message: "El abogado fue encontrado.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      handleError(error, res);
+    }
+  },
+
+  findAvailable: async (req: Request, res: Response) => {
+    try {
+      const abogados = await em.execute(
+        `
+        SELECT us.id, us.nombre, us.apellido
+	        , ab.matricula, ab.foto, COUNT(ca.id) cantidad_casos
+        FROM abogados ab
+        INNER JOIN usuarios us
+          ON us.id = ab.id_usuario
+          AND us.fecha_baja IS NULL
+        LEFT JOIN abogados_casos ab_ca
+	        ON ab_ca.id_abogado = ab.id_usuario
+          AND ab_ca.fecha_baja IS NULL
+        LEFT JOIN casos ca
+	        ON ca.id = ab_ca.id_caso
+          AND ca.estado = ?
+        GROUP BY us.id
+        HAVING cantidad_casos < 5;
+        `,
+        [EstadoCasoEnum.EN_CURSO]
+      );
+
+      const data = abogados.map((a) => {
+        return {
+          id: a.id,
+          nombre: a.nombre,
+          apellido: a.apellido,
+          matricula: a.matricula,
+          foto: a.foto,
+        };
+      });
+
+      res.status(200).json({
+        message: "Todos los abogados disponibles fueron encontrados.",
+        data,
+      });
+    } catch (error: unknown) {
+      handleError(error, res);
+    }
+  },
+
+  findAvailableForCaso: async (req: Request, res: Response) => {
+    try {
+      const id_caso = validateNumericId(req.params.id_caso, "id_caso");
+
+      const abogados = await em.execute(
+        `
+        SELECT us.id, us.nombre, us.apellido
+	        , ab.matricula, ab.foto, COUNT(ca.id) cantidad_casos
+        FROM abogados ab
+        INNER JOIN usuarios us
+          ON us.id = ab.id_usuario
+          AND ab.fecha_baja IS NULL
+        INNER JOIN abogados_especialidades ab_es
+          ON ab_es.id_abogado = ab.id_usuario
+        LEFT JOIN abogados_casos ab_ca
+	        ON ab_ca.id_abogado = ab.id_usuario
+          AND ab_ca.fecha_baja IS NULL
+        LEFT JOIN casos ca
+	        ON ca.id = ab_ca.id_caso
+          AND ca.estado = ?
+        WHERE ab_es.id_especialidad = (SELECT id_especialidad FROM casos WHERE id=?)
+          AND us.id NOT IN (SELECT id_abogado FROM abogados_casos WHERE id=? AND fecha_baja IS NULL)
+        GROUP BY us.id
+        HAVING cantidad_casos < 5;
+        `,
+        [EstadoCasoEnum.EN_CURSO, id_caso, id_caso]
+      );
+
+      const data = abogados.map((a) => {
+        return {
+          id: a.id,
+          nombre: a.nombre,
+          apellido: a.apellido,
+          matricula: a.matricula,
+          foto: a.foto,
+        };
+      });
+
+      res.status(200).json({
+        message:
+          "Todos los abogados disponibles para el caso fueron encontrados.",
+        data,
+      });
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -77,7 +168,7 @@ export const controller = {
       const data = new AbogadoDTO(abogado);
 
       res.status(201).json({ message: "Abogado creado.", data });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -90,7 +181,7 @@ export const controller = {
         { usuario: { id, fecha_baja: { $eq: null } } },
         { populate: ["usuario", "especialidades:ref"] }
       );
-      console.log(abogado);
+
       em.assign(abogado, req.body.sanitizedInput, {
         updateByPrimaryKey: false,
       });
@@ -111,7 +202,7 @@ export const controller = {
         message: "Abogado actualizado.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -137,7 +228,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

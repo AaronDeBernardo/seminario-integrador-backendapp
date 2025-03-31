@@ -1,9 +1,19 @@
+@id = id
+
 ###
 GET http://localhost:3000/api/usuarios/abogados/
 
 
 ###
-GET http://localhost:3000/api/usuarios/abogados/4
+GET http://localhost:3000/api/usuarios/abogados/disponibles
+
+
+###
+GET http://localhost:3000/api/usuarios/abogados/disponibles/caso/{{id}}
+
+
+###
+GET http://localhost:3000/api/usuarios/abogados/{{id}}
 
 
 ###
@@ -20,20 +30,20 @@ Content-Type: application/json
   "nro_doc": "12345678",
   "foto": "datos-archivo",
   "matricula": "55889",
-  "id_rol": 1,
-  "especialidades": [2]
+  "id_rol": {{id}},
+  "especialidades": [{{id}}]
 }
 
 
 ###
-PATCH http://localhost:3000/api/usuarios/abogados/5
+PATCH http://localhost:3000/api/usuarios/abogados/{{id}}
 Content-Type: application/json
 
 {
   "nombre": "Juan Bautista",
   "apellido": "Rodriguez",
   "matricula": "62358",
-  "id_rol": 1,
+  "id_rol": {{id}},
   "telefono": "1234",
-  "especialidades": [1,2,3]
+  "especialidades": [{{id}},{{id}},{{id}}]
 }

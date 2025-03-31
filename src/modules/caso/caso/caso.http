@@ -40,8 +40,8 @@ PATCH http://localhost:3000/api/casos/{{id}}/finalizar/
 Content-Type: application/json
 
 {
-  "cant_jus": {{id}},
-  "num_cuotas": {{id}},
+  "cant_jus": 10,
+  "num_cuotas": 6,
   "fecha_primer_cobro": "2025-09-10",
   "frecuencia_cobro": "mensual"
 }

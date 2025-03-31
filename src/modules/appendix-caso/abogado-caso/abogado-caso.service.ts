@@ -1,9 +1,9 @@
-import { format } from "date-fns";
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 import { AbogadoCaso } from "../abogado-caso/abogado-caso.entity.js";
 import { AbogadoEspecialidad } from "../../especialidad/abogado-especialidad/abogado-especialidad.entity.js";
 import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
 import { EstadoCasoEnum } from "../../../utils/enums.js";
+import { format } from "date-fns";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
 
@@ -15,6 +15,7 @@ export const abogadoCasoService = {
     id_especialidad: Especialidad,
     already_working_in_caso: boolean
   ) => {
+    //TODO validar que no esté dado de baja el abogado
     const abogadoEspecialidad = await em.findOne(AbogadoEspecialidad, {
       abogado: id_abogado,
       especialidad: id_especialidad,
@@ -32,7 +33,7 @@ export const abogadoCasoService = {
       caso: { estado: { $eq: EstadoCasoEnum.EN_CURSO } },
     });
 
-    if (!already_working_in_caso && count > 5)
+    if (!already_working_in_caso && count >= 5)
       throw new HttpError(
         400,
         "Un abogado no puede trabajar en más de 5 casos a la vez."
