@@ -12,31 +12,6 @@ import { validateNumericId } from "../../../utils/validators.js";
 const em = orm.em;
 
 export const controller = {
-  findByCaso: async (req: Request, res: Response) => {
-    try {
-      const id_caso = validateNumericId(req.params.id_caso, "id_caso");
-
-      const abogadoCasos = await em.find(
-        AbogadoCaso,
-        {
-          caso: id_caso,
-          fecha_baja: null,
-        },
-        { populate: ["abogado.usuario", "caso"] }
-      );
-
-      const data = abogadoCasos.map((ac) => new AbogadoCasoDTO(ac));
-
-      res.status(200).json({
-        message:
-          "Relaciones abogado-caso encontradas para el caso especificado.",
-        data,
-      });
-    } catch (error: unknown) {
-      handleError(error, res);
-    }
-  },
-
   link: async (req: Request, res: Response): Promise<void> => {
     try {
       //TODO validar que los abogados que se asignen no estén dados de baja, lo mismo con clientes... En actividades está realizada la verificación

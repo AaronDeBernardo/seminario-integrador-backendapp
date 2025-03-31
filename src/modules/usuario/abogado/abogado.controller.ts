@@ -114,7 +114,7 @@ export const controller = {
         FROM abogados ab
         INNER JOIN usuarios us
           ON us.id = ab.id_usuario
-          AND ab.fecha_baja IS NULL
+          AND us.fecha_baja IS NULL
         INNER JOIN abogados_especialidades ab_es
           ON ab_es.id_abogado = ab.id_usuario
         LEFT JOIN abogados_casos ab_ca
@@ -124,7 +124,7 @@ export const controller = {
 	        ON ca.id = ab_ca.id_caso
           AND ca.estado = ?
         WHERE ab_es.id_especialidad = (SELECT id_especialidad FROM casos WHERE id=?)
-          AND us.id NOT IN (SELECT id_abogado FROM abogados_casos WHERE id=? AND fecha_baja IS NULL)
+          AND us.id NOT IN (SELECT id_abogado FROM abogados_casos WHERE id_caso=? AND fecha_baja IS NULL)
         GROUP BY us.id
         HAVING cantidad_casos < 5;
         `,
