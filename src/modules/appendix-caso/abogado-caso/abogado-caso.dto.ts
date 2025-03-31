@@ -5,7 +5,7 @@ export class AbogadoCasoDTO {
   fecha_alta: string;
   es_principal: boolean;
   fecha_baja?: string;
-  abogado: {
+  abogado?: {
     id: number;
     nombre: string;
     apellido: string;
@@ -18,12 +18,15 @@ export class AbogadoCasoDTO {
     this.fecha_alta = input.fecha_alta!;
     this.es_principal = input.es_principal!;
     this.fecha_baja = input.fecha_baja;
-    this.abogado = {
-      id: input.abogado.usuario.id,
-      nombre: input.abogado.usuario.nombre,
-      apellido: input.abogado.usuario.apellido,
-      matricula: input.abogado.matricula,
-      rol: { id: input.abogado.rol.id, nombre: input.abogado.rol.nombre },
-    };
+
+    if (input.abogado.matricula !== undefined) {
+      this.abogado = {
+        id: input.abogado.usuario.id,
+        nombre: input.abogado.usuario.nombre,
+        apellido: input.abogado.usuario.apellido,
+        matricula: input.abogado.matricula,
+        rol: { id: input.abogado.rol.id, nombre: input.abogado.rol.nombre },
+      };
+    }
   }
 }

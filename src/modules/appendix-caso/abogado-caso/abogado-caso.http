@@ -1,5 +1,7 @@
+@id = id
+
 ###
-GET http://localhost:3000/api/casos/abogados-casos/2
+GET http://localhost:3000/api/casos/abogados-casos/{{id}}
 
 
 ###
@@ -7,14 +9,14 @@ POST http://localhost:3000/api/casos/abogados-casos/
 Content-Type: application/json
 
 {
-  "id_abogado": 4,
-  "id_caso": 2,
+  "id_abogado": {{id}},
+  "id_caso": {{id}},
   "detalle": "Bienvenido al caso. Comuníquese con ... para que le asigne una tarea."
 }
 
 
 ###
-PATCH http://localhost:3000/api/casos/abogados-casos/desvincular/5
+PATCH http://localhost:3000/api/casos/abogados-casos/{{id}}/desvincular
 Content-Type: application/json
 
 {

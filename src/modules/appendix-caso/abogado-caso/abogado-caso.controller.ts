@@ -1,10 +1,10 @@
-import { format } from "date-fns";
 import { NextFunction, Request, Response } from "express";
 import { AbogadoCaso } from "./abogado-caso.entity.js";
 import { AbogadoCasoDTO } from "./abogado-caso.dto.js";
 import { abogadoCasoService } from "./abogado-caso.service.js";
 import { Caso } from "../../caso/caso/caso.entity.js";
 import { EstadoCasoEnum } from "../../../utils/enums.js";
+import { format } from "date-fns";
 import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
 import { validateNumericId } from "../../../utils/validators.js";
@@ -32,7 +32,7 @@ export const controller = {
           "Relaciones abogado-caso encontradas para el caso especificado.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -75,7 +75,7 @@ export const controller = {
         message: "El abogado fue asociado al caso.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -115,7 +115,7 @@ export const controller = {
         message: "Abogado desvinculado del caso exitosamente.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -135,7 +135,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
