@@ -128,3 +128,39 @@ ADD CONSTRAINT `fk_notas_casos`
   REFERENCES `sistema_juridico`.`casos` (`id`)
   ON DELETE RESTRICT
   ON UPDATE CASCADE;
+
+
+-- Update to V9.0 - 2025-04-03 17:00:38
+USE `sistema_juridico`;
+DROP procedure IF EXISTS `get_actividades`;
+
+DELIMITER $$
+USE `sistema_juridico`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `get_actividades`()
+BEGIN
+	SELECT MAX(fecha_hora_desde) INTO @fecha_hora_desde
+	FROM precios_jus
+	WHERE fecha_hora_desde <= NOW();
+
+	SELECT valor INTO @valor_jus
+	FROM precios_jus
+	WHERE fecha_hora_desde = @fecha_hora_desde;
+
+	WITH cte AS (
+	  SELECT id_actividad, MAX(fecha_hora_desde) fecha_hora_desde
+	  FROM costos_actividades
+	  WHERE fecha_hora_desde <= NOW()
+	  GROUP BY id_actividad
+	)
+	SELECT act.id, act.nombre, cost.cant_jus, ROUND(cost.cant_jus * @valor_jus, 3) precio_pesos, cost.fecha_hora_desde
+	FROM actividades act
+	INNER JOIN costos_actividades cost
+	  ON cost.id_actividad = act.id
+	INNER JOIN cte
+	  ON cte.id_actividad = cost.id_actividad
+		AND cte.fecha_hora_desde = cost.fecha_hora_desde
+	WHERE fecha_baja IS NULL;
+END$$
+
+DELIMITER ;
+;

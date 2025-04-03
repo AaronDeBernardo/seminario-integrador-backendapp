@@ -1,15 +1,15 @@
-import { format } from "date-fns";
 import { NextFunction, Request, Response } from "express";
-import { Actividad } from "./actividad.entity.js";
-import { ActividadDTO } from "./actividad.dto.js";
-import { CostoActividad } from "../costo-actividad/costo-actividad.entity.js";
-import { handleError } from "../../../utils/error-handler.js";
-import { orm } from "../../../config/db.config.js";
 import {
   validateEntity,
   validateNumericId,
   validatePrice,
 } from "../../../utils/validators.js";
+import { Actividad } from "./actividad.entity.js";
+import { ActividadDTO } from "./actividad.dto.js";
+import { CostoActividad } from "../costo-actividad/costo-actividad.entity.js";
+import { format } from "date-fns";
+import { handleError } from "../../../utils/error-handler.js";
+import { orm } from "../../../config/db.config.js";
 
 const em = orm.em;
 
@@ -28,13 +28,26 @@ export const controller = {
         message: "Todas las actividades activas fueron encontradas.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
 
   add: async (req: Request, res: Response) => {
     try {
+      const actividadExistente = await em.findOne(Actividad, {
+        nombre: req.body.sanitizedInput.nombre,
+        fecha_baja: null,
+      });
+
+      if (actividadExistente) {
+        res.status(409).json({
+          message: "Ya existe una actividad con el mismo nombre.",
+          data: actividadExistente,
+        });
+        return;
+      }
+
       const actividad = em.create(Actividad, req.body.sanitizedInput);
       const costoActividad = em.create(CostoActividad, req.body.sanitizedInput);
       costoActividad.actividad = actividad;
@@ -51,7 +64,7 @@ export const controller = {
         message: "Actividad creada.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -65,6 +78,22 @@ export const controller = {
         id,
         fecha_baja: { $eq: null },
       });
+
+      if (input.nombre && actividad.nombre !== input.nombre) {
+        const actividadExistente = await em.findOne(Actividad, {
+          nombre: input.nombre,
+          fecha_baja: null,
+        });
+
+        if (actividadExistente) {
+          res.status(409).json({
+            message: "Ya existe una actividad con el mismo nombre.",
+            data: actividadExistente,
+          });
+          return;
+        }
+      }
+
       em.assign(actividad, input);
 
       const results = await em.execute<{ cant_jus: string }[]>(
@@ -93,7 +122,7 @@ export const controller = {
         message: "Actividad actualizada.",
         data,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -113,7 +142,7 @@ export const controller = {
         message: "Actividad dada de baja.",
         data: actividad,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -132,7 +161,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

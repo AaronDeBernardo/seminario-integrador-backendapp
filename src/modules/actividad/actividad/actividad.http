@@ -13,13 +13,14 @@ Content-Type: application/json
 
 
 ### Modificar una actividad
-PUT http://localhost:3000/api/actividades/4
+PUT http://localhost:3000/api/actividades/{{id}}
 Content-Type: application/json
 
 {
-  "cant_jus": 1.2
+  "nombre": "Redacción de contrato",
+  "cant_jus": 1.45
 }
 
 
 ### Dar de baja una actividad
-PATCH http://localhost:3000/api/actividades/deactivate/3
+PATCH http://localhost:3000/api/actividades/{{id}}/deactivate/

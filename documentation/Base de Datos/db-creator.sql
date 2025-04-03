@@ -599,7 +599,7 @@ BEGIN
 	  WHERE fecha_hora_desde <= NOW()
 	  GROUP BY id_actividad
 	)
-	SELECT act.id, act.nombre, cost.cant_jus, ROUND(cost.cant_jus * @valor_jus, 3) precio_pesos
+	SELECT act.id, act.nombre, cost.cant_jus, ROUND(cost.cant_jus * @valor_jus, 3) precio_pesos, cost.fecha_hora_desde
 	FROM actividades act
 	INNER JOIN costos_actividades cost
 	  ON cost.id_actividad = act.id
@@ -623,4 +623,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-03 15:50:25
+-- Dump completed on 2025-04-03 17:00:38
