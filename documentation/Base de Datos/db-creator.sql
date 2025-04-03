@@ -347,13 +347,15 @@ DROP TABLE IF EXISTS `notas`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `notas` (
-  `id_caso` int unsigned NOT NULL AUTO_INCREMENT,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `id_caso` int unsigned NOT NULL,
   `id_abogado` int unsigned NOT NULL,
   `fecha_hora` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `titulo` varchar(50) NOT NULL,
   `descripcion` text NOT NULL,
-  PRIMARY KEY (`id_caso`,`id_abogado`,`fecha_hora`),
+  PRIMARY KEY (`id`),
   KEY `fk_notas_abogados_idx` (`id_abogado`),
+  KEY `fk_notas_casos` (`id_caso`),
   CONSTRAINT `fk_notas_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_notas_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -621,4 +623,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-02-21 10:11:17
+-- Dump completed on 2025-04-03 15:50:25

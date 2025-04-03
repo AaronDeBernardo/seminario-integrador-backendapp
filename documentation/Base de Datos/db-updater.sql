@@ -111,3 +111,20 @@ BEGIN
 	SET NEW.fecha_alta = CURRENT_DATE;
 END
 DELIMITER ;
+
+
+-- Update to V9.0 - 2025-04-03 15:50:25
+ALTER TABLE `sistema_juridico`.`notas` 
+DROP FOREIGN KEY `fk_notas_casos`;
+ALTER TABLE `sistema_juridico`.`notas` 
+ADD COLUMN `id` INT UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
+CHANGE COLUMN `id_caso` `id_caso` INT UNSIGNED NOT NULL ,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`id`);
+;
+ALTER TABLE `sistema_juridico`.`notas` 
+ADD CONSTRAINT `fk_notas_casos`
+  FOREIGN KEY (`id_caso`)
+  REFERENCES `sistema_juridico`.`casos` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE CASCADE;

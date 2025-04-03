@@ -1,30 +1,28 @@
+import { NextFunction, Request, Response } from "express";
+import {
+  validateEntity,
+  validateNumericId,
+} from "../../../utils/validators.js";
 import { AbogadoCaso } from "../abogado-caso/abogado-caso.entity.js";
+import { differenceInHours } from "date-fns";
 import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { Nota } from "./nota.entity.js";
 import { NotaDTO } from "./nota.dto.js";
 import { orm } from "../../../config/db.config.js";
-import { Request, Response } from "express";
-import {
-  validateEntity,
-  validateNumericId,
-} from "../../../utils/validators.js";
 
 const em = orm.em;
 
 export const controller = {
   findAll: async (_req: Request, res: Response) => {
     try {
-      const notas = await em.find(
-        Nota,
-        {},
-        {
-          populate: ["abogado.usuario", "caso.cliente.usuario"],
-        }
-      );
+      const notas = await em.findAll(Nota, {
+        populate: ["abogado.usuario", "caso.cliente.usuario"],
+      });
       const data = notas.map((nota) => new NotaDTO(nota));
+
       res.status(200).json({ message: "Notas encontradas.", data });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -37,69 +35,49 @@ export const controller = {
         { caso: id_caso },
         { populate: ["abogado.usuario"] }
       );
+
       const data = notas.map((nota) => new NotaDTO(nota));
+
       res.status(200).json({ message: "Notas del caso encontradas.", data });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
 
   add: async (req: Request, res: Response): Promise<void> => {
     try {
-      const id_caso = validateNumericId(req.body.id_caso, "id_caso");
-      const id_abogado = validateNumericId(req.body.id_abogado, "id_abogado");
-
-      const abogadoCaso = await em.findOneOrFail(
-        AbogadoCaso,
-        {
-          caso: { id: id_caso, estado: EstadoCasoEnum.EN_CURSO },
-          abogado: { usuario: id_abogado },
-          fecha_baja: { $eq: null },
+      await em.findOneOrFail(AbogadoCaso, {
+        caso: {
+          id: req.body.sanitizedInput.caso,
+          estado: EstadoCasoEnum.EN_CURSO,
         },
-        {
-          populate: ["abogado.usuario"],
-        }
-      );
-
-      const caso = abogadoCaso.caso;
-      const abogado = abogadoCaso.abogado;
-
-      const fecha_hora = new Date();
-
-      const nota = em.create(Nota, {
-        abogado,
-        caso,
-        titulo: req.body.sanitizedInput.titulo,
-        descripcion: req.body.sanitizedInput.descripcion,
-        fecha_hora: fecha_hora,
+        abogado: { usuario: req.body.sanitizedInput.abogado },
+        fecha_baja: { $eq: null },
       });
 
+      const nota = em.create(Nota, req.body.sanitizedInput);
       validateEntity(nota);
 
       await em.flush();
-      await em.populate(nota, ["abogado"]);
+      await em.refresh(nota);
 
       const data = new NotaDTO(nota);
       res.status(201).json({ message: "Nota creada.", data });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
 
   update: async (req: Request, res: Response) => {
     try {
-      const id_caso = validateNumericId(req.params.id_caso, "id_caso");
-      const id_abogado = validateNumericId(req.params.id_abogado, "id_abogado");
-      const fecha_hora = new Date(req.params.fecha_hora);
+      const id = validateNumericId(req.params.id, "id");
 
       const nota = await em.findOneOrFail(Nota, {
-        caso: id_caso,
-        abogado: id_abogado,
-        fecha_hora: fecha_hora,
+        id,
+        abogado: req.body.sanitizedInput.abogado,
       });
 
-      const horasTranscurridas =
-        (new Date().getTime() - nota.fecha_hora.getTime()) / (1000 * 60 * 60);
+      const horasTranscurridas = differenceInHours(new Date(), nota.fecha_hora);
 
       if (horasTranscurridas > 2) {
         res.status(403).json({
@@ -114,31 +92,24 @@ export const controller = {
         req.body.sanitizedInput.descripcion || nota.descripcion;
 
       validateEntity(nota);
-
       await em.flush();
-      await em.populate(nota, ["abogado.usuario"]);
 
       const data = new NotaDTO(nota);
       res.status(200).json({ message: "Nota actualizada.", data });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
 
   delete: async (req: Request, res: Response): Promise<void> => {
     try {
-      const id_caso = validateNumericId(req.params.id_caso, "id_caso");
-      const id_abogado = validateNumericId(req.params.id_abogado, "id_abogado");
-      const fecha_hora = new Date(req.params.fecha_hora);
+      const id = validateNumericId(req.params.id, "id");
 
       const nota = await em.findOneOrFail(Nota, {
-        caso: id_caso,
-        abogado: id_abogado,
-        fecha_hora: fecha_hora,
+        id,
       });
 
-      const horasTranscurridas =
-        (new Date().getTime() - nota.fecha_hora.getTime()) / (1000 * 60 * 60);
+      const horasTranscurridas = differenceInHours(new Date(), nota.fecha_hora);
 
       if (horasTranscurridas > 2) {
         res.status(403).json({
@@ -150,14 +121,16 @@ export const controller = {
 
       await em.removeAndFlush(nota);
       res.status(200).json({ message: "Nota eliminada." });
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
 
-  sanitize: (req: Request, res: Response, next: Function) => {
+  sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
+        caso: validateNumericId(req.body.id_caso, "id_caso"),
+        abogado: validateNumericId(req.body.id_abogado, "id_abogado"),
         titulo: req.body.titulo?.trim(),
         descripcion: req.body.descripcion?.trim(),
       };
@@ -169,7 +142,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
