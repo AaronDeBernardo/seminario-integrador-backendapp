@@ -10,6 +10,7 @@ abogadoRouter.get(
   controller.findAvailableForCaso
 );
 abogadoRouter.get("/:id", controller.findOne);
+abogadoRouter.get("/:id/especialidades", controller.findEspecialidades);
 abogadoRouter.get("/", controller.findAll);
 abogadoRouter.post("/", controller.sanitize, controller.add);
 abogadoRouter.put("/:id", controller.sanitize, controller.update);

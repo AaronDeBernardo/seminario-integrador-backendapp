@@ -11,6 +11,8 @@ GET http://localhost:3000/api/usuarios/abogados/disponibles
 ###
 GET http://localhost:3000/api/usuarios/abogados/disponibles/caso/{{id}}
 
+### 
+GET http://localhost:3000/api/usuarios/abogados/{{id}}/especialidades
 
 ###
 GET http://localhost:3000/api/usuarios/abogados/{{id}}

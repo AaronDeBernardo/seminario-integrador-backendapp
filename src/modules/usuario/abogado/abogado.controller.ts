@@ -62,6 +62,34 @@ export const controller = {
     }
   },
 
+  findEspecialidades: async (req: Request, res: Response) => {
+    try {
+      const id = validateNumericId(req.params.id, "id");
+
+      const abogado = await em.findOneOrFail(
+        Abogado,
+        {
+          usuario: { id, fecha_baja: { $eq: null } },
+        },
+        { populate: ["especialidades"] }
+      );
+
+      const especialidades = abogado.especialidades.getItems();
+
+      const data = especialidades.map((esp) => ({
+        id: esp.id,
+        nombre: esp.nombre,
+      }));
+
+      res.status(200).json({
+        message: "Especialidades del abogado encontradas.",
+        data,
+      });
+    } catch (error: unknown) {
+      handleError(error, res);
+    }
+  },
+
   findAvailable: async (req: Request, res: Response) => {
     try {
       const abogados = await em.execute(
