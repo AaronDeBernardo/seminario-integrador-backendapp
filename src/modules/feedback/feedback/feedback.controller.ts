@@ -1,16 +1,17 @@
-import { Request, Response, NextFunction } from "express";
-import { subMonths } from "date-fns";
+import { NextFunction, Request, Response } from "express";
+import {
+  validateEntity,
+  validateIntegerInRange,
+  validateNumericId,
+} from "../../../utils/validators.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
 import { Feedback } from "./feedback.entity.js";
 import { FeedbackDTO } from "./feedback.dto.js";
 import { feedbackService } from "./feedback.service.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
-import {
-  validateEntity,
-  validateIntegerInRange,
-  validateNumericId,
-} from "../../../utils/validators.js";
+import { subMonths } from "date-fns";
 
 const em = orm.em;
 
@@ -26,8 +27,8 @@ export const controller = {
       );
 
       const data = feedbacks.map((feedback) => new FeedbackDTO(feedback));
-      res.status(200).json({ message: "Feedbacks encontrados.", data });
-    } catch (error: any) {
+      res.status(200).json(new ApiResponse("Feedbacks encontrados.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -47,8 +48,8 @@ export const controller = {
       const data = feedbacks.map((feedback) => new FeedbackDTO(feedback));
       res
         .status(200)
-        .json({ message: "Feedbacks del abogado encontrados.", data });
-    } catch (error: any) {
+        .json(new ApiResponse("Feedbacks del abogado encontrados.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -62,11 +63,15 @@ export const controller = {
 
       const data = await feedbackService.getAbogadosForFeedback(id_caso);
 
-      res.status(200).json({
-        message: "Todos los abogados calificables del caso fueron encontrados.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Todos los abogados calificables del caso fueron encontrados.",
+            data
+          )
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -92,8 +97,8 @@ export const controller = {
       await em.flush();
       await em.refresh(feedback);
 
-      res.status(201).json({ message: "Feedback registrado.", data: feedback });
-    } catch (error: any) {
+      res.status(201).json(new ApiResponse("Feedback registrado.", feedback));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -120,7 +125,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

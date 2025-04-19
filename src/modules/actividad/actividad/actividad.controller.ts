@@ -6,6 +6,7 @@ import {
 } from "../../../utils/validators.js";
 import { Actividad } from "./actividad.entity.js";
 import { ActividadDTO } from "./actividad.dto.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
 import { CostoActividad } from "../costo-actividad/costo-actividad.entity.js";
 import { format } from "date-fns";
 import { handleError } from "../../../utils/error-handler.js";
@@ -24,10 +25,14 @@ export const controller = {
         return ActividadDTO.fromGetActividades(a);
       });
 
-      res.status(200).json({
-        message: "Todas las actividades activas fueron encontradas.",
-        data,
-      });
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Todas las actividades activas fueron encontradas.",
+            data
+          )
+        );
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -41,10 +46,14 @@ export const controller = {
       });
 
       if (actividadExistente) {
-        res.status(409).json({
-          message: "Ya existe una actividad con el mismo nombre.",
-          data: actividadExistente,
-        });
+        res
+          .status(409)
+          .json(
+            new ApiResponse(
+              "Ya existe una actividad con el mismo nombre.",
+              actividadExistente
+            )
+          );
         return;
       }
 
@@ -60,10 +69,7 @@ export const controller = {
         costoActividad
       );
 
-      res.status(201).json({
-        message: "Actividad creada.",
-        data,
-      });
+      res.status(201).json(new ApiResponse("Actividad creada.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -86,10 +92,14 @@ export const controller = {
         });
 
         if (actividadExistente) {
-          res.status(409).json({
-            message: "Ya existe una actividad con el mismo nombre.",
-            data: actividadExistente,
-          });
+          res
+            .status(409)
+            .json(
+              new ApiResponse(
+                "Ya existe una actividad con el mismo nombre.",
+                actividadExistente
+              )
+            );
           return;
         }
       }
@@ -118,10 +128,7 @@ export const controller = {
       validateEntity(actividad);
       await em.flush();
 
-      res.status(200).json({
-        message: "Actividad actualizada.",
-        data,
-      });
+      res.status(200).json(new ApiResponse("Actividad actualizada.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -138,10 +145,9 @@ export const controller = {
       actividad.fecha_baja = format(new Date(), "yyyy-MM-dd");
       await em.flush();
 
-      res.status(200).json({
-        message: "Actividad dada de baja.",
-        data: actividad,
-      });
+      res
+        .status(200)
+        .json(new ApiResponse("Actividad dada de baja.", actividad));
     } catch (error: unknown) {
       handleError(error, res);
     }

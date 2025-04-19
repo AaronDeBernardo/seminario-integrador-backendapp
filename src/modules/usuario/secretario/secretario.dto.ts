@@ -1,5 +1,5 @@
-import { Usuario } from "../usuario/usuario.entity.js";
 import { Secretario } from "./secretario.entity.js";
+import { Usuario } from "../usuario/usuario.entity.js";
 
 export class SecretarioDTO {
   id: number;

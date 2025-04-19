@@ -1,6 +1,5 @@
 import { format, subMonths } from "date-fns";
 import { EstadoCasoEnum } from "../../../utils/enums.js";
-import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
 
 const em = orm.em;

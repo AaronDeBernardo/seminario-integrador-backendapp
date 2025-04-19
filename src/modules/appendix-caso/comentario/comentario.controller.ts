@@ -1,14 +1,15 @@
-import { AbogadoCaso } from "../abogado-caso/abogado-caso.entity.js";
-import { EstadoCasoEnum } from "../../caso/caso/caso.entity.js";
-import { Comentario } from "./comentario.entity.js";
-import { ComentarioDTO } from "./comentario.dto.js";
-import { handleError } from "../../../utils/error-handler.js";
-import { orm } from "../../../config/db.config.js";
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import {
   validateEntity,
   validateNumericId,
 } from "../../../utils/validators.js";
+import { AbogadoCaso } from "../abogado-caso/abogado-caso.entity.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
+import { Comentario } from "./comentario.entity.js";
+import { ComentarioDTO } from "./comentario.dto.js";
+import { EstadoCasoEnum } from "../../caso/caso/caso.entity.js";
+import { handleError } from "../../../utils/error-handler.js";
+import { orm } from "../../../config/db.config.js";
 
 const em = orm.em;
 
@@ -25,11 +26,10 @@ export const controller = {
 
       const data = comentarios.map((c) => new ComentarioDTO(c));
 
-      res.status(200).json({
-        message: "Comentarios del caso encontrados.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(new ApiResponse("Comentarios del caso encontrados.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -71,11 +71,15 @@ export const controller = {
       await em.flush();
       await em.populate(comentario, ["caso", "abogado", "padre", "respuestas"]);
 
-      res.status(201).json({
-        message: padre ? "Respuesta creada." : "Comentario creado.",
-        data: new ComentarioDTO(comentario),
-      });
-    } catch (error: any) {
+      res
+        .status(201)
+        .json(
+          new ApiResponse(
+            padre ? "Respuesta creada." : "Comentario creado.",
+            new ComentarioDTO(comentario)
+          )
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -90,15 +94,19 @@ export const controller = {
         (1000 * 60 * 60);
 
       if (horasTranscurridas > 24) {
-        res.status(403).json({
-          message: "No se puede eliminar el comentario después de 24 horas.",
-        });
+        res
+          .status(403)
+          .json(
+            new ApiResponse(
+              "No se puede eliminar el comentario después de 24 horas."
+            )
+          );
         return;
       }
 
       await em.removeAndFlush(comentario);
-      res.status(200).json({ message: "Comentario eliminado." });
-    } catch (error: any) {
+      res.status(200).json(new ApiResponse("Comentario eliminado."));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -116,7 +124,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

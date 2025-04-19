@@ -1,12 +1,13 @@
-import { getDay } from "date-fns/fp";
-import { LockMode } from "@mikro-orm/core";
+import { addHours, format, startOfDay, subHours } from "date-fns";
 import { NextFunction, Request, Response } from "express";
-import { orm } from "../../../config/db.config.js";
-import { startOfDay, subHours, addHours, format } from "date-fns";
+import { ApiResponse } from "../../../utils/api-response.class.js";
 import { Cliente } from "../../usuario/cliente/cliente.entity.js";
+import { getDay } from "date-fns/fp";
 import { handleError } from "../../../utils/error-handler.js";
 import { HorarioTurno } from "../horario-turno/horario-turno.entity.js";
 import { HttpError } from "../../../utils/http-error.js";
+import { LockMode } from "@mikro-orm/core";
+import { orm } from "../../../config/db.config.js";
 import { TurnoOtorgado } from "./turno-otorgado.entity.js";
 import { TurnoOtorgadoDTO } from "./turno-otorgado.dto.js";
 import { validateNumericId } from "../../../utils/validators.js";
@@ -44,8 +45,8 @@ export const controller = {
       const data = turnosOtorgados.map((t) => new TurnoOtorgadoDTO(t));
       res
         .status(200)
-        .json({ message: "Todos los turnos han sido encontrados.", data });
-    } catch (error: any) {
+        .json(new ApiResponse("Todos los turnos han sido encontrados.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -98,8 +99,8 @@ export const controller = {
       //TODO send email
 
       const data = new TurnoOtorgadoDTO(turnoOtorgado);
-      res.status(201).json({ message: "Turno otorgado.", data });
-    } catch (error: any) {
+      res.status(201).json(new ApiResponse("Turno otorgado.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -164,7 +165,7 @@ export const controller = {
       req.body.dia_semana = getDay(fechaTurno.utcDate);
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

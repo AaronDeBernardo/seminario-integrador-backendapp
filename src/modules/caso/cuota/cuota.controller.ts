@@ -1,15 +1,16 @@
 import { addMonths, format, subMonths } from "date-fns";
-import { HttpError } from "../../../utils/http-error.js";
+import { EstadoCasoEnum, FormaCobroEnum } from "../../../utils/enums.js";
 import { NextFunction, Request, Response } from "express";
-import { QueryOrder } from "@mikro-orm/core";
+import { validateEnum, validateNumericId } from "../../../utils/validators.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
 import { Caso } from "../caso/caso.entity.js";
 import { Cuota } from "./cuota.entity.js";
 import { CuotaDTO } from "./cuota.dto.js";
-import { EstadoCasoEnum, FormaCobroEnum } from "../../../utils/enums.js";
 import { handleError } from "../../../utils/error-handler.js";
+import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
 import { precioJusService } from "../../misc/precio-jus/precio-jus.service.js";
-import { validateEnum, validateNumericId } from "../../../utils/validators.js";
+import { QueryOrder } from "@mikro-orm/core";
 
 const em = orm.em;
 
@@ -32,12 +33,15 @@ export const controller = {
       );
 
       const data = cuotas.map((c) => new CuotaDTO(c, true));
-      res.status(200).json({
-        message:
-          "Todas las cuotas que fueron cobradas en los últimos 3 meses, que vencieron en los últimos 3 meses o que vencen en el próximo mes, fueron encontradas.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Todas las cuotas que fueron cobradas en los últimos 3 meses, que vencieron en los últimos 3 meses o que vencen en el próximo mes, fueron encontradas.",
+            data
+          )
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -56,11 +60,15 @@ export const controller = {
       );
 
       const data = cuotas.map((c) => new CuotaDTO(c, true));
-      res.status(200).json({
-        message: "Todas las cuotas pendientes de pago fueron encontradas.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Todas las cuotas pendientes de pago fueron encontradas.",
+            data
+          )
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -74,11 +82,12 @@ export const controller = {
       });
 
       const data = cuotas.map((c) => new CuotaDTO(c, false));
-      res.status(200).json({
-        message: "Todas las cuotas del caso fueron encontradas.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(
+          new ApiResponse("Todas las cuotas del caso fueron encontradas.", data)
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -107,13 +116,19 @@ export const controller = {
         });
 
         if (caso === null)
-          res.status(400).json({
-            message: 'El caso no se encuentra con estado "finalizado".',
-          });
+          res
+            .status(400)
+            .json(
+              new ApiResponse(
+                'El caso no se encuentra con estado "finalizado".'
+              )
+            );
         else
           res
             .status(200)
-            .json({ message: "Todas las cuotas del caso fueron cobradas." });
+            .json(
+              new ApiResponse("Todas las cuotas del caso fueron cobradas.")
+            );
 
         return;
       }
@@ -124,8 +139,8 @@ export const controller = {
       const data = new CuotaDTO(cuota as Cuota, false, precioPesos);
       res
         .status(200)
-        .json({ message: "Cuota pendiente de cobro encontrada.", data });
-    } catch (error: any) {
+        .json(new ApiResponse("Cuota pendiente de cobro encontrada.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -164,8 +179,8 @@ export const controller = {
       });
 
       const data = new CuotaDTO(cuota, false);
-      res.status(200).json({ message: "Cuota cobrada.", data });
-    } catch (error: any) {
+      res.status(200).json(new ApiResponse("Cuota cobrada.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -195,8 +210,8 @@ export const controller = {
       const data = new CuotaDTO(cuota, false);
       res
         .status(200)
-        .json({ message: "Se eliminó el cobro de la cuota.", data });
-    } catch (error: any) {
+        .json(new ApiResponse("Se eliminó el cobro de la cuota.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -213,7 +228,7 @@ export const controller = {
       };
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

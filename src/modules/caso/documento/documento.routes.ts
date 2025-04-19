@@ -1,6 +1,6 @@
-import { Router } from "express";
 import { controller } from "./documento.controller.js";
 import { handleFileUpload } from "../../../middleware/multer-pdf-image.config.js";
+import { Router } from "express";
 
 export const documentoRouter = Router();
 

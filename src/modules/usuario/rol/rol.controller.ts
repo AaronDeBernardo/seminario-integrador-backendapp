@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { ApiResponse } from "../../../utils/api-response.class.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
 import { Rol } from "./rol.entity.js";
@@ -10,11 +11,10 @@ export const controller = {
     try {
       const roles = await em.findAll(Rol);
 
-      res.status(200).json({
-        message: "Todos los roles fueron encontrados.",
-        data: roles,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(new ApiResponse("Todos los roles fueron encontrados.", roles));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

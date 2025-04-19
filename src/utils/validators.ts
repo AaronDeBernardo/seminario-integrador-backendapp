@@ -77,7 +77,10 @@ export function validatePassword(password: any, field: string) {
   password = password.trim();
   if (password.length >= 4) return password;
 
-  throw new Error(`${field}: debe ser un string con 4 caracteres como mínimo.`);
+  throw new HttpError(
+    400,
+    `${field}: debe ser un string con 4 caracteres como mínimo.`
+  );
 }
 
 export function validateTime(time: any, field: string) {

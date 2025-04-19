@@ -1,5 +1,5 @@
-import { Router } from "express";
 import { controller } from "./comentario.controller.js";
+import { Router } from "express";
 
 export const comentarioRouter = Router();
 

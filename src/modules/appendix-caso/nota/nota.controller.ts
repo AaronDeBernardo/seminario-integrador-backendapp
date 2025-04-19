@@ -4,6 +4,7 @@ import {
   validateNumericId,
 } from "../../../utils/validators.js";
 import { AbogadoCaso } from "../abogado-caso/abogado-caso.entity.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
 import { differenceInHours } from "date-fns";
 import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { handleError } from "../../../utils/error-handler.js";
@@ -21,7 +22,7 @@ export const controller = {
       });
       const data = notas.map((nota) => new NotaDTO(nota));
 
-      res.status(200).json({ message: "Notas encontradas.", data });
+      res.status(200).json(new ApiResponse("Notas encontradas.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -38,7 +39,9 @@ export const controller = {
 
       const data = notas.map((nota) => new NotaDTO(nota));
 
-      res.status(200).json({ message: "Notas del caso encontradas.", data });
+      res
+        .status(200)
+        .json(new ApiResponse("Notas del caso encontradas.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -62,7 +65,7 @@ export const controller = {
       await em.refresh(nota);
 
       const data = new NotaDTO(nota);
-      res.status(201).json({ message: "Nota creada.", data });
+      res.status(201).json(new ApiResponse("Nota creada.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -80,10 +83,13 @@ export const controller = {
       const horasTranscurridas = differenceInHours(new Date(), nota.fecha_hora);
 
       if (horasTranscurridas > 2) {
-        res.status(403).json({
-          message:
-            "No se puede actualizar la nota después de 2 horas de su creación.",
-        });
+        res
+          .status(403)
+          .json(
+            new ApiResponse(
+              "No se puede actualizar la nota después de 2 horas de su creación."
+            )
+          );
         return;
       }
 
@@ -95,7 +101,7 @@ export const controller = {
       await em.flush();
 
       const data = new NotaDTO(nota);
-      res.status(200).json({ message: "Nota actualizada.", data });
+      res.status(200).json(new ApiResponse("Nota actualizada.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -112,15 +118,18 @@ export const controller = {
       const horasTranscurridas = differenceInHours(new Date(), nota.fecha_hora);
 
       if (horasTranscurridas > 2) {
-        res.status(403).json({
-          message:
-            "No se puede eliminar la nota después de 2 horas de su creación.",
-        });
+        res
+          .status(403)
+          .json(
+            new ApiResponse(
+              "No se puede eliminar la nota después de 2 horas de su creación."
+            )
+          );
         return;
       }
 
       await em.removeAndFlush(nota);
-      res.status(200).json({ message: "Nota eliminada." });
+      res.status(200).json(new ApiResponse("Nota eliminada."));
     } catch (error: unknown) {
       handleError(error, res);
     }

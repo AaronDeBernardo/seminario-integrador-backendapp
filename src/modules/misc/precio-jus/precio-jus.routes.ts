@@ -1,5 +1,5 @@
-import { Router } from "express";
 import { controller } from "./precio-jus.controller.js";
+import { Router } from "express";
 
 export const precioJusRouter = Router();
 

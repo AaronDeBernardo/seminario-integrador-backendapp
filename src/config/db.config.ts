@@ -1,5 +1,5 @@
-import { MikroORM } from "@mikro-orm/mysql";
 import { environment } from "./env.config.js";
+import { MikroORM } from "@mikro-orm/mysql";
 
 export const orm = await MikroORM.init({
   entities: ["./dist/**/*.entity.js"],

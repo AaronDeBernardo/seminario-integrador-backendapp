@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { AbogadoCaso } from "./abogado-caso.entity.js";
 import { AbogadoCasoDTO } from "./abogado-caso.dto.js";
 import { abogadoCasoService } from "./abogado-caso.service.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
 import { Caso } from "../../caso/caso/caso.entity.js";
 import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { format } from "date-fns";
@@ -27,9 +28,11 @@ export const controller = {
       });
 
       if (existingRelation) {
-        res.status(400).json({
-          message: "El abogado ya se encuentra asociado al caso.",
-        });
+        res
+          .status(400)
+          .json(
+            new ApiResponse("El abogado ya se encuentra asociado al caso.")
+          );
         return;
       }
 
@@ -46,10 +49,9 @@ export const controller = {
       //TODO enviar email al abogado con el detalle
       const data = new AbogadoCasoDTO(abogadoCaso);
 
-      res.status(201).json({
-        message: "El abogado fue asociado al caso.",
-        data,
-      });
+      res
+        .status(201)
+        .json(new ApiResponse("El abogado fue asociado al caso.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -66,17 +68,24 @@ export const controller = {
       });
 
       if (!abogadoCaso) {
-        res.status(404).json({
-          message: "No se encontró la relación entre el caso y el abogado.",
-        });
+        res
+          .status(404)
+          .json(
+            new ApiResponse(
+              "No se encontró la relación entre el caso y el abogado."
+            )
+          );
         return;
       }
 
       if (abogadoCaso.es_principal === true) {
-        res.status(409).json({
-          message:
-            "No se puede desvincular al abogado principal del caso. Primero asigne otro.",
-        });
+        res
+          .status(409)
+          .json(
+            new ApiResponse(
+              "No se puede desvincular al abogado principal del caso. Primero asigne otro."
+            )
+          );
         return;
       }
 
@@ -86,10 +95,11 @@ export const controller = {
       //TODO enviar email con detalle
 
       const data = new AbogadoCasoDTO(abogadoCaso);
-      res.status(200).json({
-        message: "Abogado desvinculado del caso exitosamente.",
-        data,
-      });
+      res
+        .status(200)
+        .json(
+          new ApiResponse("Abogado desvinculado del caso exitosamente.", data)
+        );
     } catch (error: unknown) {
       handleError(error, res);
     }

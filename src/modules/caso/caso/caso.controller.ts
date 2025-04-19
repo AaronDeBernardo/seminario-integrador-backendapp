@@ -11,6 +11,7 @@ import {
 import { AbogadoCaso } from "../../appendix-caso/abogado-caso/abogado-caso.entity.js";
 import { AbogadoCasoDTO } from "../../appendix-caso/abogado-caso/abogado-caso.dto.js";
 import { abogadoCasoService } from "../../appendix-caso/abogado-caso/abogado-caso.service.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
 import { Caso } from "./caso.entity.js";
 import { CasoDTO } from "./caso.dto.js";
 import { casoService } from "./caso.service.js";
@@ -44,10 +45,9 @@ export const controller = {
 
       const data = casos.map((c) => new CasoDTO(c));
 
-      res.status(200).json({
-        message: "Todos los casos fueron encontrados.",
-        data,
-      });
+      res
+        .status(200)
+        .json(new ApiResponse("Todos los casos fueron encontrados.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -63,10 +63,11 @@ export const controller = {
 
       const data = casos.map((c) => new CasoDTO(c));
 
-      res.status(200).json({
-        message: "Todos los casos en curso fueron encontrados.",
-        data,
-      });
+      res
+        .status(200)
+        .json(
+          new ApiResponse("Todos los casos en curso fueron encontrados.", data)
+        );
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -84,10 +85,7 @@ export const controller = {
 
       const data = new CasoDTO(caso);
 
-      res.status(200).json({
-        message: "El caso fue encontrado.",
-        data,
-      });
+      res.status(200).json(new ApiResponse("El caso fue encontrado.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -108,11 +106,14 @@ export const controller = {
 
       const data = abogados.map((a) => new AbogadoCasoDTO(a));
 
-      res.status(200).json({
-        message:
-          "Todos los abogados que se encuentran trabajando en el caso fueron encontrados.",
-        data,
-      });
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Todos los abogados que se encuentran trabajando en el caso fueron encontrados.",
+            data
+          )
+        );
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -141,10 +142,7 @@ export const controller = {
 
       const data = new CasoDTO(caso);
 
-      res.status(201).json({
-        message: "Caso creado.",
-        data,
-      });
+      res.status(201).json(new ApiResponse("Caso creado.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -175,10 +173,7 @@ export const controller = {
 
       const data = new CasoDTO(caso);
 
-      res.status(200).json({
-        message: "Caso actualizado.",
-        data,
-      });
+      res.status(200).json(new ApiResponse("Caso actualizado.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -192,16 +187,22 @@ export const controller = {
       if (caso.estado !== EstadoCasoEnum.EN_CURSO) {
         res
           .status(400)
-          .json({ message: 'El caso no se encuentra con estado "en curso"' });
+          .json(
+            new ApiResponse('El caso no se encuentra con estado "en curso"')
+          );
         return;
       }
 
       const politicas = await politicasService.loadPoliticas();
 
       if (req.body.sanitizedInput.num_cuotas > politicas.max_cuotas) {
-        res.status(400).json({
-          message: `El número de cuotas (${req.body.sanitizedInput.num_cuotas}) excede el máximo permitido (${politicas.max_cuotas}).`,
-        });
+        res
+          .status(400)
+          .json(
+            new ApiResponse(
+              `El número de cuotas (${req.body.sanitizedInput.num_cuotas}) excede el máximo permitido (${politicas.max_cuotas}).`
+            )
+          );
         return;
       }
 
@@ -216,10 +217,9 @@ export const controller = {
 
       const data = CasoDTO.fromCasoAndCuotas(caso, cuotas);
 
-      res.status(200).json({
-        message: "Caso finalizado y cuotas generadas.",
-        data,
-      });
+      res
+        .status(200)
+        .json(new ApiResponse("Caso finalizado y cuotas generadas.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -240,10 +240,7 @@ export const controller = {
       caso.fecha_estado = format(new Date(), "yyyy-MM-dd");
       await em.flush();
 
-      res.status(200).json({
-        message: "Caso cancelado.",
-        data: caso,
-      });
+      res.status(200).json(new ApiResponse("Caso cancelado.", caso));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -301,10 +298,13 @@ export const controller = {
         req.body.sanitizedInput.fecha_primer_cobro <
           format(new Date(), "yyyy-MM-dd")
       ) {
-        res.status(400).json({
-          message:
-            "fecha_primer_cobro: debe ser igual o posterior a la fecha actual.",
-        });
+        res
+          .status(400)
+          .json(
+            new ApiResponse(
+              "fecha_primer_cobro: debe ser igual o posterior a la fecha actual."
+            )
+          );
         return;
       }
 

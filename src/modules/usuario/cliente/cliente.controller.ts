@@ -1,15 +1,16 @@
 import { NextFunction, Request, Response } from "express";
-import { orm } from "../../../config/db.config.js";
-import { Cliente } from "./cliente.entity.js";
-import { ClienteDTO } from "./cliente.dto.js";
-import { handleError } from "../../../utils/error-handler.js";
-import { HttpError } from "../../../utils/http-error.js";
-import { sanitizeUsuario } from "../usuario/usuario.controller.js";
-import { Usuario } from "../usuario/usuario.entity.js";
 import {
   validateEntity,
   validateNumericId,
 } from "../../../utils/validators.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
+import { Cliente } from "./cliente.entity.js";
+import { ClienteDTO } from "./cliente.dto.js";
+import { handleError } from "../../../utils/error-handler.js";
+import { HttpError } from "../../../utils/http-error.js";
+import { orm } from "../../../config/db.config.js";
+import { Usuario } from "../usuario/usuario.entity.js";
+import { usuarioService } from "../usuario/usuario.service.js";
 
 const em = orm.em;
 
@@ -27,11 +28,10 @@ export const controller = {
 
       const data = clientes.map((c) => new ClienteDTO(c));
 
-      res.status(200).json({
-        message: "Todos los clientes fueron encontrados.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(new ApiResponse("Todos los clientes fueron encontrados.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -50,11 +50,8 @@ export const controller = {
 
       const data = new ClienteDTO(cliente);
 
-      res.status(200).json({
-        message: "El cliente fue encontrado.",
-        data,
-      });
-    } catch (error: any) {
+      res.status(200).json(new ApiResponse("El cliente fue encontrado.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -77,8 +74,8 @@ export const controller = {
       await em.flush();
 
       const data = new ClienteDTO(cliente);
-      res.status(201).json({ message: "Cliente creado.", data });
-    } catch (error: any) {
+      res.status(201).json(new ApiResponse("Cliente creado.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -112,18 +109,15 @@ export const controller = {
       await em.flush();
       const data = new ClienteDTO(cliente);
 
-      res.status(200).json({
-        message: "Cliente actualizado.",
-        data,
-      });
-    } catch (error: any) {
+      res.status(200).json(new ApiResponse("Cliente actualizado.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
-      sanitizeUsuario(req);
+      usuarioService.sanitizeUsuario(req);
       req.body.sanitizedInput = {
         ...req.body.sanitizedInput,
         es_empresa: req.body.es_empresa,
@@ -136,7 +130,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

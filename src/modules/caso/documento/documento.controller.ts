@@ -1,14 +1,15 @@
-import { format } from "date-fns";
 import { NextFunction, Request, Response } from "express";
-import { Documento } from "./documento.entity.js";
-import { DocumentoDTO } from "./documento.dto.js";
-import { handleError } from "../../../utils/error-handler.js";
-import { HttpError } from "../../../utils/http-error.js";
-import { orm } from "../../../config/db.config.js";
 import {
   validateEntity,
   validateNumericId,
 } from "../../../utils/validators.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
+import { Documento } from "./documento.entity.js";
+import { DocumentoDTO } from "./documento.dto.js";
+import { format } from "date-fns";
+import { handleError } from "../../../utils/error-handler.js";
+import { HttpError } from "../../../utils/http-error.js";
+import { orm } from "../../../config/db.config.js";
 
 const em = orm.em;
 
@@ -37,11 +38,12 @@ export const controller = {
         (d) => new DocumentoDTO(d as Documento, true)
       );
 
-      res.status(200).json({
-        message: "Todos los documentos fueron encontrados.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(
+          new ApiResponse("Todos los documentos fueron encontrados.", data)
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -62,11 +64,15 @@ export const controller = {
         (d) => new DocumentoDTO(d as Documento, false)
       );
 
-      res.status(200).json({
-        message: "Todos los documentos del caso fueron encontrados.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Todos los documentos del caso fueron encontrados.",
+            data
+          )
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -82,11 +88,10 @@ export const controller = {
       console.log(documento);
       const data = new DocumentoDTO(documento, false);
 
-      res.status(200).json({
-        message: "El documento fue encontrado.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(new ApiResponse("El documento fue encontrado.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -99,10 +104,8 @@ export const controller = {
 
       await em.flush();
 
-      res.status(201).json({
-        message: "Documento guardado.",
-      });
-    } catch (error: any) {
+      res.status(201).json(new ApiResponse("Documento guardado."));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -123,11 +126,10 @@ export const controller = {
       documento.fecha_baja = format(new Date(), "yyyy-MM-dd");
       await em.flush();
 
-      res.status(200).json({
-        message: "Documento dado de baja.",
-        data: documento,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(new ApiResponse("Documento dado de baja.", documento));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -143,7 +145,7 @@ export const controller = {
       if (!req.file) throw new HttpError(400, "archivo: es requerido.");
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

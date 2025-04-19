@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, Property, Rel } from "@mikro-orm/core";
-import { IsNotEmpty } from "class-validator";
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 import { Caso } from "../../caso/caso/caso.entity.js";
+import { IsNotEmpty } from "class-validator";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 
 @Entity({ tableName: "feedbacks" })

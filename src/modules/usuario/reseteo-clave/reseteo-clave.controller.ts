@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { ApiResponse } from "../../../utils/api-response.class.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
 import { ReseteoClave } from "./reseteo-clave.entity.js";
@@ -16,10 +17,14 @@ export const controller = {
 
       //TODO enviar correo de recuperación
 
-      res.status(201).json({
-        message: "Código de recuperación enviado al email del usuario.",
-      });
-    } catch (error: any) {
+      res
+        .status(201)
+        .json(
+          new ApiResponse(
+            "Código de recuperación enviado al email del usuario."
+          )
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -39,7 +44,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

@@ -1,4 +1,3 @@
-import { Caso } from "../caso/caso.entity.js";
 import {
   Entity,
   Index,
@@ -7,8 +6,9 @@ import {
   Property,
   Rel,
 } from "@mikro-orm/core";
-import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
+import { Caso } from "../caso/caso.entity.js";
 import { FormaCobroEnum } from "../../../utils/enums.js";
+import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 
 @Entity({ tableName: "cuotas" })
 @Index({ properties: ["caso", "fecha_vencimiento"] })

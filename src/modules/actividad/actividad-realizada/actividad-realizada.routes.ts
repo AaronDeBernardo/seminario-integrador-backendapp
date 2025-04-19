@@ -1,5 +1,5 @@
-import { Router } from "express";
 import { controller } from "./actividad-realizada.controller.js";
+import { Router } from "express";
 
 export const actividadRealizadaRouter = Router();
 

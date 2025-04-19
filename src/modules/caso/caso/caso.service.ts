@@ -9,7 +9,7 @@ const em = orm.em;
 
 export const casoService = {
   generateCuotas: (caso: Caso, input: any): Cuota[] => {
-    let cuotas: Cuota[] = [];
+    const cuotas: Cuota[] = [];
     let nextDate = input.fecha_primer_cobro;
     const jusCuota = parseFloat((input.cant_jus / input.num_cuotas).toFixed(3));
 

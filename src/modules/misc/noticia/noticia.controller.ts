@@ -1,14 +1,15 @@
 import { addDays, format } from "date-fns";
 import { NextFunction, Request, Response } from "express";
-import { handleError } from "../../../utils/error-handler.js";
-import { Noticia } from "./noticia.entity.js";
-import { NoticiaDTO } from "./noticia.dto.js";
-import { orm } from "../../../config/db.config.js";
 import {
   validateDate,
   validateEntity,
   validateNumericId,
 } from "../../../utils/validators.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
+import { handleError } from "../../../utils/error-handler.js";
+import { Noticia } from "./noticia.entity.js";
+import { NoticiaDTO } from "./noticia.dto.js";
+import { orm } from "../../../config/db.config.js";
 
 const em = orm.em;
 
@@ -21,11 +22,15 @@ export const controller = {
       });
       const data = noticias.map((n) => new NoticiaDTO(n));
 
-      res.status(200).json({
-        message: "Todas las noticias vigentes fueron encontradas.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Todas las noticias vigentes fueron encontradas.",
+            data
+          )
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -41,11 +46,10 @@ export const controller = {
       });
       const data = new NoticiaDTO(noticia);
 
-      res.status(200).json({
-        message: "La noticia vigente fue encontrada.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(new ApiResponse("La noticia vigente fue encontrada.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -65,18 +69,24 @@ export const controller = {
         );
 
       if (input.fecha_publicacion >= input.fecha_vencimiento) {
-        res.status(400).json({
-          message:
-            "La fecha de publicación no puede ser mayor o igual a la fecha de vencimiento.",
-        });
+        res
+          .status(400)
+          .json(
+            new ApiResponse(
+              "La fecha de publicación no puede ser mayor o igual a la fecha de vencimiento."
+            )
+          );
         return;
       }
 
       if (input.fecha_publicacion < today) {
-        res.status(400).json({
-          message:
-            "La fecha de publicación debe ser mayor o igual a la fecha actual.",
-        });
+        res
+          .status(400)
+          .json(
+            new ApiResponse(
+              "La fecha de publicación debe ser mayor o igual a la fecha actual."
+            )
+          );
         return;
       }
 
@@ -86,11 +96,8 @@ export const controller = {
       await em.flush();
 
       const data = new NoticiaDTO(noticia);
-      res.status(201).json({
-        message: "La noticia fue creada.",
-        data,
-      });
-    } catch (error: any) {
+      res.status(201).json(new ApiResponse("La noticia fue creada.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -108,20 +115,26 @@ export const controller = {
         input.fecha_publicacion !== noticia.fecha_publicacion &&
         input.fecha_publicacion < today
       ) {
-        res.status(400).json({
-          message:
-            "La fecha de publicación debe ser mayor o igual a la fecha actual, o no modificarse.",
-        });
+        res
+          .status(400)
+          .json(
+            new ApiResponse(
+              "La fecha de publicación debe ser mayor o igual a la fecha actual, o no modificarse."
+            )
+          );
         return;
       }
 
       em.assign(noticia, req.body.sanitizedInput);
 
       if (noticia.fecha_publicacion >= noticia.fecha_vencimiento) {
-        res.status(400).json({
-          message:
-            "La fecha de publicación no puede ser mayor o igual a la fecha de vencimiento.",
-        });
+        res
+          .status(400)
+          .json(
+            new ApiResponse(
+              "La fecha de publicación no puede ser mayor o igual a la fecha de vencimiento."
+            )
+          );
         return;
       }
 
@@ -129,11 +142,10 @@ export const controller = {
       await em.flush();
 
       const data = new NoticiaDTO(noticia);
-      res.status(200).json({
-        message: "La noticia fue actualizada.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(new ApiResponse("La noticia fue actualizada.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -148,9 +160,9 @@ export const controller = {
         noticia.fecha_vencimiento &&
         new Date(noticia.fecha_vencimiento) <= now
       ) {
-        res.status(400).json({
-          message: "La noticia ya está dada de baja.",
-        });
+        res
+          .status(400)
+          .json(new ApiResponse("La noticia ya está dada de baja."));
         return;
       }
 
@@ -158,11 +170,10 @@ export const controller = {
       await em.flush();
 
       const data = new NoticiaDTO(noticia);
-      res.status(200).json({
-        message: "La noticia fue dada de baja.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(new ApiResponse("La noticia fue dada de baja.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -191,7 +202,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

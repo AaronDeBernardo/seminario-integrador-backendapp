@@ -1,5 +1,5 @@
-import { Router } from "express";
 import { controller } from "./reseteo-clave.controller";
+import { Router } from "express";
 
 export const reseteoClaveRouter = Router();
 

@@ -1,13 +1,14 @@
 import "reflect-metadata";
-import cors from "cors";
-import express from "express";
-import { RequestContext } from "@mikro-orm/mysql";
-import { orm } from "./config/db.config.js";
 import { actividadModuleRouter } from "./modules/actividad/actividad-module.routes.js";
+import { ApiResponse } from "./utils/api-response.class.js";
 import { casoModuleRouter } from "./modules/caso/caso-module.routes.js";
+import cors from "cors";
 import { especialidadModuleRouter } from "./modules/especialidad/especialidad-module.routes.js";
+import express from "express";
 import { feedbackRouter } from "./modules/feedback/feedback/feedback.routes.js";
 import { miscModuleRouter } from "./modules/misc/misc-module.routes.js";
+import { orm } from "./config/db.config.js";
+import { RequestContext } from "@mikro-orm/mysql";
 import { turnoModuleRoutes } from "./modules/turno/turno-module.routes.js";
 import { usuarioModuleRouter } from "./modules/usuario/usuario-module.routes.js";
 
@@ -31,7 +32,7 @@ app.use("/api/turnos/", turnoModuleRoutes);
 app.use("/api/usuarios/", usuarioModuleRouter);
 
 app.use((_req, res) => {
-  res.status(404).send({ message: "Resource not found" });
+  res.status(404).send(new ApiResponse("Recurso no encontrado."));
 });
 
 app.listen(PORT, () => {

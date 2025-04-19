@@ -1,5 +1,5 @@
-import { Router } from "express";
 import { controller } from "./horario-turno.controller.js";
+import { Router } from "express";
 
 export const horarioTurnoRouter = Router();
 

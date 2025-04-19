@@ -1,5 +1,6 @@
 import multer, { FileFilterCallback } from "multer";
 import { NextFunction, Request, Response } from "express";
+import { ApiResponse } from "../utils/api-response.class.js";
 import { politicasService } from "../modules/misc/politicas/politicas.service.js";
 import { validateNumericId } from "../utils/validators.js";
 
@@ -44,13 +45,17 @@ export function handleFileUpload(
       if (error instanceof multer.MulterError) {
         errorCode = 400;
         if (error.code === "LIMIT_FILE_SIZE") {
-          res.status(400).json({
-            message: `El archivo excede el tamaño máximo permitido (${politicas.tam_max_archivo_mb} MB)`,
-          });
+          res
+            .status(400)
+            .json(
+              new ApiResponse(
+                `El archivo excede el tamaño máximo permitido (${politicas.tam_max_archivo_mb} MB)`
+              )
+            );
           return;
         }
       }
-      res.status(errorCode).json({ message: error.message });
+      res.status(errorCode).json(new ApiResponse(error.message, null, false));
       return;
     }
 

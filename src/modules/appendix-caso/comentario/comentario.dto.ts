@@ -1,4 +1,3 @@
-import { AbogadoDTO } from "../../usuario/abogado/abogado.dto.js";
 import { Comentario } from "./comentario.entity.js";
 
 export class ComentarioDTO {

@@ -6,12 +6,13 @@ import {
 } from "../../../utils/validators.js";
 import { Abogado } from "./abogado.entity.js";
 import { AbogadoDTO } from "./abogado.dto.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
 import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
-import { sanitizeUsuario } from "../usuario/usuario.controller.js";
 import { Usuario } from "../usuario/usuario.entity.js";
+import { usuarioService } from "../usuario/usuario.service.js";
 
 const em = orm.em;
 //TODO revisar el otro endpoint q me pidio milton, que no este daod de baka
@@ -30,10 +31,9 @@ export const controller = {
 
       const data = abogados.map((a) => new AbogadoDTO(a));
 
-      res.status(200).json({
-        message: "Todos los abogados fueron encontrados.",
-        data,
-      });
+      res
+        .status(200)
+        .json(new ApiResponse("Todos los abogados fueron encontrados.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -53,10 +53,7 @@ export const controller = {
 
       const data = new AbogadoDTO(abogado);
 
-      res.status(200).json({
-        message: "El abogado fue encontrado.",
-        data,
-      });
+      res.status(200).json(new ApiResponse("El abogado fue encontrado.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -81,10 +78,9 @@ export const controller = {
         nombre: esp.nombre,
       }));
 
-      res.status(200).json({
-        message: "Especialidades del abogado encontradas.",
-        data,
-      });
+      res
+        .status(200)
+        .json(new ApiResponse("Especialidades del abogado encontradas.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -122,10 +118,14 @@ export const controller = {
         };
       });
 
-      res.status(200).json({
-        message: "Todos los abogados disponibles fueron encontrados.",
-        data,
-      });
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Todos los abogados disponibles fueron encontrados.",
+            data
+          )
+        );
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -169,11 +169,14 @@ export const controller = {
         };
       });
 
-      res.status(200).json({
-        message:
-          "Todos los abogados disponibles para el caso fueron encontrados.",
-        data,
-      });
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Todos los abogados disponibles para el caso fueron encontrados.",
+            data
+          )
+        );
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -195,7 +198,7 @@ export const controller = {
       await em.flush();
       const data = new AbogadoDTO(abogado);
 
-      res.status(201).json({ message: "Abogado creado.", data });
+      res.status(201).json(new ApiResponse("Abogado creado.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -226,10 +229,7 @@ export const controller = {
       await em.flush();
       const data = new AbogadoDTO(abogado);
 
-      res.status(200).json({
-        message: "Abogado actualizado.",
-        data,
-      });
+      res.status(200).json(new ApiResponse("Abogado actualizado.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }
@@ -237,7 +237,7 @@ export const controller = {
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
-      sanitizeUsuario(req);
+      usuarioService.sanitizeUsuario(req);
       req.body.sanitizedInput = {
         ...req.body.sanitizedInput,
         foto: req.body.foto,

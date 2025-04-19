@@ -1,16 +1,17 @@
-import { Request, Response } from "express";
-import { subWeeks } from "date-fns";
-import { handleError } from "../../../utils/error-handler.js";
-import { HttpError } from "../../../utils/http-error.js";
-import { orm } from "../../../config/db.config.js";
-import { Recordatorio } from "./recordatorio.entity.js";
-import { RecordatorioDTO } from "./recordatorio.dto.js";
+import { NextFunction, Request, Response } from "express";
 import {
   validateDateTime,
   validateEntity,
   validateNumericId,
 } from "../../../utils/validators.js";
 import { abogadoCasoService } from "../abogado-caso/abogado-caso.service.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
+import { handleError } from "../../../utils/error-handler.js";
+import { HttpError } from "../../../utils/http-error.js";
+import { orm } from "../../../config/db.config.js";
+import { Recordatorio } from "./recordatorio.entity.js";
+import { RecordatorioDTO } from "./recordatorio.dto.js";
+import { subWeeks } from "date-fns";
 
 const em = orm.em;
 
@@ -33,8 +34,8 @@ export const controller = {
       const data = recordatorios.map(
         (recordatorio) => new RecordatorioDTO(recordatorio)
       );
-      res.status(200).json({ message: "Recordatorios encontrados.", data });
-    } catch (error: any) {
+      res.status(200).json(new ApiResponse("Recordatorios encontrados.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -55,8 +56,8 @@ export const controller = {
       );
       res
         .status(200)
-        .json({ message: "Recordatorios del caso encontrados.", data });
-    } catch (error: any) {
+        .json(new ApiResponse("Recordatorios del caso encontrados.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -78,8 +79,8 @@ export const controller = {
       await em.flush();
 
       const data = new RecordatorioDTO(recordatorio);
-      res.status(201).json({ message: "Recordatorio creado.", data });
-    } catch (error: any) {
+      res.status(201).json(new ApiResponse("Recordatorio creado.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -104,8 +105,8 @@ export const controller = {
       await em.flush();
 
       const data = new RecordatorioDTO(recordatorio);
-      res.status(200).json({ message: "Recordatorio actualizado.", data });
-    } catch (error: any) {
+      res.status(200).json(new ApiResponse("Recordatorio actualizado.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -117,13 +118,13 @@ export const controller = {
       const recordatorio = em.getReference(Recordatorio, id);
       await em.removeAndFlush(recordatorio);
 
-      res.status(200).json({ message: "Recordatorio eliminado." });
-    } catch (error: any) {
+      res.status(200).json(new ApiResponse("Recordatorio eliminado."));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
 
-  sanitize: (req: Request, res: Response, next: Function) => {
+  sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
         //req.method==="POST" para no permitir cambiar el caso en un put o patch
@@ -146,14 +147,18 @@ export const controller = {
       });
 
       if (req.body.sanitizedInput.fecha_hora_limite <= new Date()) {
-        res.status(400).json({
-          message: "La fecha y hora límite deben ser posteriores a la actual.",
-        });
+        res
+          .status(400)
+          .json(
+            new ApiResponse(
+              "La fecha y hora límite deben ser posteriores a la actual."
+            )
+          );
         return;
       }
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

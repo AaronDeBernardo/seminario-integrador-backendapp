@@ -1,14 +1,15 @@
 import { NextFunction, Request, Response } from "express";
-import { QueryOrder } from "@mikro-orm/core";
 import { subDays, subMonths } from "date-fns";
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 import { Actividad } from "../actividad/actividad.entity.js";
 import { ActividadRealizada } from "./actividad-realizada.entity.js";
 import { ActividadRealizadaDTO } from "./actividad-realizada.dto.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
 import { Cliente } from "../../usuario/cliente/cliente.entity.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
+import { QueryOrder } from "@mikro-orm/core";
 import { validateNumericId } from "../../../utils/validators.js";
 
 const em = orm.em;
@@ -29,11 +30,15 @@ export const controller = {
         (a) => new ActividadRealizadaDTO(a, true)
       );
 
-      res.status(200).json({
-        message: "Actividades realizadas en los últimos 60 días.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Actividades realizadas en los últimos 60 días.",
+            data
+          )
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -58,11 +63,15 @@ export const controller = {
         (a) => new ActividadRealizadaDTO(a, false)
       );
 
-      res.status(200).json({
-        message: "Últimas 50 actividades realizadas por el abogado.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Últimas 50 actividades realizadas por el abogado.",
+            data
+          )
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -78,8 +87,8 @@ export const controller = {
       const data = new ActividadRealizadaDTO(ar, true);
       res
         .status(201)
-        .json({ message: "Se registró la actividad realizada.", data });
-    } catch (error: any) {
+        .json(new ApiResponse("Se registró la actividad realizada.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -96,8 +105,8 @@ export const controller = {
       const data = new ActividadRealizadaDTO(ar, true);
       res
         .status(200)
-        .json({ message: "Se actualizó la actividad realizada.", data });
-    } catch (error: any) {
+        .json(new ApiResponse("Se actualizó la actividad realizada.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -117,8 +126,8 @@ export const controller = {
       await em.removeAndFlush(ar);
       res
         .status(200)
-        .json({ message: "Se eliminó la actividad realizada.", data: ar });
-    } catch (error: any) {
+        .json(new ApiResponse("Se eliminó la actividad realizada.", ar));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -138,7 +147,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

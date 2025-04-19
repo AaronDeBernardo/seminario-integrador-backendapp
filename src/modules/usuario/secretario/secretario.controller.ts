@@ -1,11 +1,15 @@
 import { NextFunction, Request, Response } from "express";
+import {
+  validateEntity,
+  validateNumericId,
+} from "../../../utils/validators.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
-import { sanitizeUsuario } from "../usuario/usuario.controller.js";
 import { Secretario } from "./secretario.entity.js";
 import { SecretarioDTO } from "./secretario.dto.js";
 import { Usuario } from "../usuario/usuario.entity.js";
-import { validateEntity, validateNumericId } from "../../../utils/validators.js";
+import { usuarioService } from "../usuario/usuario.service.js";
 
 const em = orm.em;
 
@@ -23,11 +27,12 @@ export const controller = {
 
       const data = secretarios.map((s) => new SecretarioDTO(s));
 
-      res.status(200).json({
-        message: "Todos los secretarios fueron encontrados.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(
+          new ApiResponse("Todos los secretarios fueron encontrados.", data)
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -46,11 +51,10 @@ export const controller = {
 
       const data = new SecretarioDTO(secretario);
 
-      res.status(200).json({
-        message: "El secretario fue encontrado.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(new ApiResponse("El secretario fue encontrado.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -64,8 +68,8 @@ export const controller = {
       await em.flush();
 
       const data = new SecretarioDTO(secretario);
-      res.status(201).json({ message: "Secretario creado.", data });
-    } catch (error: any) {
+      res.status(201).json(new ApiResponse("Secretario creado.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -91,18 +95,15 @@ export const controller = {
       await em.flush();
       const data = new SecretarioDTO(secretario);
 
-      res.status(200).json({
-        message: "Secretario actualizado.",
-        data,
-      });
-    } catch (error: any) {
+      res.status(200).json(new ApiResponse("Secretario actualizado.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
-      sanitizeUsuario(req);
+      usuarioService.sanitizeUsuario(req);
       req.body.sanitizedInput = {
         ...req.body.sanitizedInput,
         turno_trabajo: req.body.turno_trabajo?.trim(),
@@ -115,7 +116,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },

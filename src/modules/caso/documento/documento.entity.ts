@@ -1,5 +1,5 @@
-import { Caso } from "../caso/caso.entity.js";
 import { Entity, ManyToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
+import { Caso } from "../caso/caso.entity.js";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";
 
 @Entity({ tableName: "documentos" })

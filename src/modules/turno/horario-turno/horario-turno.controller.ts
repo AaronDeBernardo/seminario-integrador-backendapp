@@ -1,16 +1,17 @@
 import { addHours, format, getDay, startOfDay } from "date-fns";
 import { NextFunction, Request, Response } from "express";
-import { orm } from "../../../config/db.config.js";
-import { handleError } from "../../../utils/error-handler.js";
-import { HorarioTurno } from "./horario-turno.entity.js";
-import { HorarioTurnoDTO } from "./horario-turno.dto.js";
-import { HttpError } from "../../../utils/http-error.js";
-import { TurnoOtorgado } from "../turno-otorgado/turno-otorgado.entity.js";
 import {
   validateIntegerInRange,
   validateNumericId,
   validateTime,
 } from "../../../utils/validators.js";
+import { ApiResponse } from "../../../utils/api-response.class.js";
+import { handleError } from "../../../utils/error-handler.js";
+import { HorarioTurno } from "./horario-turno.entity.js";
+import { HorarioTurnoDTO } from "./horario-turno.dto.js";
+import { HttpError } from "../../../utils/http-error.js";
+import { orm } from "../../../config/db.config.js";
+import { TurnoOtorgado } from "../turno-otorgado/turno-otorgado.entity.js";
 
 const em = orm.em;
 
@@ -25,11 +26,15 @@ export const controller = {
 
       const data = horariosTurnos.map((ht) => new HorarioTurnoDTO(ht));
 
-      res.status(200).json({
-        message: "Todos los horarios de turnos fueron encontrados.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Todos los horarios de turnos fueron encontrados.",
+            data
+          )
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -76,11 +81,15 @@ export const controller = {
       const horariosTurnos = await qb2.execute("all", true);
       const data = horariosTurnos.map((h) => new HorarioTurnoDTO(h));
 
-      res.status(200).json({
-        message: "Todos los horarios de turnos fueron encontrados.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Todos los horarios de turnos fueron encontrados.",
+            data
+          )
+        );
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -102,8 +111,8 @@ export const controller = {
       });
 
       const data = new HorarioTurnoDTO(horarioTurno);
-      res.status(201).json({ message: "Horario de turno creado.", data });
-    } catch (error: any) {
+      res.status(201).json(new ApiResponse("Horario de turno creado.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -130,8 +139,10 @@ export const controller = {
       });
 
       const data = new HorarioTurnoDTO(horarioTurno);
-      res.status(200).json({ message: "Horario de turno actualizado.", data });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(new ApiResponse("Horario de turno actualizado.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -149,11 +160,10 @@ export const controller = {
       await em.flush();
 
       const data = new HorarioTurnoDTO(horarioTurno);
-      res.status(200).json({
-        message: "Horario de turno dado de baja.",
-        data,
-      });
-    } catch (error: any) {
+      res
+        .status(200)
+        .json(new ApiResponse("Horario de turno dado de baja.", data));
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
@@ -179,7 +189,7 @@ export const controller = {
       });
 
       next();
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error, res);
     }
   },
