@@ -14,8 +14,7 @@ import { orm } from "../../../config/db.config.js";
 import { Usuario } from "../usuario/usuario.entity.js";
 import { usuarioService } from "../usuario/usuario.service.js";
 
-const em = orm.em;
-//TODO revisar el otro endpoint q me pidio milton, que no este daod de baka
+const em = orm.em.fork();
 
 export const controller = {
   findAll: async (_req: Request, res: Response) => {
@@ -237,10 +236,13 @@ export const controller = {
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.file?.buffer && req.method !== "PATCH")
+        throw new HttpError(400, "foto: es requerida.");
+
       usuarioService.sanitizeUsuario(req);
       req.body.sanitizedInput = {
         ...req.body.sanitizedInput,
-        foto: req.body.foto,
+        foto: req.file?.buffer,
         matricula: req.body.matricula?.trim(),
         rol: validateNumericId(req.body.id_rol, "id_rol"),
         especialidades: validateNumericIdArray(

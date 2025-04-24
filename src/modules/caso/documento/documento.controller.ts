@@ -85,9 +85,8 @@ export const controller = {
         id,
         fecha_baja: null,
       });
-      console.log(documento);
-      const data = new DocumentoDTO(documento, false);
 
+      const data = new DocumentoDTO(documento, false);
       res
         .status(200)
         .json(new ApiResponse("El documento fue encontrado.", data));
@@ -136,13 +135,13 @@ export const controller = {
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.file?.buffer) throw new HttpError(400, "archivo: es requerido.");
+
       req.body.sanitizedInput = {
         caso: validateNumericId(req.body.id_caso, "id_caso"),
-        nombre: req.body.nombre?.trim(),
-        archivo: req.file,
+        nombre: req.body.nombre.trim(),
+        archivo: req.file.buffer,
       };
-
-      if (!req.file) throw new HttpError(400, "archivo: es requerido.");
 
       next();
     } catch (error: unknown) {

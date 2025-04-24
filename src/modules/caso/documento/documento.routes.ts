@@ -1,6 +1,11 @@
 import { controller } from "./documento.controller.js";
-import { handleFileUpload } from "../../../middleware/multer-pdf-image.config.js";
+import { createFileUploadMiddleware } from "../../../middleware/multer.config.js";
 import { Router } from "express";
+
+const fileUploadMiddleware = createFileUploadMiddleware({
+  allowedMimeTypes: ["application/pdf", "image/jpeg", "image/png"],
+  fieldName: "archivo",
+});
 
 export const documentoRouter = Router();
 
@@ -10,7 +15,7 @@ documentoRouter.get("/", controller.findAll);
 
 documentoRouter.post(
   "/",
-  handleFileUpload,
+  fileUploadMiddleware,
   controller.sanitize,
   controller.add
 );

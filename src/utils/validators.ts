@@ -10,14 +10,22 @@ export function validateNumericId(id: any, field: string) {
   throw new HttpError(400, `${field}: debe ser un número entero positivo.`);
 }
 
-export function validateNumericIdArray(array: any, field: string) {
+export function validateNumericIdArray(
+  array: string | number[],
+  field: string
+) {
   if (array === undefined) return undefined;
+  const errorMessage = `${field}: debe ser un array de números enteros positivos.`;
 
-  if (!Array.isArray(array))
-    throw new HttpError(
-      400,
-      `${field}: debe ser un array de números enteros positivos.`
-    );
+  if (typeof array === "string") {
+    try {
+      array = JSON.parse(array);
+    } catch {
+      throw new HttpError(400, errorMessage);
+    }
+  }
+
+  if (!Array.isArray(array)) throw new HttpError(400, errorMessage);
 
   const result = array.every((id, index, array) => {
     if (Number.isInteger(id) && id > 0) return true;
@@ -30,11 +38,7 @@ export function validateNumericIdArray(array: any, field: string) {
   });
 
   if (result) return array;
-  else
-    throw new HttpError(
-      400,
-      `${field}: debe ser un array de números enteros positivos.`
-    );
+  else throw new HttpError(400, errorMessage);
 }
 
 export function validatePrice(
