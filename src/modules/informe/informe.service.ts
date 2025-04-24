@@ -17,6 +17,39 @@ export interface IActividad {
   pesos: string;
 }
 
+export interface INota {
+  fecha_hora: string;
+  titulo: string;
+  descripcion: string;
+}
+
+export interface IComentario {
+  fecha_hora: string;
+  comentario: string;
+}
+
+export interface IFeedback {
+  fecha_hora: string;
+  descripcion: string;
+  puntuacion: number;
+}
+
+export interface ICaso {
+  id: number;
+  estado: string;
+  fecha_alta: string;
+  fecha_baja?: string;
+  descripcion: string;
+  notas: INota[];
+  comentarios: IComentario[];
+  feedback?: IFeedback;
+}
+
+export interface IActividadRealizada {
+  fecha_hora: string;
+  nombre: string;
+}
+
 export const informeService = {
   sendIncomeMail: async (
     mes: Date,
@@ -88,6 +121,73 @@ export const informeService = {
 
     await sendEmail(
       `Informe de ingresos ${nombreMes} de ${año}`,
+      htmlContent,
+      receivers
+    );
+  },
+
+  sendPerformanceReport: async (
+    mes: Date,
+    receivers: string[],
+    abogado: { nombre: string; apellido: string },
+    cantidad_turnos_otorgados: number,
+    casos: ICaso[],
+    actividades_realizadas: IActividadRealizada[]
+  ) => {
+    const templateSource = fs.readFileSync(
+      "templates/informe-desempenio.html",
+      "utf8"
+    );
+
+    const template = handlebars.compile(templateSource);
+
+    casos.forEach((caso) => {
+      caso.fecha_alta = format(caso.fecha_alta, "dd/MM/yyyy");
+      if (caso.fecha_baja) {
+        caso.fecha_baja = format(caso.fecha_baja, "dd/MM/yyyy");
+      }
+
+      caso.notas.forEach((nota) => {
+        nota.fecha_hora = format(nota.fecha_hora, "dd/MM/yyyy HH:mm:ss");
+      });
+
+      caso.comentarios.forEach((comentario) => {
+        comentario.fecha_hora = format(
+          comentario.fecha_hora,
+          "dd/MM/yyyy HH:mm:ss"
+        );
+      });
+
+      if (caso.feedback) {
+        caso.feedback.fecha_hora = format(
+          caso.feedback.fecha_hora,
+          "dd/MM/yyyy HH:mm:ss"
+        );
+      }
+    });
+
+    actividades_realizadas.forEach((actividad) => {
+      actividad.fecha_hora = format(
+        actividad.fecha_hora,
+        "dd/MM/yyyy HH:mm:ss"
+      );
+    });
+
+    const nombreMes = format(mes, "MMMM", { locale: es });
+    const año = format(mes, "yyyy");
+
+    const data = {
+      abogado: `${abogado.nombre} ${abogado.apellido}`,
+      mes: `${nombreMes} ${año}`,
+      cantidad_turnos_otorgados,
+      casos,
+      actividades_realizadas,
+    };
+
+    const htmlContent = template(data);
+
+    await sendEmail(
+      `Informe de desempeño ${abogado.nombre} ${abogado.apellido} - ${nombreMes} de ${año}`,
       htmlContent,
       receivers
     );
