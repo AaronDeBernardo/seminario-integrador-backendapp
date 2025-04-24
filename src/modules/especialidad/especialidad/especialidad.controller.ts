@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { AbogadoDTO } from "../../usuario/abogado/abogado.dto.js";
 import { ApiResponse } from "../../../utils/api-response.class.js";
 import { Especialidad } from "./especialidad.entity.js";
 import { EspecialidadDTO } from "./especialidad.dto.js";
@@ -36,6 +37,35 @@ export const controller = {
       res
         .status(200)
         .json(new ApiResponse("La especialidad fue encontrada.", data));
+    } catch (error: unknown) {
+      handleError(error, res);
+    }
+  },
+
+  findAbogados: async (req: Request, res: Response) => {
+    try {
+      const id = validateNumericId(req.params.id, "id");
+
+      const especialidad = await em.findOneOrFail(
+        Especialidad,
+        { id },
+        {
+          populate: ["abogados.usuario.abogado"],
+        }
+      );
+
+      const abogados = especialidad.abogados.getItems();
+
+      const data = abogados.map((abogado) => new AbogadoDTO(abogado));
+
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            `Abogados de la especialidad ${especialidad.nombre} encontrados.`,
+            data
+          )
+        );
     } catch (error: unknown) {
       handleError(error, res);
     }

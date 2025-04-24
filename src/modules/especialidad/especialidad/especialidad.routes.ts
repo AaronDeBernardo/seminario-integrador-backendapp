@@ -3,5 +3,6 @@ import { Router } from "express";
 
 export const especialidadRouter = Router();
 
+especialidadRouter.get("/:id/abogados", controller.findAbogados);
 especialidadRouter.get("/:id", controller.findOne);
 especialidadRouter.get("/", controller.findAll);

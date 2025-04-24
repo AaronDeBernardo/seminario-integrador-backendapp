@@ -4,3 +4,7 @@ GET http://localhost:3000/api/especialidades/
 
 ###
 GET http://localhost:3000/api/especialidades/2
+
+
+###
+GET http://localhost:3000/api/especialidades/2/abogados
