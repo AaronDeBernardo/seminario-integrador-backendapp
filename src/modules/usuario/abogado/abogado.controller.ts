@@ -25,7 +25,9 @@ export const controller = {
           abogado: { $ne: null },
           fecha_baja: { $eq: null },
         },
-        { populate: ["abogado", "abogado.rol"] }
+        {
+          populate: ["abogado", "abogado.rol", "abogado.especialidades"],
+        }
       );
 
       const data = abogados.map((a) => new AbogadoDTO(a));
