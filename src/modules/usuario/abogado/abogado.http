@@ -20,32 +20,51 @@ GET http://localhost:3000/api/usuarios/abogados/{{id}}
 
 ###
 POST http://localhost:3000/api/usuarios/abogados
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
-{
-  "nombre": "Juan",
-  "apellido": "Pérez",
-  "email": "juanperez@example.com",
-  "telefono": "+5491123456789",
-  "contrasena": "miContraseña123",
-  "tipo_doc": "DNI",
-  "nro_doc": "12345678",
-  "foto": "datos-archivo",
-  "matricula": "55889",
-  "id_rol": {{id}},
-  "especialidades": [{{id}}]
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="nombre"
 
+Juan
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="apellido"
 
-###
-PATCH http://localhost:3000/api/usuarios/abogados/{{id}}
-Content-Type: application/json
+Pérez
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="email"
 
-{
-  "nombre": "Juan Bautista",
-  "apellido": "Rodriguez",
-  "matricula": "62358",
-  "id_rol": {{id}},
-  "telefono": "1234",
-  "especialidades": [{{id}},{{id}},{{id}}]
-}
+juanperez@example.com
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="telefono"
+
++5491123456789
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="contrasena"
+
+miContraseña123
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="tipo_doc"
+
+DNI
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="nro_doc"
+
+12345678
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="foto";
+Content-Type: image/jpeg
+
+< ruta-al-archivo
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="matricula"
+
+55889
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="id_rol"
+
+{{id}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="especialidades[]"
+
+{{id}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
