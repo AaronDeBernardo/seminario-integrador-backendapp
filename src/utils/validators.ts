@@ -131,6 +131,25 @@ export function validateDateTime(dateTime: any, field: string) {
   );
 }
 
+export function validateMonth(
+  month: unknown,
+  field: string,
+  allowUndefined: boolean = false
+) {
+  if (month === undefined && allowUndefined) return undefined;
+
+  const errorMessage = `${field}: debe ser un string en formato YYYY-MM`;
+
+  if (month === undefined || typeof month !== "string")
+    throw new HttpError(400, errorMessage);
+
+  const regex = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+  if (!regex.test(month)) throw new HttpError(400, errorMessage);
+
+  return month;
+}
+
 export function validateIntegerInRange(
   number: any,
   minValue: number,
