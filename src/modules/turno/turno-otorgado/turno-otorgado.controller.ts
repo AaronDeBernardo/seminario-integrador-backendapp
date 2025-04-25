@@ -2,6 +2,7 @@ import { addHours, format, startOfDay, subHours } from "date-fns";
 import { NextFunction, Request, Response } from "express";
 import { ApiResponse } from "../../../utils/api-response.class.js";
 import { clienteService } from "../../usuario/cliente/cliente.service.js";
+import { environment } from "../../../config/env.config.js";
 import { getDay } from "date-fns/fp";
 import { handleError } from "../../../utils/error-handler.js";
 import { HorarioTurno } from "../horario-turno/horario-turno.entity.js";
@@ -114,29 +115,32 @@ export const controller = {
       });
 
       if (turnoOtorgado.fecha_cancelacion !== null) {
-        res
-          .status(409)
-          .json(new ApiResponse("Su turno ya fue cancelado previamente."));
+        res.redirect(
+          `${environment.systemUrls.frontendUrl}?mensaje=${encodeURIComponent(
+            "Su turno ya fue cancelado previamente."
+          )}`
+        );
         return;
       }
 
       const today = format(new Date(), "yyyy-MM-dd");
       if (today >= turnoOtorgado.fecha_turno) {
-        res
-          .status(409)
-          .json(
-            new ApiResponse(
-              "El turno no puede ser cancelado porque ya pasó su fecha o es hoy."
-            )
-          );
+        res.redirect(
+          `${environment.systemUrls.frontendUrl}?mensaje=${encodeURIComponent(
+            "El turno no puede ser cancelado porque ya pasó su fecha o es hoy."
+          )}`
+        );
         return;
       }
 
       turnoOtorgado.fecha_cancelacion = today;
       await em.flush();
 
-      res.status(200).json(new ApiResponse("Su turno fue cancelado."));
-      //TODO definir si se redirige al front y este muestra el mensaje, o si se envía un template desde el back
+      res.redirect(
+        `${environment.systemUrls.frontendUrl}?mensaje=${encodeURIComponent(
+          "Su turno fue cancelado."
+        )}`
+      );
     } catch (error: unknown) {
       handleError(error, res);
     }
