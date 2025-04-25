@@ -140,6 +140,7 @@ export const controller = {
       req.body.sanitizedInput = {
         caso: validateNumericId(req.body.id_caso, "id_caso"),
         abogado: validateNumericId(req.body.id_abogado, "id_abogado"),
+        //TODO validar que sea el abogado logueado
         titulo: req.body.titulo?.trim(),
         descripcion: req.body.descripcion?.trim(),
       };

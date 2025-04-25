@@ -15,7 +15,6 @@ const em = orm.em;
 export const controller = {
   link: async (req: Request, res: Response): Promise<void> => {
     try {
-      //TODO validar que los abogados que se asignen no estén dados de baja, lo mismo con clientes... En actividades está realizada la verificación
       const caso = await em.findOneOrFail(Caso, {
         id: req.body.sanitizedInput.caso,
         estado: EstadoCasoEnum.EN_CURSO,
@@ -44,9 +43,18 @@ export const controller = {
 
       const abogadoCaso = em.create(AbogadoCaso, req.body.sanitizedInput);
       await em.flush();
-      await em.refresh(abogadoCaso);
+      await em.refresh(abogadoCaso, {
+        populate: [
+          "abogado.usuario",
+          "caso.cliente.usuario",
+          "caso.especialidad",
+        ],
+      });
 
-      //TODO enviar email al abogado con el detalle
+      abogadoCasoService.sendCasoAsignadoMail(
+        abogadoCaso,
+        req.body.sanitizedInput.detalle
+      );
       const data = new AbogadoCasoDTO(abogadoCaso);
 
       res
@@ -61,11 +69,21 @@ export const controller = {
     try {
       const id_abogado_caso = validateNumericId(req.params.id, "id");
 
-      const abogadoCaso = await em.findOne(AbogadoCaso, {
-        id: id_abogado_caso,
-        fecha_baja: null,
-        caso: { estado: EstadoCasoEnum.EN_CURSO },
-      });
+      const abogadoCaso = await em.findOne(
+        AbogadoCaso,
+        {
+          id: id_abogado_caso,
+          fecha_baja: null,
+          caso: { estado: EstadoCasoEnum.EN_CURSO },
+        },
+        {
+          populate: [
+            "abogado.usuario",
+            "caso.cliente.usuario",
+            "caso.especialidad",
+          ],
+        }
+      );
 
       if (!abogadoCaso) {
         res
@@ -92,7 +110,7 @@ export const controller = {
       abogadoCaso.fecha_baja = format(new Date(), "yyyy-MM-dd");
       await em.flush();
 
-      //TODO enviar email con detalle
+      abogadoCasoService.sendCasoDesasignadoMail(abogadoCaso, req.body.detalle);
 
       const data = new AbogadoCasoDTO(abogadoCaso);
       res

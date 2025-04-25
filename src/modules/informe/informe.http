@@ -1,0 +1,7 @@
+###
+POST http://localhost:3000/api/informes/ingresos/
+Content-Type: application/json
+
+{
+  "mes": "2025-02"
+}

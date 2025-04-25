@@ -1,0 +1,19 @@
+@codigo = codigo
+
+###
+POST http://localhost:3000/api/usuarios/restablecer-contrasena
+Content-Type: application/json
+
+{
+  "email": "patricia@gutierrez.com"
+}
+
+
+###
+POST http://localhost:3000/api/usuarios/restablecer-contrasena/{{codigo}}
+Content-Type: application/json
+
+{
+  "nueva_contrasena": "new-password",
+  "confirmar_contrasena": "new-password"
+}

@@ -1,5 +1,8 @@
+@id = id
+@codigo_cancelacion = codigo
+
 ### Obtener todos los turnos otorgados por un abogado para la fecha actual o futuras.
-GET http://localhost:3000/api/turnos/4
+GET http://localhost:3000/api/turnos/{{id}}
 
 
 ### Reservar un turno como cliente
@@ -7,9 +10,9 @@ POST http://localhost:3000/api/turnos/
 Content-Type: application/json
 
 {
-  "id_horario_turno": 7,
+  "id_horario_turno": {{id}},
   "fecha_turno": "2025-01-31",
-  "id_cliente": 5
+  "id_cliente": {{id}}
 }
 
 
@@ -18,9 +21,13 @@ POST http://localhost:3000/api/turnos/
 Content-Type: application/json
 
 {
-  "id_horario_turno": 7,
-  "fecha_turno": "2025-01-24",
+  "id_horario_turno": {{id}},
+  "fecha_turno": "2025-08-31",
   "nombre": "Jorgelina",
-  "telefono": "21321",
-  "email": "asd"
+  "telefono": "3419478416",
+  "email": "jorgelina@gomez.com"
 }
+
+
+### Cancelar la reserva de un turno
+PATCH http://localhost:3000/api/turnos/{{id}}/cancelar/{{codigo_cancelacion}}

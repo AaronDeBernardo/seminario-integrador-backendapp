@@ -4,8 +4,11 @@ import { AbogadoEspecialidad } from "../../especialidad/abogado-especialidad/abo
 import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
 import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { format } from "date-fns";
+import fs from "fs";
+import handlebars from "handlebars";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
+import { sendEmail } from "../../../utils/notifications.js";
 
 const em = orm.em;
 
@@ -15,17 +18,23 @@ export const abogadoCasoService = {
     id_especialidad: Especialidad,
     already_working_in_caso: boolean
   ) => {
-    //TODO validar que no esté dado de baja el abogado
-    const abogadoEspecialidad = await em.findOne(AbogadoEspecialidad, {
-      abogado: id_abogado,
-      especialidad: id_especialidad,
-    });
+    const abogadoEspecialidad = await em.findOne(
+      AbogadoEspecialidad,
+      {
+        abogado: id_abogado,
+        especialidad: id_especialidad,
+      },
+      { populate: ["abogado.usuario"] }
+    );
 
     if (!abogadoEspecialidad)
       throw new HttpError(
         400,
         "El abogado no tiene asociada la especialidad elegida para el caso."
       );
+
+    if (abogadoEspecialidad.abogado.usuario.fecha_baja !== null)
+      throw new HttpError(400, "El abogado está dado de baja.");
 
     const count = await em.count(AbogadoCaso, {
       abogado: id_abogado,
@@ -112,6 +121,81 @@ export const abogadoCasoService = {
         id_especialidad_check as unknown as Especialidad,
         abogado_already_working
       );
+    }
+  },
+
+  sendCasoAsignadoMail: async (
+    abogadoCaso: AbogadoCaso,
+    indicaciones: string
+  ) => {
+    try {
+      const templateSource = fs.readFileSync(
+        "templates/caso-asignado.html",
+        "utf8"
+      );
+
+      const template = handlebars.compile(templateSource);
+
+      const nombreAbogado = abogadoCaso.abogado.usuario.nombre;
+
+      const usuarioCliente = abogadoCaso.caso.cliente.usuario;
+      let nombreCliente = usuarioCliente.nombre;
+      if (usuarioCliente.apellido)
+        nombreCliente += " " + usuarioCliente.apellido;
+
+      if (indicaciones) indicaciones = `Indicaciones: ${indicaciones}`;
+      const data = {
+        idCaso: abogadoCaso.caso.id,
+        especialidad: abogadoCaso.caso.especialidad.nombre,
+        descripcion: abogadoCaso.caso.descripcion,
+        nombreAbogado,
+        nombreCliente,
+        indicaciones,
+      };
+
+      const htmlContent = template(data);
+
+      await sendEmail(`Nuevo caso asignado`, htmlContent, [
+        abogadoCaso.abogado.usuario.email,
+      ]);
+    } catch {
+      // intentionally left blank
+    }
+  },
+
+  sendCasoDesasignadoMail: async (abogadoCaso: AbogadoCaso, motivo: string) => {
+    try {
+      const templateSource = fs.readFileSync(
+        "templates/caso-desasignado.html",
+        "utf8"
+      );
+
+      const template = handlebars.compile(templateSource);
+
+      const nombreAbogado = abogadoCaso.abogado.usuario.nombre;
+
+      const usuarioCliente = abogadoCaso.caso.cliente.usuario;
+      let nombreCliente = usuarioCliente.nombre;
+      if (usuarioCliente.apellido)
+        nombreCliente += " " + usuarioCliente.apellido;
+
+      if (motivo) motivo = `Motivo: ${motivo}`;
+      const data = {
+        idCaso: abogadoCaso.caso.id,
+        especialidad: abogadoCaso.caso.especialidad.nombre,
+        nombreAbogado,
+        nombreCliente,
+        motivo,
+      };
+
+      const htmlContent = template(data);
+
+      await sendEmail(`Desasignación de caso`, htmlContent, [
+        abogadoCaso.abogado.usuario.email,
+      ]);
+    } catch (err) {
+      console.log(err);
+      // intentionally left blank
     }
   },
 };

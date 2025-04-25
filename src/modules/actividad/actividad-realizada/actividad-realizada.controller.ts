@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { subDays, subMonths } from "date-fns";
-import { Abogado } from "../../usuario/abogado/abogado.entity.js";
+import { abogadoService } from "../../usuario/abogado/abogado.service.js";
 import { Actividad } from "../actividad/actividad.entity.js";
 import { ActividadRealizada } from "./actividad-realizada.entity.js";
 import { ActividadRealizadaDTO } from "./actividad-realizada.dto.js";
 import { ApiResponse } from "../../../utils/api-response.class.js";
-import { Cliente } from "../../usuario/cliente/cliente.entity.js";
+import { clienteService } from "../../usuario/cliente/cliente.service.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
@@ -159,17 +159,7 @@ async function validateEntitiesActive(ar: ActividadRealizada) {
     fecha_baja: { $eq: null },
   });
 
-  await em.findOneOrFail(Abogado, {
-    usuario: {
-      id: ar.abogado.usuario.id,
-      fecha_baja: { $eq: null },
-    },
-  });
+  await abogadoService.checkAbogadoIsActive(ar.abogado.usuario.id);
 
-  await em.findOneOrFail(Cliente, {
-    usuario: {
-      id: ar.cliente.usuario.id,
-      fecha_baja: { $eq: null },
-    },
-  });
+  await clienteService.checkClientIsActive(ar.cliente.usuario.id);
 }

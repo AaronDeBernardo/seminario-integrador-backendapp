@@ -15,6 +15,7 @@ import { ApiResponse } from "../../../utils/api-response.class.js";
 import { Caso } from "./caso.entity.js";
 import { CasoDTO } from "./caso.dto.js";
 import { casoService } from "./caso.service.js";
+import { clienteService } from "../../usuario/cliente/cliente.service.js";
 import { Cuota } from "../cuota/cuota.entity.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { HttpError } from "../../../utils/http-error.js";
@@ -121,6 +122,8 @@ export const controller = {
 
   add: async (req: Request, res: Response) => {
     try {
+      await clienteService.checkClientIsActive(req.body.sanitizedInput.cliente);
+
       await abogadoCasoService.checkAbogadoAvailability(
         req.body.sanitizedInput.abogado_principal,
         req.body.sanitizedInput.especialidad,
@@ -157,6 +160,11 @@ export const controller = {
         throw new HttpError(
           400,
           'El caso no se encuentra con estado "en curso"'
+        );
+
+      if (req.body.sanitizedInput.cliente)
+        await clienteService.checkClientIsActive(
+          req.body.sanitizedInput.cliente
         );
 
       await em.transactional(async (tem) => {
