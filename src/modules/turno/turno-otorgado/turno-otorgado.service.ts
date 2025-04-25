@@ -44,15 +44,4 @@ export const turnoOtorgadoService = {
       () => {}
     );
   },
-
-  generateRandomCode(length: number = 20): string {
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-      const indice = Math.floor(Math.random() * characters.length);
-      result += characters[indice];
-    }
-    return result;
-  },
 };

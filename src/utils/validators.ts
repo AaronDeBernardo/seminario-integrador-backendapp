@@ -1,4 +1,5 @@
 import { IsNotEmpty, MaxLength, validateSync } from "class-validator";
+import bcrypt from "bcrypt";
 import { HttpError } from "./http-error.js";
 
 export function validateNumericId(id: any, field: string) {
@@ -75,16 +76,26 @@ export function validatePrice(
   else throw new HttpError(400, `${field}: debe ser un número mayor que 0.`);
 }
 
-export function validatePassword(password: any, field: string) {
-  if (password === undefined) return undefined;
+export function validatePassword(
+  password: string,
+  field: string,
+  allowUndefined: boolean = false
+) {
+  if (allowUndefined && !password) return undefined;
 
-  password = password.trim();
-  if (password.length >= 4) return password;
+  if (!allowUndefined && !password)
+    throw new HttpError(400, `El campo ${field} es requerido.`);
 
-  throw new HttpError(
-    400,
-    `${field}: debe ser un string con 4 caracteres como mínimo.`
-  );
+  if (typeof password !== "string")
+    throw new HttpError(400, `El campo ${field} debe ser de tipo string.`);
+
+  if (password.length < 4)
+    throw new HttpError(
+      400,
+      `El campo ${field} debe tener al menos 4 caracteres.`
+    );
+
+  return bcrypt.hashSync(password, 10);
 }
 
 export function validateTime(time: any, field: string) {

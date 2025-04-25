@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
 import { Cliente } from "../../usuario/cliente/cliente.entity.js";
+import { generateRandomCode } from "../../../utils/randome-code.js";
 import { HorarioTurno } from "../horario-turno/horario-turno.entity.js";
-import { turnoOtorgadoService } from "./turno-otorgado.service.js";
 
 @Entity({ tableName: "turnos_otorgados" })
 export class TurnoOtorgado {
@@ -15,7 +15,7 @@ export class TurnoOtorgado {
   fecha_turno!: string;
 
   @Property({ type: "varchar", length: 20 })
-  codigo_cancelacion = turnoOtorgadoService.generateRandomCode();
+  codigo_cancelacion = generateRandomCode(20);
 
   @Property({ type: "date", nullable: true })
   fecha_cancelacion?: string;
