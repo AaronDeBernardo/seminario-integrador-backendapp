@@ -164,3 +164,8 @@ END$$
 
 DELIMITER ;
 ;
+
+
+-- Update to V10.0 - 2025-04-25 11:51:58
+ALTER TABLE `sistema_juridico`.`turnos_otorgados` 
+ADD COLUMN `codigo_cancelacion` VARCHAR(72) NOT NULL AFTER `fecha_turno`;

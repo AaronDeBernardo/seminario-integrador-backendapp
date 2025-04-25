@@ -4,6 +4,9 @@ dotenv.config();
 
 const requiredEnvVars = [
   "PRODUCTION",
+  "PORT",
+  "BACKEND_URL",
+  "FRONTEND_URL",
   "EMAIL",
   "EMAIL_PASSWORD",
   "DB_HOST",
@@ -20,6 +23,11 @@ requiredEnvVars.forEach((envVar) => {
 
 export const environment = {
   production: process.env.PRODUCTION === "true",
+  systemUrls: {
+    port: process.env.PORT,
+    backendUrl: process.env.BACKEND_URL,
+    frontendUrl: process.env.FRONTEND_URL,
+  },
   db: {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,

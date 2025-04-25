@@ -106,7 +106,44 @@ export const controller = {
     }
   },
 
-  //TODO cancelar turno
+  unbook: async (req: Request, res: Response) => {
+    try {
+      const id = validateNumericId(req.params.id, "id");
+      const codigo = String(req.params.codigo);
+
+      const turnoOtorgado = await em.findOneOrFail(TurnoOtorgado, {
+        id,
+        codigo_cancelacion: codigo,
+      });
+
+      if (turnoOtorgado.fecha_cancelacion !== null) {
+        res
+          .status(409)
+          .json(new ApiResponse("Su turno ya fue cancelado previamente."));
+        return;
+      }
+
+      const today = format(new Date(), "yyyy-MM-dd");
+      if (today >= turnoOtorgado.fecha_turno) {
+        res
+          .status(409)
+          .json(
+            new ApiResponse(
+              "El turno no puede ser cancelado porque ya pasó su fecha o es hoy."
+            )
+          );
+        return;
+      }
+
+      turnoOtorgado.fecha_cancelacion = today;
+      await em.flush();
+
+      res.status(200).json(new ApiResponse("Su turno fue cancelado."));
+      //TODO definir si se redirige al front y este muestra el mensaje, o si se envía un template desde el back
+    } catch (error: unknown) {
+      handleError(error, res);
+    }
+  },
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {

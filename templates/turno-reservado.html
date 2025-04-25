@@ -21,6 +21,9 @@
       h2 {
         color: #2c3e50;
       }
+      .button-container {
+        text-align: center;
+      }
       .button {
         display: inline-block;
         margin-top: 20px;
@@ -31,6 +34,17 @@
         border-radius: 5px;
       }
       .button:hover {
+        background-color: #c0392b;
+      }
+      .button-container a {
+        color: #ffffff;
+        text-decoration: none;
+      }
+      .button-container a:visited {
+        color: #ffffff;
+      }
+      .button-container a:hover {
+        color: #ffffff;
         background-color: #c0392b;
       }
       .footer {
@@ -57,7 +71,9 @@
       <p>
         Si necesitas cancelar tu turno, podés hacerlo desde el siguiente enlace:
       </p>
-      <a href="{{urlCancelacion}}" class="button">Cancelar Turno</a>
+      <div class="button-container">
+        <a href="{{urlCancelacion}}" class="button">Cancelar Turno</a>
+      </div>
       <div class="footer">
         Este es un mensaje automático. Por favor, no responder a este correo.
       </div>

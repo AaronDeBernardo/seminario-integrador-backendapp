@@ -1,3 +1,4 @@
+import { environment } from "../../../config/env.config.js";
 import { format } from "date-fns";
 import fs from "fs";
 import handlebars from "handlebars";
@@ -35,12 +36,23 @@ export const turnoOtorgadoService = {
       horaInicio: turnoOtorgado.horarioTurno.hora_inicio.slice(0, 5),
       horaFin: turnoOtorgado.horarioTurno.hora_fin.slice(0, 5),
       nombreAbogado,
-      urlCancelacion: "TODO", //TODO
+      urlCancelacion: `${environment.systemUrls.backendUrl}/api/turnos/${turnoOtorgado.id}/cancelar/${turnoOtorgado.codigo_cancelacion}`,
     };
 
     const htmlContent = template(data);
     await sendEmail(`Turno Estudio Jurídico`, htmlContent, [email!]).catch(
       () => {}
     );
+  },
+
+  generateRandomCode(length: number = 20): string {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      const indice = Math.floor(Math.random() * characters.length);
+      result += characters[indice];
+    }
+    return result;
   },
 };
