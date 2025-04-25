@@ -1,7 +1,7 @@
 import { addHours, format, startOfDay, subHours } from "date-fns";
 import { NextFunction, Request, Response } from "express";
 import { ApiResponse } from "../../../utils/api-response.class.js";
-import { Cliente } from "../../usuario/cliente/cliente.entity.js";
+import { clienteService } from "../../usuario/cliente/cliente.service.js";
 import { getDay } from "date-fns/fp";
 import { handleError } from "../../../utils/error-handler.js";
 import { HorarioTurno } from "../horario-turno/horario-turno.entity.js";
@@ -57,12 +57,9 @@ export const controller = {
       const input = req.body.sanitizedInput;
 
       if (input.cliente) {
-        await em.findOneOrFail(Cliente, {
-          usuario: {
-            id: req.body.sanitizedInput.cliente,
-            fecha_baja: { $eq: null },
-          },
-        });
+        await clienteService.checkClientIsActive(
+          req.body.sanitizedInput.cliente
+        );
       }
 
       const turnoOtorgado = await orm.em.transactional(async (em) => {

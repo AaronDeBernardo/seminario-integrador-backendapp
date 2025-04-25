@@ -15,17 +15,23 @@ export const abogadoCasoService = {
     id_especialidad: Especialidad,
     already_working_in_caso: boolean
   ) => {
-    //TODO validar que no esté dado de baja el abogado
-    const abogadoEspecialidad = await em.findOne(AbogadoEspecialidad, {
-      abogado: id_abogado,
-      especialidad: id_especialidad,
-    });
+    const abogadoEspecialidad = await em.findOne(
+      AbogadoEspecialidad,
+      {
+        abogado: id_abogado,
+        especialidad: id_especialidad,
+      },
+      { populate: ["abogado.usuario"] }
+    );
 
     if (!abogadoEspecialidad)
       throw new HttpError(
         400,
         "El abogado no tiene asociada la especialidad elegida para el caso."
       );
+
+    if (abogadoEspecialidad.abogado.usuario.fecha_baja !== null)
+      throw new HttpError(400, "El abogado está dado de baja.");
 
     const count = await em.count(AbogadoCaso, {
       abogado: id_abogado,

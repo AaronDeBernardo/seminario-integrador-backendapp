@@ -5,7 +5,7 @@ import { Actividad } from "../actividad/actividad.entity.js";
 import { ActividadRealizada } from "./actividad-realizada.entity.js";
 import { ActividadRealizadaDTO } from "./actividad-realizada.dto.js";
 import { ApiResponse } from "../../../utils/api-response.class.js";
-import { Cliente } from "../../usuario/cliente/cliente.entity.js";
+import { clienteService } from "../../usuario/cliente/cliente.service.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
@@ -166,10 +166,5 @@ async function validateEntitiesActive(ar: ActividadRealizada) {
     },
   });
 
-  await em.findOneOrFail(Cliente, {
-    usuario: {
-      id: ar.cliente.usuario.id,
-      fecha_baja: { $eq: null },
-    },
-  });
+  await clienteService.checkClientIsActive(ar.cliente.usuario.id);
 }
