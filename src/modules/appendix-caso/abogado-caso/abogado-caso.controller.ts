@@ -15,7 +15,6 @@ const em = orm.em;
 export const controller = {
   link: async (req: Request, res: Response): Promise<void> => {
     try {
-      //TODO validar que los abogados que se asignen en las diferentes realciones, no estén dados de baja
       const caso = await em.findOneOrFail(Caso, {
         id: req.body.sanitizedInput.caso,
         estado: EstadoCasoEnum.EN_CURSO,
