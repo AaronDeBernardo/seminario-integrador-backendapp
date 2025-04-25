@@ -10,6 +10,7 @@ import { LockMode } from "@mikro-orm/core";
 import { orm } from "../../../config/db.config.js";
 import { TurnoOtorgado } from "./turno-otorgado.entity.js";
 import { TurnoOtorgadoDTO } from "./turno-otorgado.dto.js";
+import { turnoOtorgadoService } from "./turno-otorgado.service.js";
 import { validateNumericId } from "../../../utils/validators.js";
 
 interface DateTZ {
@@ -96,7 +97,7 @@ export const controller = {
         });
       });
 
-      //TODO send email
+      turnoOtorgadoService.sendBookedAppointmentEmail(turnoOtorgado);
 
       const data = new TurnoOtorgadoDTO(turnoOtorgado);
       res.status(201).json(new ApiResponse("Turno otorgado.", data));
@@ -104,6 +105,8 @@ export const controller = {
       handleError(error, res);
     }
   },
+
+  //TODO cancelar turno
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
