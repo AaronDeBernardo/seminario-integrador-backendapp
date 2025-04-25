@@ -1,4 +1,5 @@
 import { Abogado } from "./abogado.entity.js";
+import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
 import { Rol } from "../rol/rol.entity.js";
 import { Usuario } from "../usuario/usuario.entity.js";
 
@@ -14,6 +15,7 @@ export class AbogadoDTO {
   foto: Buffer;
   matricula: string;
   rol: Rol;
+  especialidades: Especialidad[] | null;
 
   constructor(input: Abogado | Usuario) {
     if (input instanceof Abogado) {
@@ -28,6 +30,7 @@ export class AbogadoDTO {
       this.foto = input.foto;
       this.matricula = input.matricula;
       this.rol = input.rol;
+      this.especialidades = input.especialidades.getItems();
     } else {
       this.id = input.id;
       this.nombre = input.nombre;
@@ -40,6 +43,7 @@ export class AbogadoDTO {
       this.foto = input.abogado!.foto;
       this.matricula = input.abogado!.matricula;
       this.rol = input.abogado!.rol;
+      this.especialidades = input.abogado!.especialidades.getItems();
     }
   }
 }
