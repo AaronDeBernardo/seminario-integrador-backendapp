@@ -89,35 +89,40 @@ export const controller = {
 
   findAvailable: async (req: Request, res: Response) => {
     try {
-      const abogados = await em.execute(
+      const availableIds: Array<{ id: number }> = await em.execute(
         `
-        SELECT us.id, us.nombre, us.apellido
-	        , ab.matricula, ab.foto, COUNT(ca.id) cantidad_casos
+        SELECT us.id
         FROM abogados ab
         INNER JOIN usuarios us
           ON us.id = ab.id_usuario
           AND us.fecha_baja IS NULL
         LEFT JOIN abogados_casos ab_ca
-	        ON ab_ca.id_abogado = ab.id_usuario
+          ON ab_ca.id_abogado = ab.id_usuario
           AND ab_ca.fecha_baja IS NULL
         LEFT JOIN casos ca
-	        ON ca.id = ab_ca.id_caso
+          ON ca.id = ab_ca.id_caso
           AND ca.estado = ?
         GROUP BY us.id
-        HAVING cantidad_casos < 5;
+        HAVING COUNT(ca.id) < 5;
         `,
         [EstadoCasoEnum.EN_CURSO]
       );
 
-      const data = abogados.map((a) => {
-        return {
-          id: a.id,
-          nombre: a.nombre,
-          apellido: a.apellido,
-          matricula: a.matricula,
-          foto: a.foto,
-        };
-      });
+      const ids: number[] = availableIds.map((row) => Number(row.id));
+
+      const abogados = await em.find(
+        Usuario,
+        {
+          id: { $in: ids },
+          abogado: { $ne: null },
+          fecha_baja: { $eq: null },
+        },
+        {
+          populate: ["abogado", "abogado.rol", "abogado.especialidades"],
+        }
+      );
+
+      const data = abogados.map((a) => new AbogadoDTO(a));
 
       res
         .status(200)
@@ -136,39 +141,48 @@ export const controller = {
     try {
       const id_caso = validateNumericId(req.params.id_caso, "id_caso");
 
-      const abogados = await em.execute(
+      const availableIds: Array<{ id: number }> = await em.execute(
         `
-        SELECT us.id, us.nombre, us.apellido
-	        , ab.matricula, ab.foto, COUNT(ca.id) cantidad_casos
+        SELECT us.id
         FROM abogados ab
         INNER JOIN usuarios us
           ON us.id = ab.id_usuario
           AND us.fecha_baja IS NULL
-        INNER JOIN abogados_especialidades ab_es
-          ON ab_es.id_abogado = ab.id_usuario
+        INNER JOIN abogados_especialidades ab_es1
+          ON ab_es1.id_abogado = ab.id_usuario
         LEFT JOIN abogados_casos ab_ca
-	        ON ab_ca.id_abogado = ab.id_usuario
+          ON ab_ca.id_abogado = ab.id_usuario
           AND ab_ca.fecha_baja IS NULL
         LEFT JOIN casos ca
-	        ON ca.id = ab_ca.id_caso
+          ON ca.id = ab_ca.id_caso
           AND ca.estado = ?
-        WHERE ab_es.id_especialidad = (SELECT id_especialidad FROM casos WHERE id=?)
+        WHERE ab_es1.id_especialidad = (SELECT id_especialidad FROM casos WHERE id=?)
           AND us.id NOT IN (SELECT id_abogado FROM abogados_casos WHERE id_caso=? AND fecha_baja IS NULL)
         GROUP BY us.id
-        HAVING cantidad_casos < 5;
+        HAVING COUNT(ca.id) < 5;
         `,
         [EstadoCasoEnum.EN_CURSO, id_caso, id_caso]
       );
 
-      const data = abogados.map((a) => {
-        return {
-          id: a.id,
-          nombre: a.nombre,
-          apellido: a.apellido,
-          matricula: a.matricula,
-          foto: a.foto,
-        };
-      });
+      const ids: number[] = availableIds.map((row) => Number(row.id));
+
+      const abogados = await em.find(
+        Usuario,
+        {
+          id: { $in: ids },
+          abogado: { $ne: null },
+          fecha_baja: { $eq: null },
+        },
+        {
+          populate: [
+            "abogado.usuario",
+            "abogado.rol",
+            "abogado.especialidades",
+          ],
+        }
+      );
+
+      const data = abogados.map((a) => new AbogadoDTO(a));
 
       res
         .status(200)
