@@ -1,4 +1,4 @@
-import { controller } from "./reseteo-clave.controller";
+import { controller } from "./reseteo-clave.controller.js";
 import { Router } from "express";
 
 export const reseteoClaveRouter = Router();

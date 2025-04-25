@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Informe de Ingresos - {{mes}} {{año}}</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        color: #333;
+      }
+      h2 {
+        color: #00508f;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 8px 12px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .total {
+        font-weight: bold;
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Informe de Ingresos - {{mes}} {{año}}</h2>
+
+    <p>
+      A continuación, se presenta el informe de ingresos correspondiente a
+      <strong>{{mes}} {{año}}</strong>:
+    </p>
+
+    <h3>Detalle de ingresos por cuotas:</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>ID Caso</th>
+          <th>N.º Cuota</th>
+          <th>Fecha y hora de cobro</th>
+          <th>Monto (en pesos)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each cuotas}}
+        <tr>
+          <td>{{id_caso}}</td>
+          <td>{{numero}}</td>
+          <td>{{fecha_hora_cobro}}</td>
+          <td>${{pesos}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <p class="total">Total de ingresos por cuotas: ${{totalCuotas}}</p>
+
+    <h3>Detalle de ingresos por actividades:</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Actividad</th>
+          <th>Fecha y hora de realización</th>
+          <th>Monto (en pesos)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each actividades}}
+        <tr>
+          <td>{{nombre}}</td>
+          <td>{{fecha_hora}}</td>
+          <td>${{pesos}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <p class="total">
+      Total de ingresos por actividades: ${{totalActividades}}
+    </p>
+
+    <h3 class="total">Total de ingresos: ${{totalGeneral}}</h3>
+  </body>
+</html>

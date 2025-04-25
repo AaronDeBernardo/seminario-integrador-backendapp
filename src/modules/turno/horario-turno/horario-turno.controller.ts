@@ -172,6 +172,7 @@ export const controller = {
     try {
       req.body.sanitizedInput = {
         abogado: validateNumericId(req.body.id_abogado, "id_abogado"),
+        //TODO validar que sea el abogado logueado
         hora_inicio: validateTime(req.body.hora_inicio, "hora_inicio"),
         hora_fin: validateTime(req.body.hora_fin, "hora_fin"),
         dia_semana: validateIntegerInRange(

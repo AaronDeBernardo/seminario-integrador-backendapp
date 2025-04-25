@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Confirmación de Turno</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+      }
+      h2 {
+        color: #2c3e50;
+      }
+      .button-container {
+        text-align: center;
+      }
+      .button {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 15px;
+        background-color: #e74c3c;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+      .button:hover {
+        background-color: #c0392b;
+      }
+      .button-container a {
+        color: #ffffff;
+        text-decoration: none;
+      }
+      .button-container a:visited {
+        color: #ffffff;
+      }
+      .button-container a:hover {
+        color: #ffffff;
+        background-color: #c0392b;
+      }
+      .footer {
+        font-size: 12px;
+        color: #999;
+        margin-top: 20px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>¡Turno confirmado!</h2>
+      <p>Hola <strong>{{nombreCliente}}</strong>,</p>
+      <p>
+        Te confirmamos que tu turno ha sido reservado con éxito. A continuación,
+        te compartimos los detalles:
+      </p>
+      <ul>
+        <li><strong>Fecha:</strong> {{fechaTurno}}</li>
+        <li><strong>Hora:</strong> {{horaInicio}} - {{horaFin}}</li>
+        <li><strong>Abogado:</strong> Dr. {{nombreAbogado}}</li>
+      </ul>
+      <p>
+        Si necesitas cancelar tu turno, podés hacerlo desde el siguiente enlace:
+      </p>
+      <div class="button-container">
+        <a href="{{urlCancelacion}}" class="button">Cancelar Turno</a>
+      </div>
+      <div class="footer">
+        Este es un mensaje automático. Por favor, no responder a este correo.
+      </div>
+    </div>
+  </body>
+</html>

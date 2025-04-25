@@ -487,6 +487,7 @@ CREATE TABLE `turnos_otorgados` (
   `id_horario_turno` int unsigned NOT NULL,
   `id_cliente` int unsigned DEFAULT NULL,
   `fecha_turno` date NOT NULL,
+  `codigo_cancelacion` varchar(20) NOT NULL,
   `fecha_cancelacion` date DEFAULT NULL,
   `nombre` varchar(50) DEFAULT NULL,
   `telefono` varchar(20) DEFAULT NULL,
@@ -623,4 +624,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-03 17:00:38
+-- Dump completed on 2025-04-25 11:51:58

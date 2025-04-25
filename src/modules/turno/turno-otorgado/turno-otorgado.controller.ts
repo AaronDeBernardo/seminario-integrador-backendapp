@@ -1,7 +1,8 @@
 import { addHours, format, startOfDay, subHours } from "date-fns";
 import { NextFunction, Request, Response } from "express";
 import { ApiResponse } from "../../../utils/api-response.class.js";
-import { Cliente } from "../../usuario/cliente/cliente.entity.js";
+import { clienteService } from "../../usuario/cliente/cliente.service.js";
+import { environment } from "../../../config/env.config.js";
 import { getDay } from "date-fns/fp";
 import { handleError } from "../../../utils/error-handler.js";
 import { HorarioTurno } from "../horario-turno/horario-turno.entity.js";
@@ -10,6 +11,7 @@ import { LockMode } from "@mikro-orm/core";
 import { orm } from "../../../config/db.config.js";
 import { TurnoOtorgado } from "./turno-otorgado.entity.js";
 import { TurnoOtorgadoDTO } from "./turno-otorgado.dto.js";
+import { turnoOtorgadoService } from "./turno-otorgado.service.js";
 import { validateNumericId } from "../../../utils/validators.js";
 
 interface DateTZ {
@@ -56,12 +58,9 @@ export const controller = {
       const input = req.body.sanitizedInput;
 
       if (input.cliente) {
-        await em.findOneOrFail(Cliente, {
-          usuario: {
-            id: req.body.sanitizedInput.cliente,
-            fecha_baja: { $eq: null },
-          },
-        });
+        await clienteService.checkClientIsActive(
+          req.body.sanitizedInput.cliente
+        );
       }
 
       const turnoOtorgado = await orm.em.transactional(async (em) => {
@@ -96,10 +95,52 @@ export const controller = {
         });
       });
 
-      //TODO send email
+      turnoOtorgadoService.sendBookedAppointmentEmail(turnoOtorgado);
 
       const data = new TurnoOtorgadoDTO(turnoOtorgado);
       res.status(201).json(new ApiResponse("Turno otorgado.", data));
+    } catch (error: unknown) {
+      handleError(error, res);
+    }
+  },
+
+  unbook: async (req: Request, res: Response) => {
+    try {
+      const id = validateNumericId(req.params.id, "id");
+      const codigo = String(req.params.codigo);
+
+      const turnoOtorgado = await em.findOneOrFail(TurnoOtorgado, {
+        id,
+        codigo_cancelacion: codigo,
+      });
+
+      if (turnoOtorgado.fecha_cancelacion !== null) {
+        res.redirect(
+          `${environment.systemUrls.frontendUrl}?mensaje=${encodeURIComponent(
+            "Su turno ya fue cancelado previamente."
+          )}`
+        );
+        return;
+      }
+
+      const today = format(new Date(), "yyyy-MM-dd");
+      if (today >= turnoOtorgado.fecha_turno) {
+        res.redirect(
+          `${environment.systemUrls.frontendUrl}?mensaje=${encodeURIComponent(
+            "El turno no puede ser cancelado porque ya pasó su fecha o es hoy."
+          )}`
+        );
+        return;
+      }
+
+      turnoOtorgado.fecha_cancelacion = today;
+      await em.flush();
+
+      res.redirect(
+        `${environment.systemUrls.frontendUrl}?mensaje=${encodeURIComponent(
+          "Su turno fue cancelado."
+        )}`
+      );
     } catch (error: unknown) {
       handleError(error, res);
     }
