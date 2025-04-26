@@ -9,6 +9,7 @@ import { ClienteDTO } from "./cliente.dto.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
+import { UniqueConstraintViolationException } from "@mikro-orm/core";
 import { Usuario } from "../usuario/usuario.entity.js";
 import { usuarioService } from "../usuario/usuario.service.js";
 
@@ -76,7 +77,15 @@ export const controller = {
       const data = new ClienteDTO(cliente);
       res.status(201).json(new ApiResponse("Cliente creado.", data));
     } catch (error: unknown) {
-      handleError(error, res);
+      if (error instanceof UniqueConstraintViolationException) {
+        res
+          .status(409)
+          .send(
+            new ApiResponse("Ya existe un usuario con el email ingresado.")
+          );
+      } else {
+        handleError(error, res);
+      }
     }
   },
 
@@ -111,7 +120,15 @@ export const controller = {
 
       res.status(200).json(new ApiResponse("Cliente actualizado.", data));
     } catch (error: unknown) {
-      handleError(error, res);
+      if (error instanceof UniqueConstraintViolationException) {
+        res
+          .status(409)
+          .send(
+            new ApiResponse("Ya existe un usuario con el email ingresado.")
+          );
+      } else {
+        handleError(error, res);
+      }
     }
   },
 

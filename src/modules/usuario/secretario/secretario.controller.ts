@@ -8,6 +8,7 @@ import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
 import { Secretario } from "./secretario.entity.js";
 import { SecretarioDTO } from "./secretario.dto.js";
+import { UniqueConstraintViolationException } from "@mikro-orm/core";
 import { Usuario } from "../usuario/usuario.entity.js";
 import { usuarioService } from "../usuario/usuario.service.js";
 
@@ -70,7 +71,15 @@ export const controller = {
       const data = new SecretarioDTO(secretario);
       res.status(201).json(new ApiResponse("Secretario creado.", data));
     } catch (error: unknown) {
-      handleError(error, res);
+      if (error instanceof UniqueConstraintViolationException) {
+        res
+          .status(409)
+          .send(
+            new ApiResponse("Ya existe un usuario con el email ingresado.")
+          );
+      } else {
+        handleError(error, res);
+      }
     }
   },
 
@@ -97,7 +106,15 @@ export const controller = {
 
       res.status(200).json(new ApiResponse("Secretario actualizado.", data));
     } catch (error: unknown) {
-      handleError(error, res);
+      if (error instanceof UniqueConstraintViolationException) {
+        res
+          .status(409)
+          .send(
+            new ApiResponse("Ya existe un usuario con el email ingresado.")
+          );
+      } else {
+        handleError(error, res);
+      }
     }
   },
 

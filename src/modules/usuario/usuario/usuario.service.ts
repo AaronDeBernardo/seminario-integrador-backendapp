@@ -3,7 +3,7 @@ import { validatePassword } from "../../../utils/validators.js";
 
 export const usuarioService = {
   sanitizeUsuario: (req: Request): void => {
-    const allowUndefined = req.method === "PATCH";
+    const allowUndefined = req.method === "PATCH" || req.method === "PUT";
 
     req.body.sanitizedInput = {
       usuario: {
