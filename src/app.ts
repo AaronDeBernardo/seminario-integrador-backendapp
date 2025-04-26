@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { actividadModuleRouter } from "./modules/actividad/actividad-module.routes.js";
 import { ApiResponse } from "./utils/api-response.class.js";
+import { authRouter } from "./modules/auth/auth.routes.js";
 import { casoModuleRouter } from "./modules/caso/caso-module.routes.js";
 import cors from "cors";
 import { environment } from "./config/env.config.js";
@@ -30,6 +31,7 @@ app.use((_req, _res, next) => {
 app.use(express.json());
 
 app.use("/api/actividades/", actividadModuleRouter);
+app.use("/api/auth/", authRouter);
 app.use("/api/casos/", casoModuleRouter);
 app.use("/api/especialidades/", especialidadModuleRouter);
 app.use("/api/feedbacks/", feedbackRouter);

@@ -6,6 +6,7 @@ import {
   Property,
 } from "@mikro-orm/core";
 import { Abogado } from "../abogado/abogado.entity.js";
+import { RolEnum } from "../../../utils/enums.js";
 
 @Entity({ tableName: "roles" })
 export class Rol {
@@ -13,7 +14,7 @@ export class Rol {
   id!: number;
 
   @Property({ type: "varchar", length: 20 })
-  nombre!: string;
+  nombre!: RolEnum;
 
   @OneToMany({
     entity: () => Abogado,

@@ -13,6 +13,9 @@ const requiredEnvVars = [
   "DB_USER",
   "DB_PASSWORD",
   "DB_NAME",
+  "JWT_SECRET",
+  "SESSION_DURATION_HOURS",
+  "REFRESH_TIME_MINUTES",
 ];
 
 requiredEnvVars.forEach((envVar) => {
@@ -38,4 +41,21 @@ export const environment = {
     email: process.env.EMAIL,
     password: process.env.EMAIL_PASSWORD,
   },
+  session: {
+    jwtSecret: process.env.JWT_SECRET as string,
+    durationInHours: Number(process.env.SESSION_DURATION_HOURS),
+    refreshTimeInMinutes: Number(process.env.REFRESH_TIME_MINUTES),
+  },
 };
+
+if (
+  !Number.isInteger(environment.session.durationInHours) ||
+  environment.session.durationInHours < 1
+)
+  throw new Error("SESSION_DURATION_HOURS debe ser un número entero positivo.");
+
+if (
+  !Number.isInteger(environment.session.refreshTimeInMinutes) ||
+  environment.session.refreshTimeInMinutes < 1
+)
+  throw new Error("REFRESH_TIME_MINUTES debe ser un número entero positivo.");

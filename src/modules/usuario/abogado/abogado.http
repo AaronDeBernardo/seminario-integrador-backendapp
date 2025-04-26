@@ -64,7 +64,7 @@ Content-Disposition: form-data; name="id_rol"
 
 {{id}}
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="especialidades[]"
+Content-Disposition: form-data; name="especialidades"
 
 {{id}}
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
