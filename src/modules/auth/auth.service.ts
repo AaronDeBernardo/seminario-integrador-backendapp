@@ -49,11 +49,14 @@ export const authService = {
   },
 
   loadUsuarioSesion: async (id: number, req: Request): Promise<void> => {
-    const usuario = await em.findOne(Usuario, {
-      id,
-      fecha_baja: null,
-    });
-    //TODO populate
+    const usuario = await em.findOne(
+      Usuario,
+      {
+        id,
+        fecha_baja: null,
+      },
+      { populate: ["abogado.rol"] }
+    );
 
     if (usuario) req.usuario = new UsuarioSesion(usuario);
   },

@@ -3,6 +3,7 @@ import { actividadModuleRouter } from "./modules/actividad/actividad-module.rout
 import { ApiResponse } from "./utils/api-response.class.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { casoModuleRouter } from "./modules/caso/caso-module.routes.js";
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import { environment } from "./config/env.config.js";
 import { especialidadModuleRouter } from "./modules/especialidad/especialidad-module.routes.js";
@@ -29,6 +30,7 @@ app.use((_req, _res, next) => {
 });
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/actividades/", actividadModuleRouter);
 app.use("/api/auth/", authRouter);
