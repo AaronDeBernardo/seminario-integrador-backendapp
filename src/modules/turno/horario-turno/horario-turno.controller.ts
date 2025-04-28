@@ -94,6 +94,30 @@ export const controller = {
     }
   },
 
+  findByAbogado: async (req: Request, res: Response) => {
+    try {
+      const idAbogado = validateNumericId(req.params.id_abogado, "id_abogado");
+
+      const horariosTurnos = await em.find(HorarioTurno, {
+        abogado: idAbogado,
+        fecha_baja: { $eq: null },
+      });
+
+      const data = horariosTurnos.map((ht) => new HorarioTurnoDTO(ht));
+
+      res
+        .status(200)
+        .json(
+          new ApiResponse(
+            "Todos los horarios de turnos del abogado fueron encontrados.",
+            data
+          )
+        );
+    } catch (error: unknown) {
+      handleError(error, res);
+    }
+  },
+
   add: async (req: Request, res: Response) => {
     try {
       const input = req.body.sanitizedInput;

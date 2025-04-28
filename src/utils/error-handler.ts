@@ -10,7 +10,13 @@ export function handleError(error: unknown, res: Response) {
     if (error.code === "ER_NO_REFERENCED_ROW_2")
       return res
         .status(400)
-        .json(new ApiResponse("Una o más claves foráneas no son válidas."));
+        .json(
+          new ApiResponse(
+            "Una o más claves foráneas no son válidas.",
+            null,
+            false
+          )
+        );
 
     return res
       .status(500)
@@ -20,7 +26,13 @@ export function handleError(error: unknown, res: Response) {
   if (error instanceof NotFoundError) {
     return res
       .status(404)
-      .json(new ApiResponse("No se pudo encontrar una de las entidades."));
+      .json(
+        new ApiResponse(
+          "No se pudo encontrar una de las entidades.",
+          null,
+          false
+        )
+      );
   }
 
   return res
