@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Informe de Desempeño</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        color: #333333; /* Slightly darker gray */
+        line-height: 1.5; /* Adjusted line height */
+        margin: 20px; /* Add some margin around the body */
+      }
+      h2,
+      h3 {
+        color: #000000; /* Black color for main headers */
+        border-bottom: 1px solid #cccccc; /* Underline for separation */
+        padding-bottom: 5px;
+        margin-top: 30px;
+        margin-bottom: 15px;
+      }
+      h2 {
+        margin-top: 0; /* No top margin for the main title */
+      }
+      h4 {
+        margin-top: 0; /* Remove default top margin */
+        margin-bottom: 8px;
+        color: #333333;
+        font-size: 1.1em; /* Slightly larger case title */
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 20px;
+        font-size: 0.95em; /* Slightly smaller table font */
+      }
+      th,
+      td {
+        border: 1px solid #cccccc;
+        padding: 8px 10px; /* Adjusted padding */
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background-color: #f2f2f2;
+        font-weight: bold; /* Ensure header is bold */
+      }
+      p {
+        margin-top: 0;
+        margin-bottom: 10px; /* Consistent paragraph spacing */
+      }
+      .header-info {
+        margin-bottom: 20px; /* Space below initial info */
+      }
+      .case-container {
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        /* Removed dashed border, separation handled by h3 */
+      }
+      .case-header {
+        /* Removed background and left border for simplicity */
+        margin-bottom: 15px;
+        padding: 5px 0; /* Minimal padding */
+      }
+      .case-header div {
+        font-size: 0.9em;
+        color: #555555;
+        margin-bottom: 3px;
+      }
+      .section-title {
+        font-weight: bold;
+        margin-top: 20px; /* More space above section titles */
+        margin-bottom: 8px;
+        color: #333333;
+      }
+      .empty-message {
+        font-style: italic;
+        color: #666666;
+        margin-top: 5px;
+        margin-bottom: 15px;
+        padding: 5px;
+        background-color: #f9f9f9; /* Light background for visibility */
+        border-left: 3px solid #cccccc;
+        padding-left: 10px;
+      }
+      /* Removed specific feedback div style, will use table */
+      .rating {
+        /* Keep rating style if used elsewhere, otherwise remove */
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Informe de desempeño</h2>
+
+    <div class="header-info">
+      <p><strong>Abogado:</strong> {{abogado}}</p>
+      <p><strong>Mes:</strong> {{mes}}</p>
+      <p>
+        <strong>Cantidad de turnos otorgados:</strong>
+        {{cantidad_turnos_otorgados}}
+      </p>
+    </div>
+
+    <h3>Casos</h3>
+    {{#if casos.length}} {{#each casos}}
+    <div class="case-container">
+      <div class="case-header">
+        <h4>Caso {{id}}</h4>
+        <div><strong>Estado:</strong> {{estado}}</div>
+        <div>
+          <strong>Inició a trabajar:</strong> {{fecha_alta}}{{#if fecha_baja}} -
+          <strong>Finalizó:</strong> {{fecha_baja}}{{/if}}
+        </div>
+        <div><strong>Descripción:</strong> {{descripcion}}</div>
+      </div>
+
+      <div class="section-title">Notas</div>
+      {{#if notas.length}}
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha y hora</th>
+            <th>Título</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each notas}}
+          <tr>
+            <td>{{fecha_hora}}</td>
+            <td>{{titulo}}</td>
+            <td>{{descripcion}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+      {{else}}
+      <p class="empty-message">
+        El abogado no realizó notas en este caso durante el período.
+      </p>
+      {{/if}}
+
+      <div class="section-title">Comentarios</div>
+      {{#if comentarios.length}}
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha y hora</th>
+            <th>Comentario</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each comentarios}}
+          <tr>
+            <td>{{fecha_hora}}</td>
+            <td>{{comentario}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+      {{else}}
+      <p class="empty-message">
+        El abogado no realizó comentarios en este caso durante el período.
+      </p>
+      {{/if}}
+
+      <div class="section-title">Feedback</div>
+      {{#if feedback}}
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha y hora</th>
+            <th>Descripción</th>
+            <th>Puntuación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{feedback.fecha_hora}}</td>
+            <td>{{feedback.descripcion}}</td>
+            <td class="rating">{{feedback.puntuacion}} de 5 estrellas.</td>
+          </tr>
+        </tbody>
+      </table>
+      {{else}}
+      <p class="empty-message">
+        El caso aún no tiene feedback o no se recibió durante el período.
+      </p>
+      {{/if}}
+    </div>
+    {{/each}} {{else}}
+    <p class="empty-message">
+      No hay casos en los que el abogado haya trabajado durante este período.
+    </p>
+    {{/if}}
+
+    <h3>Actividades realizadas</h3>
+    {{#if actividades_realizadas.length}}
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha y hora</th>
+          <th>Actividad</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each actividades_realizadas}}
+        <tr>
+          <td>{{fecha_hora}}</td>
+          <td>{{nombre}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    {{else}}
+    <p class="empty-message">
+      No hay actividades registradas durante este período.
+    </p>
+    {{/if}}
+  </body>
+</html>
