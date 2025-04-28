@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import fs from "fs";
 import handlebars from "handlebars";
 import { sendEmail } from "../../utils/notifications.js";
+import { Usuario } from "../usuario/usuario/usuario.entity.js";
 
 export interface ICuota {
   id_caso: number;
@@ -15,6 +16,29 @@ export interface IActividad {
   nombre: string;
   fecha_hora: string;
   pesos: string;
+}
+
+export interface ICasoBase {
+  id: number;
+  descripcion: string;
+  fecha_inicio: string;
+  estado: string;
+  fecha_estado: string;
+  especialidad: string;
+}
+
+export interface INotaCaso {
+  fecha_hora: string;
+  titulo: string;
+  descripcion: string;
+  nombre: string;
+  apellido: string;
+}
+
+export interface IAbogado {
+  usuario: Usuario;
+  nombre: string;
+  apellido: string;
 }
 
 export interface INota {
@@ -124,6 +148,47 @@ export const informeService = {
       htmlContent,
       receivers
     );
+  },
+
+  sendCaseReport: async (
+    receivers: string[],
+    caso: ICasoBase,
+    notas: INotaCaso[]
+  ) => {
+    const templateSource = fs.readFileSync(
+      "templates/informe-caso.html",
+      "utf8"
+    );
+
+    const template = handlebars.compile(templateSource);
+
+    caso.fecha_inicio = format(caso.fecha_inicio, "dd/MM/yyyy");
+    caso.fecha_estado = format(caso.fecha_estado, "dd/MM/yyyy");
+
+    notas.forEach((nota) => {
+      nota.fecha_hora = format(nota.fecha_hora, "dd/MM/yyyy HH:mm:ss");
+    });
+
+    const data = {
+      caso: {
+        id: caso.id,
+        especialidad: caso.especialidad,
+        descripcion: caso.descripcion,
+        fecha_inicio: caso.fecha_inicio,
+        estado: caso.estado,
+        fecha_estado: caso.fecha_estado,
+      },
+      notas: notas.map((nota) => ({
+        fecha_hora: nota.fecha_hora,
+        titulo: nota.titulo,
+        abogado: `${nota.nombre} ${nota.apellido}`,
+        descripcion: nota.descripcion,
+      })),
+    };
+
+    const htmlContent = template(data);
+
+    await sendEmail(`Informe del Caso #${caso.id}`, htmlContent, receivers);
   },
 
   sendPerformanceReport: async (

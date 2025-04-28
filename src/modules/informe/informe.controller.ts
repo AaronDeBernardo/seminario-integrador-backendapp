@@ -1,12 +1,15 @@
 import { endOfMonth, format, parse, startOfMonth } from "date-fns";
 import {
+  IAbogado,
   IActividad,
   IActividadRealizada,
   ICaso,
+  ICasoBase,
   IComentario,
   ICuota,
   informeService,
   INota,
+  INotaCaso,
 } from "./informe.service.js";
 import { Request, Response } from "express";
 import { ApiResponse } from "../../utils/api-response.class.js";
@@ -91,6 +94,48 @@ export const controller = {
 
   sendCaseReport: async (req: Request, res: Response) => {
     try {
+      const id_caso = req.body.id_caso;
+
+      if (!id_caso) {
+        res.status(400).json(new ApiResponse("Debe seleccionar un caso."));
+        return;
+      }
+
+      const caso_base = await em.execute(
+        `
+        SELECT c.id, c.descripcion, c.fecha_inicio, c.estado, c.fecha_estado, e.nombre as especialidad
+        FROM casos c
+        INNER JOIN especialidades e ON c.id_especialidad = e.id
+        WHERE c.id = ?
+        `,
+        [id_caso]
+      );
+
+      if (!caso_base.length) {
+        res.status(404).json(new ApiResponse("Caso no encontrado."));
+        return;
+      }
+
+      const notas = await em.execute(
+        `
+        SELECT n.fecha_hora, n.titulo, n.descripcion, u.nombre, u.apellido
+        FROM notas n
+        INNER JOIN abogados a ON n.id_abogado = a.id_usuario
+        INNER JOIN usuarios u ON u.id = a.id_usuario
+        WHERE n.id_caso = ?
+        ORDER BY n.fecha_hora DESC
+        `,
+        [id_caso]
+      );
+
+      const receivers = ["example@email.com"];
+
+      await informeService.sendCaseReport(
+        receivers,
+        caso_base[0] as unknown as ICasoBase,
+        notas as unknown as INotaCaso[]
+      );
+
       res.status(200).json(new ApiResponse("Informe enviado."));
     } catch (error: unknown) {
       handleError(error, res);
@@ -119,7 +164,13 @@ export const controller = {
       const inicioMes = startOfMonth(parsedDate);
       const finMes = endOfMonth(parsedDate);
 
-      const abogado = await em.findOne("abogados", { id: id_abogado });
+      const abogado = (await em.findOne(
+        "Abogado",
+        { usuario: id_abogado },
+        { populate: ["usuario"] }
+      )) as IAbogado;
+
+      console.log("Abogado encontrado: ", abogado);
 
       if (!abogado) {
         res
@@ -131,9 +182,11 @@ export const controller = {
       const cantidad_turnos = await em.execute(
         `
         SELECT COUNT(*) as cantidad
-        FROM turnos
+        FROM abogados a
+        INNER JOIN horarios_turnos ht ON a.id_usuario = ht.id_abogado
+        INNER JOIN turnos_otorgados t ON ht.id = t.id_horario_turno
         WHERE id_abogado = ?
-        AND fecha_hora BETWEEN ? AND ?
+        AND t.fecha_turno BETWEEN ? AND ?
         `,
         [id_abogado, inicioMes, finMes]
       );
@@ -161,7 +214,7 @@ export const controller = {
         const notas = await em.execute<INota[]>(
           `
           SELECT fecha_hora, titulo, descripcion
-          FROM notas
+          FROM notas 
           WHERE id_caso = ?
           AND fecha_hora BETWEEN ? AND ?
           ORDER BY fecha_hora
@@ -183,17 +236,27 @@ export const controller = {
 
         const feedbacks = await em.execute(
           `
-          SELECT fecha_hora, descripcion, puntuacion
-          FROM feedbacks
+          SELECT f.fecha_hora, f.descripcion, f.puntuacion
+          FROM abogados a
+          INNER JOIN abogados_casos ac ON a.id_usuario = ac.id_abogado
+          INNER JOIN casos c ON ac.id_caso = c.id
+          INNER JOIN feedbacks f ON ac.id_abogado = f.id_abogado and c.id_cliente = f.id_cliente
           WHERE id_caso = ?
-          AND fecha_hora BETWEEN ? AND ?
-          ORDER BY fecha_hora DESC
+          AND f.fecha_hora BETWEEN ? AND ?
+          ORDER BY f.fecha_hora DESC
           LIMIT 1
           `,
           [caso_base.id, inicioMes, finMes]
         );
 
-        const feedback = feedbacks.length > 0 ? feedbacks[0] : undefined;
+        const feedback =
+          feedbacks.length > 0
+            ? {
+                fecha_hora: feedbacks[0].fecha_hora,
+                descripcion: feedbacks[0].descripcion,
+                puntuacion: feedbacks[0].puntuacion,
+              }
+            : undefined;
 
         casos.push({
           id: caso_base.id,
@@ -225,7 +288,7 @@ export const controller = {
       await informeService.sendPerformanceReport(
         parsedDate,
         receivers,
-        { nombre: abogado.nombre, apellido: abogado.apellido },
+        { nombre: abogado.usuario.nombre, apellido: abogado.usuario.apellido },
         cantidad_turnos_otorgados,
         casos,
         actividades_realizadas
