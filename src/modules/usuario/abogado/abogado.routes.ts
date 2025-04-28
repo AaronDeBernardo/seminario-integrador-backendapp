@@ -1,3 +1,4 @@
+import { authMiddlewares } from "../../auth/auth.middlewares.js";
 import { controller } from "./abogado.controller.js";
 import { createFileUploadMiddleware } from "../../../middleware/multer.config.js";
 import { Router } from "express";
@@ -10,23 +11,38 @@ const fileUploadMiddleware = createFileUploadMiddleware({
 
 export const abogadoRouter = Router();
 
-abogadoRouter.get("/disponibles", controller.findAvailable);
+abogadoRouter.get(
+  "/disponibles",
+  authMiddlewares.verifyAdmin,
+  controller.findAvailable
+);
+
 abogadoRouter.get(
   "/disponibles/caso/:id_caso",
+  authMiddlewares.verifyAdmin,
   controller.findAvailableForCaso
 );
-abogadoRouter.get("/:id", controller.findOne);
-abogadoRouter.get("/:id/especialidades", controller.findEspecialidades);
-abogadoRouter.get("/", controller.findAll);
+
+abogadoRouter.get("/:id", authMiddlewares.verifyAdmin, controller.findOne);
+
+abogadoRouter.get(
+  "/:id/especialidades",
+  authMiddlewares.verifyAdmin,
+  controller.findEspecialidades
+);
+
+abogadoRouter.get("/", authMiddlewares.verifyAdmin, controller.findAll);
 
 abogadoRouter.post(
   "/",
+  authMiddlewares.verifyAdmin,
   fileUploadMiddleware,
   controller.sanitize,
   controller.add
 );
 abogadoRouter.put(
   "/:id",
+  authMiddlewares.verifyAdmin,
   fileUploadMiddleware,
   controller.sanitize,
   controller.update
@@ -34,9 +50,14 @@ abogadoRouter.put(
 
 abogadoRouter.patch(
   "/:id",
+  authMiddlewares.verifyAdmin,
   fileUploadMiddleware,
   controller.sanitize,
   controller.update
 );
 
-abogadoRouter.patch("/deactivate/:id", usuarioController.logicalDelete);
+abogadoRouter.patch(
+  "/deactivate/:id",
+  authMiddlewares.verifyAdmin,
+  usuarioController.logicalDelete
+);
