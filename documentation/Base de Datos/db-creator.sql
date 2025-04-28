@@ -55,7 +55,7 @@ CREATE TABLE `abogados_casos` (
   KEY `fk_abogados-casos_abogados_idx` (`id_abogado`),
   CONSTRAINT `fk_abogados-casos_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_abogados-casos_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -104,7 +104,7 @@ CREATE TABLE `actividades` (
   `nombre` varchar(50) NOT NULL,
   `fecha_baja` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -127,7 +127,7 @@ CREATE TABLE `actividades_realizadas` (
   CONSTRAINT `fk_actividades-realizadas_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_actividades-realizadas_actividades` FOREIGN KEY (`id_actividad`) REFERENCES `actividades` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_actividades-realizadas_clientes` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -151,7 +151,7 @@ CREATE TABLE `casos` (
   KEY `fk_casos_clientes_idx` (`id_cliente`),
   CONSTRAINT `fk_casos_clientes` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_casos_especialidades` FOREIGN KEY (`id_especialidad`) REFERENCES `especialidades` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -208,7 +208,7 @@ CREATE TABLE `comentarios` (
   CONSTRAINT `fk_comentarios_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_comentarios_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_comentarios_comentarios` FOREIGN KEY (`id_padre`) REFERENCES `comentarios` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -263,7 +263,7 @@ CREATE TABLE `documentos` (
   PRIMARY KEY (`id`),
   KEY `fk_documentos_casos_idx` (`id_caso`),
   CONSTRAINT `fk_documentos_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -296,7 +296,7 @@ CREATE TABLE `especialidades` (
   `nombre` varchar(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre_UNIQUE` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -336,7 +336,7 @@ CREATE TABLE `horarios_turnos` (
   PRIMARY KEY (`id`),
   KEY `fk_horarios-turnos_abogados_idx` (`id_abogado`),
   CONSTRAINT `fk_horarios-turnos_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -358,7 +358,7 @@ CREATE TABLE `notas` (
   KEY `fk_notas_casos` (`id_caso`),
   CONSTRAINT `fk_notas_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_notas_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -375,7 +375,7 @@ CREATE TABLE `noticias` (
   `fecha_publicacion` date NOT NULL,
   `fecha_vencimiento` date NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -390,7 +390,7 @@ CREATE TABLE `politicas` (
   `max_cuotas` int NOT NULL,
   `tam_max_archivo_mb` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -425,7 +425,7 @@ CREATE TABLE `recordatorios` (
   KEY `fk_recordatorios_abogados_idx` (`id_abogado`),
   CONSTRAINT `fk_recordatorios_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_recordatorios_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -457,7 +457,7 @@ CREATE TABLE `roles` (
   `nombre` varchar(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre_UNIQUE` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -497,7 +497,7 @@ CREATE TABLE `turnos_otorgados` (
   KEY `fk_turnos-otorgados_clientes_idx` (`id_cliente`),
   CONSTRAINT `fk_turnos-otorgados_clientes` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_turnos-otorgados_horarios-turnos` FOREIGN KEY (`id_horario_turno`) REFERENCES `horarios_turnos` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -520,7 +520,7 @@ CREATE TABLE `usuarios` (
   `fecha_baja` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -624,4 +624,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-25 11:51:58
+-- Dump completed on 2025-04-26 16:51:01

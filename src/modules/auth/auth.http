@@ -1,0 +1,32 @@
+### login abogado
+POST http://localhost:3000/api/auth/
+Content-Type: application/json
+
+{
+  "email": "juanperez@example.com",
+  "contrasena": "miContraseña123"
+}
+
+
+### login client
+POST http://localhost:3000/api/auth/
+Content-Type: application/json
+
+{
+  "email": "iron@man.com",
+  "contrasena": "i-am-iron-man"
+}
+
+
+### login wrong
+POST http://localhost:3000/api/auth/
+Content-Type: application/json
+
+{
+  "email": "lucas@gomez.com",
+  "contrasena": "lucas"
+}
+
+
+### logout
+POST http://localhost:3000/api/auth/logout/

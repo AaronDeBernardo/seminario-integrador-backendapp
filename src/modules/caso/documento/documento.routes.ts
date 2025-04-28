@@ -1,3 +1,4 @@
+import { authMiddlewares } from "../../auth/auth.middlewares.js";
 import { controller } from "./documento.controller.js";
 import { createFileUploadMiddleware } from "../../../middleware/multer.config.js";
 import { Router } from "express";
@@ -9,15 +10,26 @@ const fileUploadMiddleware = createFileUploadMiddleware({
 
 export const documentoRouter = Router();
 
-documentoRouter.get("/:id", controller.findOne);
-documentoRouter.get("/por-caso/:id_caso", controller.findAllByCaso);
-documentoRouter.get("/", controller.findAll);
+documentoRouter.get("/:id", authMiddlewares.verifyAbogado, controller.findOne);
+
+documentoRouter.get(
+  "/por-caso/:id_caso",
+  authMiddlewares.verifyAbogado,
+  controller.findAllByCaso
+);
+
+documentoRouter.get("/", authMiddlewares.verifyAbogado, controller.findAll);
 
 documentoRouter.post(
   "/",
+  authMiddlewares.verifyAbogado,
   fileUploadMiddleware,
   controller.sanitize,
   controller.add
 );
 
-documentoRouter.patch("/deactivate/:id", controller.logicalDelete);
+documentoRouter.patch(
+  "/deactivate/:id",
+  authMiddlewares.verifyAbogado,
+  controller.logicalDelete
+);
