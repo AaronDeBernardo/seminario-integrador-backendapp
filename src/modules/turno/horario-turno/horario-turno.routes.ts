@@ -4,6 +4,7 @@ import { Router } from "express";
 
 export const horarioTurnoRouter = Router();
 
+horarioTurnoRouter.get("/abogados/:id_abogado", controller.findByAbogado);
 horarioTurnoRouter.get("/disponibles", controller.findAvailable);
 horarioTurnoRouter.get("/", controller.findAll);
 
