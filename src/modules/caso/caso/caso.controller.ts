@@ -25,26 +25,52 @@ import { politicasService } from "../../misc/politicas/politicas.service.js";
 const em = orm.em;
 
 export const controller = {
-  findAll: async (_req: Request, res: Response) => {
+  findAll: async (req: Request, res: Response) => {
     try {
       const sixtyDaysAgo = format(subMonths(new Date(), 2), "yyyy-MM-dd");
+      let data;
 
-      const casos = await em.find(
-        Caso,
-        {
-          $or: [
-            {
-              fecha_estado: { $gte: sixtyDaysAgo },
-            },
-            {
-              estado: EstadoCasoEnum.EN_CURSO,
-            },
-          ],
-        },
-        { populate: ["cliente.usuario", "especialidad"] }
-      );
+      if (req.usuario!.is_admin) {
+        const casos = await em.find(
+          Caso,
+          {
+            $or: [
+              {
+                fecha_estado: { $gte: sixtyDaysAgo },
+              },
+              {
+                estado: EstadoCasoEnum.EN_CURSO,
+              },
+            ],
+          },
+          { populate: ["cliente.usuario", "especialidad"] }
+        );
 
-      const data = casos.map((c) => new CasoDTO(c));
+        data = casos.map((c) => new CasoDTO(c));
+      } else {
+        const abogadoCasos = await em.find(
+          AbogadoCaso,
+          {
+            abogado: { usuario: req.usuario!.id },
+            fecha_baja: null,
+            caso: {
+              $or: [
+                {
+                  fecha_estado: { $gte: sixtyDaysAgo },
+                },
+                {
+                  estado: EstadoCasoEnum.EN_CURSO,
+                },
+              ],
+            },
+          },
+          {
+            populate: ["caso.cliente.usuario", "caso.especialidad"],
+          }
+        );
+
+        data = abogadoCasos.map((ac) => new CasoDTO(ac.caso));
+      }
 
       res
         .status(200)
@@ -54,12 +80,59 @@ export const controller = {
     }
   },
 
-  findCurrent: async (_req: Request, res: Response) => {
+  findCurrent: async (req: Request, res: Response) => {
     try {
+      let data;
+
+      if (req.usuario!.is_admin) {
+        const casos = await em.find(
+          Caso,
+          { estado: EstadoCasoEnum.EN_CURSO },
+          { populate: ["cliente.usuario", "especialidad"] }
+        );
+
+        data = casos.map((c) => new CasoDTO(c));
+      } else {
+        const abogadoCasos = await em.find(
+          AbogadoCaso,
+          {
+            abogado: { usuario: req.usuario!.id },
+            fecha_baja: null,
+            caso: { estado: EstadoCasoEnum.EN_CURSO },
+          },
+          {
+            populate: ["caso.cliente.usuario", "caso.especialidad"],
+          }
+        );
+
+        data = abogadoCasos.map((ac) => new CasoDTO(ac.caso));
+      }
+
+      res
+        .status(200)
+        .json(
+          new ApiResponse("Todos los casos en curso fueron encontrados.", data)
+        );
+    } catch (error: unknown) {
+      handleError(error, res);
+    }
+  },
+
+  findByCliente: async (req: Request, res: Response) => {
+    try {
+      const idCliente = validateNumericId(req.params.id_cliente, "id_cliente");
+
+      if (idCliente !== req.usuario?.id) {
+        res.status(403).json({ message: "No autorizado." });
+        return;
+      }
+
       const casos = await em.find(
         Caso,
-        { estado: EstadoCasoEnum.EN_CURSO },
-        { populate: ["cliente.usuario", "especialidad"] }
+        {
+          cliente: idCliente,
+        },
+        { populate: ["especialidad"] }
       );
 
       const data = casos.map((c) => new CasoDTO(c));
@@ -67,7 +140,10 @@ export const controller = {
       res
         .status(200)
         .json(
-          new ApiResponse("Todos los casos en curso fueron encontrados.", data)
+          new ApiResponse(
+            "Todos los casos del cliente fueron encontrados.",
+            data
+          )
         );
     } catch (error: unknown) {
       handleError(error, res);

@@ -20,6 +20,7 @@ const app = express();
 
 app.use(
   cors({
+    credentials: true,
     origin: environment.systemUrls.frontendUrl,
     optionsSuccessStatus: 200,
   })

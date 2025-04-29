@@ -4,10 +4,18 @@ import { Router } from "express";
 
 export const casoRouter = Router();
 
+// GET
+
 casoRouter.get("/", authMiddlewares.verifyEmpleado, controller.findAll);
 
 casoRouter.get(
-  "/encurso",
+  "/cliente/:id_cliente",
+  authMiddlewares.verifyCliente,
+  controller.findByCliente
+);
+
+casoRouter.get(
+  "/encurso/",
   authMiddlewares.verifyEmpleado,
   controller.findCurrent
 );
@@ -19,6 +27,8 @@ casoRouter.get(
 );
 
 casoRouter.get("/:id", authMiddlewares.verifyEmpleado, controller.findOne);
+
+// POST PUT PATCH
 
 casoRouter.post(
   "/",
