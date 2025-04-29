@@ -84,7 +84,6 @@ export const controller = {
         [inicioMes, finMes]
       );
 
-      //TODO enviar al correo del usuario logueado
       const receivers = [req.usuario!.email];
 
       await informeService.sendIncomeMail(
@@ -178,8 +177,6 @@ export const controller = {
         { populate: ["usuario"] }
       )) as IAbogado;
 
-      console.log("Abogado encontrado: ", abogado);
-
       if (!abogado) {
         res
           .status(404)
@@ -203,7 +200,7 @@ export const controller = {
 
       const casos_base = await em.execute(
         `
-        SELECT c.id, c.estado, c.descripcion, ac.fecha_alta, ac.fecha_baja
+        SELECT c.id, c.estado, c.descripcion, ac.fecha_alta, ac.fecha_baja, c.fecha_estado
         FROM casos c
         INNER JOIN abogados_casos ac ON c.id = ac.id_caso
         WHERE ac.id_abogado = ?
@@ -212,6 +209,11 @@ export const controller = {
           (ac.fecha_baja BETWEEN ? AND ?) OR
           (ac.fecha_alta <= ? AND (ac.fecha_baja IS NULL OR ac.fecha_baja >= ?))
         )
+        AND (                           
+            c.estado = 'En curso'       
+            OR
+            (c.estado IN ('Finalizado', 'Cancelado') AND c.fecha_estado BETWEEN ? AND ?) 
+        )  
         `,
         [id_abogado, inicioMes, finMes, inicioMes, finMes, finMes, inicioMes]
       );
