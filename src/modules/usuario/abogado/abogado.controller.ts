@@ -269,7 +269,7 @@ export const controller = {
 
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.file?.buffer && req.method !== "PATCH")
+      if (!req.file?.buffer && req.method !== "PATCH" && req.method !== "PUT")
         throw new HttpError(400, "foto: es requerida.");
 
       usuarioService.sanitizeUsuario(req);
