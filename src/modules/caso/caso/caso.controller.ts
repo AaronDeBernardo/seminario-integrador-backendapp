@@ -43,10 +43,21 @@ export const controller = {
               },
             ],
           },
-          { populate: ["cliente.usuario", "especialidad"] }
+          {
+            populate: [
+              "cliente.usuario",
+              "especialidad",
+              "abogadosCaso.abogado.usuario",
+            ],
+          }
         );
 
-        data = casos.map((c) => new CasoDTO(c));
+        data = casos.map((caso) => {
+          const abogado_principal =
+            casoService.findAbogadoPrincipalFromCaso(caso);
+
+          return new CasoDTO(caso, abogado_principal!);
+        });
       } else {
         const abogadoCasos = await em.find(
           AbogadoCaso,
@@ -65,11 +76,21 @@ export const controller = {
             },
           },
           {
-            populate: ["caso.cliente.usuario", "caso.especialidad"],
+            populate: [
+              "caso.cliente.usuario",
+              "caso.especialidad",
+              "caso.abogadosCaso.abogado.usuario",
+            ],
           }
         );
 
-        data = abogadoCasos.map((ac) => new CasoDTO(ac.caso));
+        data = abogadoCasos.map((ac) => {
+          const caso = ac.caso;
+          const abogado_principal =
+            casoService.findAbogadoPrincipalFromCaso(caso);
+
+          new CasoDTO(caso, abogado_principal);
+        });
       }
 
       res
@@ -88,10 +109,21 @@ export const controller = {
         const casos = await em.find(
           Caso,
           { estado: EstadoCasoEnum.EN_CURSO },
-          { populate: ["cliente.usuario", "especialidad"] }
+          {
+            populate: [
+              "cliente.usuario",
+              "especialidad",
+              "abogadosCaso.abogado.usuario",
+            ],
+          }
         );
 
-        data = casos.map((c) => new CasoDTO(c));
+        data = casos.map((caso) => {
+          const abogado_principal =
+            casoService.findAbogadoPrincipalFromCaso(caso);
+
+          return new CasoDTO(caso, abogado_principal!);
+        });
       } else {
         const abogadoCasos = await em.find(
           AbogadoCaso,
@@ -101,11 +133,21 @@ export const controller = {
             caso: { estado: EstadoCasoEnum.EN_CURSO },
           },
           {
-            populate: ["caso.cliente.usuario", "caso.especialidad"],
+            populate: [
+              "caso.cliente.usuario",
+              "caso.especialidad",
+              "caso.abogadosCaso.abogado.usuario",
+            ],
           }
         );
 
-        data = abogadoCasos.map((ac) => new CasoDTO(ac.caso));
+        data = abogadoCasos.map((ac) => {
+          const caso = ac.caso;
+          const abogado_principal =
+            casoService.findAbogadoPrincipalFromCaso(caso);
+
+          new CasoDTO(caso, abogado_principal);
+        });
       }
 
       res
@@ -132,10 +174,15 @@ export const controller = {
         {
           cliente: idCliente,
         },
-        { populate: ["especialidad"] }
+        { populate: ["especialidad", "abogadosCaso.abogado.usuario"] }
       );
 
-      const data = casos.map((c) => new CasoDTO(c));
+      const data = casos.map((caso) => {
+        const abogado_principal =
+          casoService.findAbogadoPrincipalFromCaso(caso);
+
+        return new CasoDTO(caso, abogado_principal!);
+      });
 
       res
         .status(200)
@@ -160,7 +207,10 @@ export const controller = {
         { populate: ["cliente.usuario", "especialidad"] }
       );
 
-      const data = new CasoDTO(caso);
+      const abogado_principal = await casoService.findAbogadoPrincipalFromDB(
+        caso
+      );
+      const data = new CasoDTO(caso, abogado_principal);
 
       res.status(200).json(new ApiResponse("El caso fue encontrado.", data));
     } catch (error: unknown) {
@@ -195,6 +245,8 @@ export const controller = {
       handleError(error, res);
     }
   },
+
+  // Operaciones
 
   add: async (req: Request, res: Response) => {
     try {
@@ -324,7 +376,8 @@ export const controller = {
       caso.fecha_estado = format(new Date(), "yyyy-MM-dd");
       await em.flush();
 
-      res.status(200).json(new ApiResponse("Caso cancelado.", caso));
+      const data = new CasoDTO(caso);
+      res.status(200).json(new ApiResponse("Caso cancelado.", data));
     } catch (error: unknown) {
       handleError(error, res);
     }

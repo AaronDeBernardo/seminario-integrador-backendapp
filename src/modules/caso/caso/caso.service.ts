@@ -4,6 +4,8 @@ import { Cuota } from "../cuota/cuota.entity.js";
 import { FrecuenciaPagoEnum } from "../../../utils/enums.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
+import { Abogado } from "../../usuario/abogado/abogado.entity.js";
+import { AbogadoCaso } from "../../appendix-caso/abogado-caso/abogado-caso.entity.js";
 
 const em = orm.em;
 
@@ -63,5 +65,35 @@ export const casoService = {
     }
 
     return format(expirationDate, "yyyy-MM-dd");
+  },
+
+  findAbogadoPrincipalFromDB: async (caso: Caso) => {
+    const abogadoCasoPrincipal = await em.findOne(
+      AbogadoCaso,
+      {
+        caso,
+        fecha_baja: null,
+        es_principal: true,
+      },
+      { populate: ["abogado.usuario"] }
+    );
+
+    if (!abogadoCasoPrincipal)
+      throw new Error("No hay ningún abogado principal en el caso.");
+
+    return abogadoCasoPrincipal.abogado;
+  },
+
+  findAbogadoPrincipalFromCaso: (caso: Caso) => {
+    const abogado_principal = caso.abogadosCaso
+      .getItems()
+      .find((ac: AbogadoCaso) => {
+        return ac.fecha_baja === null && ac.es_principal;
+      })?.abogado;
+
+    if (!abogado_principal)
+      throw new Error("No hay ningún abogado principal en el caso.");
+
+    return abogado_principal;
   },
 };

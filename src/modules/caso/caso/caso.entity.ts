@@ -8,6 +8,7 @@ import {
   Property,
 } from "@mikro-orm/core";
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
+import { AbogadoCaso } from "../../appendix-caso/abogado-caso/abogado-caso.entity.js";
 import { Cliente } from "../../usuario/cliente/cliente.entity.js";
 import { Comentario } from "../../appendix-caso/comentario/comentario.entity.js";
 import { Especialidad } from "../../especialidad/especialidad/especialidad.entity.js";
@@ -57,6 +58,7 @@ export class Caso {
 
   @OneToMany(() => Comentario, (comentario) => comentario.caso)
   comentarios = new Collection<Comentario>(this);
-}
 
-export { EstadoCasoEnum };
+  @OneToMany(() => AbogadoCaso, (ac) => ac.caso)
+  abogadosCaso = new Collection<AbogadoCaso>(this);
+}

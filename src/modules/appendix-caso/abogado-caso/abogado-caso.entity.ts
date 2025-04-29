@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, ManyToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 import { Caso } from "../../caso/caso/caso.entity.js";
 
@@ -10,12 +10,12 @@ export class AbogadoCaso {
   @ManyToOne(() => Abogado, {
     fieldName: "id_abogado",
   })
-  abogado!: Abogado;
+  abogado!: Rel<Abogado>;
 
   @ManyToOne(() => Caso, {
     fieldName: "id_caso",
   })
-  caso!: Caso;
+  caso!: Rel<Caso>;
 
   @Property({ type: "date", nullable: true })
   fecha_alta?: string;

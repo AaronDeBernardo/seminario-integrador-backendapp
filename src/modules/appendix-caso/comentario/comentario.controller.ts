@@ -7,7 +7,7 @@ import { AbogadoCaso } from "../abogado-caso/abogado-caso.entity.js";
 import { ApiResponse } from "../../../utils/api-response.class.js";
 import { Comentario } from "./comentario.entity.js";
 import { ComentarioDTO } from "./comentario.dto.js";
-import { EstadoCasoEnum } from "../../caso/caso/caso.entity.js";
+import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
 
