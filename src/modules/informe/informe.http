@@ -1,9 +1,11 @@
+@id = id
+
 ###
 POST http://localhost:3000/api/informes/ingresos/
 Content-Type: application/json
 
 {
-  "mes": "2025-02"
+  "mes": "yyyy-mm"
 }
 
 ###
@@ -11,7 +13,7 @@ POST http://localhost:3000/api/informes/caso/
 Content-Type: application/json
 
 {
-  "id_caso": 2
+  "id_caso": {{id}}
 }
 
 
@@ -20,7 +22,7 @@ POST http://localhost:3000/api/informes/desempenio/
 Content-Type: application/json
 
 {
-  "mes": "2024-08",
-  "id_abogado": 3
+  "mes": "yyyy-mm",
+  "id_abogado": {{id}}
 }
 

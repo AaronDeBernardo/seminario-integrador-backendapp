@@ -58,13 +58,11 @@ Content-Type: image/jpeg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="matricula"
 
-55889
+{{id}}
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="id_rol"
 
+# Array de IDs de especialidades
 {{id}}
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="especialidades"
-
-{{id}}
-------WebKitFormBoundary7MA4YWxkTrZu0gW--

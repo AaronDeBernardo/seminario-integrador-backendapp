@@ -6,18 +6,21 @@ export const informeRouter = Router();
 
 informeRouter.post(
   "/caso",
-  authMiddlewares.verifyAdminOrCliente,
+  authMiddlewares.verifyAdmin,
+  authMiddlewares.verifyUsuario,
   controller.sendCaseReport
 );
 
 informeRouter.post(
   "/desempenio",
   authMiddlewares.verifyAdmin,
+  authMiddlewares.verifyUsuario,
   controller.sendPerformanceReport
 );
 
 informeRouter.post(
   "/ingresos",
   authMiddlewares.verifyAdmin,
+  authMiddlewares.verifyUsuario,
   controller.sendIncomeReport
 );

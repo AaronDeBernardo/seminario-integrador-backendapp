@@ -15,12 +15,20 @@ import { Request, Response } from "express";
 import { ApiResponse } from "../../utils/api-response.class.js";
 import { handleError } from "../../utils/error-handler.js";
 import { orm } from "../../config/db.config.js";
+import { UsuarioSesion } from "../auth/usuario-sesion.dto.js";
 import { validateMonth } from "../../utils/validators.js";
 
 const em = orm.em;
 
+interface AuthenticatedRequestWithUsuario extends Request {
+  usuario?: UsuarioSesion;
+}
+
 export const controller = {
-  sendIncomeReport: async (req: Request, res: Response) => {
+  sendIncomeReport: async (
+    req: AuthenticatedRequestWithUsuario,
+    res: Response
+  ) => {
     try {
       const mes = validateMonth(req.body.mes, "mes", false);
       const currentMonth = format(new Date(), "yyyy-MM");
@@ -77,7 +85,7 @@ export const controller = {
       );
 
       //TODO enviar al correo del usuario logueado
-      const receivers = ["example@email.com"];
+      const receivers = [req.usuario!.email];
 
       await informeService.sendIncomeMail(
         parsedDate,
@@ -128,7 +136,7 @@ export const controller = {
         [id_caso]
       );
 
-      const receivers = ["example@email.com"];
+      const receivers = [req.usuario!.email];
 
       await informeService.sendCaseReport(
         receivers,
@@ -240,8 +248,8 @@ export const controller = {
           FROM abogados a
           INNER JOIN abogados_casos ac ON a.id_usuario = ac.id_abogado
           INNER JOIN casos c ON ac.id_caso = c.id
-          INNER JOIN feedbacks f ON ac.id_abogado = f.id_abogado and c.id_cliente = f.id_cliente
-          WHERE id_caso = ?
+          INNER JOIN feedbacks f ON ac.id_abogado = f.id_abogado and ac.id_caso = f.id_caso
+          WHERE f.id_caso = ?
           AND f.fecha_hora BETWEEN ? AND ?
           ORDER BY f.fecha_hora DESC
           LIMIT 1
@@ -282,8 +290,7 @@ export const controller = {
         [id_abogado, inicioMes, finMes]
       );
 
-      //TODO enviar al correo del usuario logueado
-      const receivers = ["example@email.com"];
+      const receivers = [req.usuario!.email];
 
       await informeService.sendPerformanceReport(
         parsedDate,
