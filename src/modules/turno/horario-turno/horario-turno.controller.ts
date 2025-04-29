@@ -1,6 +1,7 @@
-import { addHours, format, getDay, startOfDay } from "date-fns";
+import { format, getDay, parse, startOfDay } from "date-fns";
 import { NextFunction, Request, Response } from "express";
 import {
+  validateDate,
   validateIntegerInRange,
   validateNumericId,
   validateTime,
@@ -42,19 +43,17 @@ export const controller = {
   findAvailable: async (req: Request, res: Response) => {
     try {
       const id_abogado = Number(req.query.id_abogado) || undefined;
-      const fecha = new Date(req.query.fecha as string);
+      const fechaStr = validateDate(req.query.fecha, "fecha");
 
-      if (isNaN(fecha.getTime())) throw new HttpError(400, "Fecha no válida.");
+      const fecha = parse(fechaStr, "yyyy-MM-dd", new Date());
 
-      const fechaUtc = addHours(fecha, 3);
-
-      if (fechaUtc < startOfDay(new Date()))
+      if (fecha < startOfDay(new Date()))
         throw new HttpError(
           400,
           "La fecha para el turno no puede ser anterior a hoy."
         );
 
-      const dia_semana = getDay(fechaUtc);
+      const dia_semana = getDay(fecha);
 
       const qb1 = em
         .createQueryBuilder(TurnoOtorgado, "t")
