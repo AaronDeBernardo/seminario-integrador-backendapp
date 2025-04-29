@@ -2,10 +2,10 @@ import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
 import { Politicas } from "../politicas/politicas.entity.js";
 
-const em = orm.em.fork();
-
 export const politicasService = {
   loadPoliticas: async (): Promise<Politicas> => {
+    const em = orm.em.fork();
+
     const politicas = await em.findOne(
       Politicas,
       { id: { $ne: 0 } },

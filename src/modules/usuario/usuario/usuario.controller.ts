@@ -16,11 +16,13 @@ import { Usuario } from "./usuario.entity.js";
 import { UsuarioDTO } from "./usuario.dto.js";
 import { UsuarioSesion } from "../../auth/usuario-sesion.dto.js";
 
-const em = orm.em.fork();
+const em = orm.em;
 
 export const controller = {
   selfUpdate: async (req: Request, res: Response) => {
     try {
+      const em = orm.em.fork();
+
       const id = req.usuario!.id;
       const usuario = await em.findOneOrFail(Usuario, id, {
         populate: ["abogado.rol"],

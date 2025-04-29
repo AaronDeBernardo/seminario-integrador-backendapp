@@ -15,7 +15,7 @@ import { UniqueConstraintViolationException } from "@mikro-orm/core";
 import { Usuario } from "../usuario/usuario.entity.js";
 import { usuarioService } from "../usuario/usuario.service.js";
 
-const em = orm.em.fork();
+const em = orm.em;
 
 export const controller = {
   findAll: async (_req: Request, res: Response) => {
@@ -198,8 +198,11 @@ export const controller = {
     }
   },
 
+  // add, update and sanitize
+
   add: async (req: Request, res: Response) => {
     try {
+      const em = orm.em.fork();
       const abogado = em.create(Abogado, req.body.sanitizedInput);
 
       if (abogado.especialidades.length === 0)
@@ -230,6 +233,8 @@ export const controller = {
 
   update: async (req: Request, res: Response) => {
     try {
+      const em = orm.em.fork();
+
       const id = validateNumericId(req.params.id, "id");
       const abogado = await em.findOneOrFail(
         Abogado,

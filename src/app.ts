@@ -12,7 +12,7 @@ import { feedbackRouter } from "./modules/feedback/feedback/feedback.routes.js";
 import { informeRouter } from "./modules/informe/informe.routes.js";
 import { miscModuleRouter } from "./modules/misc/misc-module.routes.js";
 import { orm } from "./config/db.config.js";
-import { RequestContext } from "@mikro-orm/mysql";
+import { RequestContext } from "@mikro-orm/core";
 import { turnoModuleRouter } from "./modules/turno/turno-module.routes.js";
 import { usuarioModuleRouter } from "./modules/usuario/usuario-module.routes.js";
 
@@ -26,12 +26,12 @@ app.use(
   })
 );
 
-app.use((_req, _res, next) => {
-  RequestContext.create(orm.em, next);
-});
-
 app.use(express.json());
 app.use(cookieParser());
+
+app.use((req, res, next) => {
+  RequestContext.create(orm.em, next);
+});
 
 app.use("/api/actividades/", actividadModuleRouter);
 app.use("/api/auth/", authRouter);
