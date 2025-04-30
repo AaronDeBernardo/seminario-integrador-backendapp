@@ -207,6 +207,19 @@ export const controller = {
         { populate: ["cliente.usuario", "especialidad"] }
       );
 
+      if (req.usuario?.is_admin === false) {
+        const isAbogadoWorking =
+          await abogadoCasoService.isAbogadoWorkingOnCaso(
+            req.usuario.id,
+            caso.id
+          );
+
+        if (!isAbogadoWorking) {
+          res.status(403).json(new ApiResponse("Acceso denegado."));
+          return;
+        }
+      }
+
       const abogado_principal = await casoService.findAbogadoPrincipalFromDB(
         caso
       );
@@ -222,7 +235,7 @@ export const controller = {
     try {
       const id_caso = validateNumericId(req.params.id, "id");
 
-      const abogados = await em.find(
+      const abogadosCasos = await em.find(
         AbogadoCaso,
         {
           caso: id_caso,
@@ -231,7 +244,18 @@ export const controller = {
         { populate: ["abogado.rol", "abogado.usuario"] }
       );
 
-      const data = abogados.map((a) => new AbogadoCasoDTO(a));
+      if (req.usuario?.is_admin === false) {
+        const abogadoPrincipal = abogadosCasos.find((ac) => {
+          return ac.es_principal === true && ac.fecha_baja === null;
+        })?.abogado;
+
+        if (abogadoPrincipal?.usuario.id !== req.usuario.id) {
+          res.status(403).json(new ApiResponse("Acceso denegado."));
+          return;
+        }
+      }
+
+      const data = abogadosCasos.map((ac) => new AbogadoCasoDTO(ac));
 
       res
         .status(200)
@@ -282,6 +306,9 @@ export const controller = {
   update: async (req: Request, res: Response) => {
     try {
       const id = validateNumericId(req.params.id, "id");
+      if (req.usuario?.is_admin === false)
+        await abogadoCasoService.checkAbogadoPrincipal(req.usuario.id, id);
+
       const caso = await em.findOneOrFail(Caso, id);
 
       if (caso.estado !== EstadoCasoEnum.EN_CURSO)
@@ -318,6 +345,9 @@ export const controller = {
   finalizar: async (req: Request, res: Response) => {
     try {
       const id = validateNumericId(req.params.id, "id");
+      if (req.usuario?.is_admin === false)
+        await abogadoCasoService.checkAbogadoPrincipal(req.usuario.id, id);
+
       const caso = await em.findOneOrFail(Caso, id);
 
       if (caso.estado !== EstadoCasoEnum.EN_CURSO) {
@@ -364,6 +394,9 @@ export const controller = {
   deactivate: async (req: Request, res: Response) => {
     try {
       const id = validateNumericId(req.params.id, "id");
+      if (req.usuario?.is_admin === false)
+        await abogadoCasoService.checkAbogadoPrincipal(req.usuario.id, id);
+
       const caso = await em.findOneOrFail(Caso, id);
 
       if (caso.estado !== EstadoCasoEnum.EN_CURSO)

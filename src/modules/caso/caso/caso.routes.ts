@@ -22,11 +22,11 @@ casoRouter.get(
 
 casoRouter.get(
   "/:id/abogados",
-  authMiddlewares.verifyEmpleado,
+  authMiddlewares.verifyEmpleado, //Si no es admin, debe ser el abogado principal del caso
   controller.findAbogadosByCaso
 );
 
-casoRouter.get("/:id", authMiddlewares.verifyEmpleado, controller.findOne);
+casoRouter.get("/:id", authMiddlewares.verifyEmpleado, controller.findOne); //Si no es admin, debe estar asignado al caso
 
 // POST PUT PATCH
 
@@ -39,20 +39,20 @@ casoRouter.post(
 
 casoRouter.put(
   "/:id",
-  authMiddlewares.verifyEmpleado,
+  authMiddlewares.verifyEmpleado, //Si no es admin, debe ser el abogado principal del caso
   controller.sanitizeCaso,
   controller.update
 );
 
 casoRouter.patch(
   "/:id/finalizar/",
-  authMiddlewares.verifyAbogado,
+  authMiddlewares.verifyEmpleado, //Si no es admin, debe ser el abogado principal del caso
   controller.sanitizeFinalizarCaso,
   controller.finalizar
 );
 
 casoRouter.patch(
   "/:id/cancelar/",
-  authMiddlewares.verifyEmpleado,
+  authMiddlewares.verifyEmpleado, //Si no es admin, debe ser el abogado principal del caso
   controller.deactivate
 );

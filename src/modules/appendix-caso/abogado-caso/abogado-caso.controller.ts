@@ -15,8 +15,13 @@ const em = orm.em;
 export const controller = {
   link: async (req: Request, res: Response): Promise<void> => {
     try {
+      const id_caso = req.body.sanitizedInput.caso;
+
+      if (req.usuario?.is_admin === false)
+        await abogadoCasoService.checkAbogadoPrincipal(req.usuario.id, id_caso);
+
       const caso = await em.findOneOrFail(Caso, {
-        id: req.body.sanitizedInput.caso,
+        id: id_caso,
         estado: EstadoCasoEnum.EN_CURSO,
       });
 
@@ -95,6 +100,12 @@ export const controller = {
           );
         return;
       }
+
+      if (req.usuario?.is_admin === false)
+        await abogadoCasoService.checkAbogadoPrincipal(
+          req.usuario.id,
+          abogadoCaso.caso.id
+        );
 
       if (abogadoCaso.es_principal === true) {
         res

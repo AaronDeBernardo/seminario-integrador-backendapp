@@ -6,13 +6,13 @@ export const abogadoCasoRouter = Router();
 
 abogadoCasoRouter.post(
   "/",
-  authMiddlewares.verifyAdmin,
+  authMiddlewares.verifyEmpleado, //Si no es admin, debe ser el abogado principal del caso
   controller.sanitize,
   controller.link
 );
 
 abogadoCasoRouter.patch(
   "/:id/desvincular",
-  authMiddlewares.verifyAdmin,
+  authMiddlewares.verifyEmpleado, //Si no es admin, debe ser el abogado principal del caso
   controller.unlink
 );

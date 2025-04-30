@@ -56,11 +56,25 @@ export const abogadoCasoService = {
     const abogado = await em.findOne(AbogadoCaso, {
       caso: { id: id_caso, estado: EstadoCasoEnum.EN_CURSO },
       fecha_baja: null,
-      abogado: id_abogado as any,
+      abogado: { usuario: id_abogado },
     });
 
     if (abogado) return true;
     else return false;
+  },
+
+  checkAbogadoPrincipal: async (id_abogado: number, id_caso: number) => {
+    //No le interesa si el caso está en curso, finalizó o fue cancelado.
+
+    const abogado = await em.findOne(AbogadoCaso, {
+      caso: id_caso,
+      fecha_baja: null,
+      es_principal: true,
+      abogado: { usuario: id_abogado },
+    });
+
+    if (abogado) return;
+    else throw new HttpError(403, "Acceso denegado.");
   },
 
   updateAbogadoPrincipal: async (
