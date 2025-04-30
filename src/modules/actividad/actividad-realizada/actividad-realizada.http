@@ -3,7 +3,7 @@ GET http://localhost:3000/api/actividades/realizadas/
 
 
 ### Obtener las últimas 50 actividades realizadas por un abogado
-GET http://localhost:3000/api/actividades/realizadas/2
+GET http://localhost:3000/api/actividades/realizadas/abogado/2
 
 
 ### Registrar una actividad realizada

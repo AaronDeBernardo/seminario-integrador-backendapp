@@ -5,7 +5,7 @@ import { Router } from "express";
 export const actividadRealizadaRouter = Router();
 
 actividadRealizadaRouter.get(
-  "/:id",
+  "/abogado/:id_abogado",
   authMiddlewares.verifyEmpleado,
   controller.findByAbogado
 );
