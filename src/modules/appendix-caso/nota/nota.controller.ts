@@ -3,10 +3,9 @@ import {
   validateEntity,
   validateNumericId,
 } from "../../../utils/validators.js";
-import { AbogadoCaso } from "../abogado-caso/abogado-caso.entity.js";
+import { abogadoCasoService } from "../abogado-caso/abogado-caso.service.js";
 import { ApiResponse } from "../../../utils/api-response.class.js";
 import { differenceInHours } from "date-fns";
-import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { Nota } from "./nota.entity.js";
 import { NotaDTO } from "./nota.dto.js";
@@ -31,6 +30,15 @@ export const controller = {
   findByCaso: async (req: Request, res: Response) => {
     try {
       const id_caso = validateNumericId(req.params.id_caso, "id_caso");
+
+      if (req.usuario?.is_admin === false) {
+        abogadoCasoService.checkAbogadoWorkingOnCaso(
+          req.body.sanitizedInput.abogado,
+          req.body.sanitizedInput.caso,
+          false
+        );
+      }
+
       const notas = await em.find(
         Nota,
         { caso: id_caso },
@@ -49,14 +57,11 @@ export const controller = {
 
   add: async (req: Request, res: Response): Promise<void> => {
     try {
-      await em.findOneOrFail(AbogadoCaso, {
-        caso: {
-          id: req.body.sanitizedInput.caso,
-          estado: EstadoCasoEnum.EN_CURSO,
-        },
-        abogado: { usuario: req.body.sanitizedInput.abogado },
-        fecha_baja: { $eq: null },
-      });
+      await abogadoCasoService.checkAbogadoWorkingOnCaso(
+        req.body.sanitizedInput.abogado,
+        req.body.sanitizedInput.caso,
+        true
+      );
 
       const nota = em.create(Nota, req.body.sanitizedInput);
       validateEntity(nota);
@@ -80,6 +85,12 @@ export const controller = {
         abogado: req.body.sanitizedInput.abogado,
       });
 
+      await abogadoCasoService.checkAbogadoWorkingOnCaso(
+        req.body.sanitizedInput.abogado,
+        nota.caso.id,
+        true
+      );
+
       const horasTranscurridas = differenceInHours(new Date(), nota.fecha_hora);
 
       if (horasTranscurridas > 2) {
@@ -93,10 +104,7 @@ export const controller = {
         return;
       }
 
-      nota.titulo = req.body.sanitizedInput.titulo || nota.titulo;
-      nota.descripcion =
-        req.body.sanitizedInput.descripcion || nota.descripcion;
-
+      em.assign(nota, req.body.sanitizedInput);
       validateEntity(nota);
       await em.flush();
 
@@ -113,7 +121,14 @@ export const controller = {
 
       const nota = await em.findOneOrFail(Nota, {
         id,
+        abogado: { usuario: req.usuario!.id },
       });
+
+      await abogadoCasoService.checkAbogadoWorkingOnCaso(
+        nota.abogado.usuario.id,
+        nota.caso.id,
+        true
+      );
 
       const horasTranscurridas = differenceInHours(new Date(), nota.fecha_hora);
 
@@ -138,9 +153,11 @@ export const controller = {
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
-        caso: validateNumericId(req.body.id_caso, "id_caso"),
-        abogado: validateNumericId(req.body.id_abogado, "id_abogado"),
-        //TODO validar que sea el abogado logueado
+        caso:
+          req.method === "POST"
+            ? validateNumericId(req.body.id_caso, "id_caso")
+            : undefined,
+        abogado: req.usuario!.id,
         titulo: req.body.titulo?.trim(),
         descripcion: req.body.descripcion?.trim(),
       };

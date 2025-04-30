@@ -4,11 +4,11 @@ import { Router } from "express";
 
 export const notaRouter = Router();
 
-notaRouter.get("/", authMiddlewares.verifyEmpleado, controller.findAll);
+notaRouter.get("/", authMiddlewares.verifyAdmin, controller.findAll);
 
 notaRouter.get(
   "/:id_caso",
-  authMiddlewares.verifyEmpleado,
+  authMiddlewares.verifyEmpleado, //Si no es admin, debe estar asignado al caso
   controller.findByCaso
 );
 

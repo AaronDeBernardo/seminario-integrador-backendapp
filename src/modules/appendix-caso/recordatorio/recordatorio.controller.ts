@@ -43,6 +43,14 @@ export const controller = {
   findByCaso: async (req: Request, res: Response) => {
     try {
       const id_caso = validateNumericId(req.params.id_caso, "id_caso");
+
+      if (req.usuario!.is_admin === false)
+        await abogadoCasoService.checkAbogadoWorkingOnCaso(
+          req.usuario!.id,
+          id_caso,
+          false
+        );
+
       const recordatorios = await em.find(
         Recordatorio,
         { caso: id_caso },
@@ -64,15 +72,11 @@ export const controller = {
 
   add: async (req: Request, res: Response): Promise<void> => {
     try {
-      const response = await abogadoCasoService.isAbogadoWorkingOnCaso(
+      await abogadoCasoService.checkAbogadoWorkingOnCaso(
         req.body.sanitizedInput.abogado,
-        req.body.sanitizedInput.caso
+        req.body.sanitizedInput.caso,
+        true
       );
-      if (response === false)
-        throw new HttpError(
-          400,
-          "El abogado no se encuentra trabajando en el caso."
-        );
 
       const recordatorio = em.create(Recordatorio, req.body.sanitizedInput);
       validateEntity(recordatorio);
@@ -87,18 +91,17 @@ export const controller = {
 
   update: async (req: Request, res: Response) => {
     try {
-      const response = await abogadoCasoService.isAbogadoWorkingOnCaso(
-        req.body.sanitizedInput.abogado,
-        req.body.sanitizedInput.caso
-      );
-      if (response === false)
-        throw new HttpError(
-          400,
-          "El abogado no se encuentra trabajando en el caso."
-        );
-
       const id = validateNumericId(req.params.id, "id");
-      const recordatorio = await em.findOneOrFail(Recordatorio, id);
+      const recordatorio = await em.findOneOrFail(Recordatorio, {
+        id,
+        abogado: { usuario: req.usuario!.id },
+      });
+
+      await abogadoCasoService.checkAbogadoWorkingOnCaso(
+        req.usuario!.id,
+        recordatorio.caso.id,
+        true
+      );
 
       em.assign(recordatorio, req.body.sanitizedInput);
       validateEntity(recordatorio);
@@ -113,9 +116,18 @@ export const controller = {
 
   delete: async (req: Request, res: Response): Promise<void> => {
     try {
-      //TODO Validar que el recordatorio sea del abogado que está logueado
       const id = validateNumericId(req.params.id, "id");
-      const recordatorio = em.getReference(Recordatorio, id);
+      const recordatorio = await em.findOneOrFail(Recordatorio, {
+        id,
+        abogado: { usuario: req.usuario!.id },
+      });
+
+      await abogadoCasoService.checkAbogadoWorkingOnCaso(
+        req.usuario!.id,
+        recordatorio.caso.id,
+        true
+      );
+
       await em.removeAndFlush(recordatorio);
 
       res.status(200).json(new ApiResponse("Recordatorio eliminado."));
@@ -127,13 +139,12 @@ export const controller = {
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
-        //req.method==="POST" para no permitir cambiar el caso en un put o patch
-        caso: validateNumericId(req.body.id_caso, "id_caso"),
-        abogado: validateNumericId(req.body.id_abogado, "id_abogado"),
-        //TODO Validar que sea el mismo cuando existan sesiones, u obtenerlo de la sesión
-
+        caso:
+          req.method === "POST"
+            ? validateNumericId(req.body.id_caso, "id_caso")
+            : undefined,
+        abogado: req.usuario!.id,
         descripcion: req.body.descripcion?.trim(),
-
         fecha_hora_limite: validateDateTime(
           req.body.fecha_hora_limite,
           "fecha_hora_limite"

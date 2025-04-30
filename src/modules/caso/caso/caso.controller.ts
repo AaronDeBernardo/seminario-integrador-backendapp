@@ -211,7 +211,8 @@ export const controller = {
         const isAbogadoWorking =
           await abogadoCasoService.isAbogadoWorkingOnCaso(
             req.usuario.id,
-            caso.id
+            caso.id,
+            false
           );
 
         if (!isAbogadoWorking) {

@@ -6,11 +6,11 @@ export const recordatorioRouter = Router();
 
 recordatorioRouter.get(
   "/:id_caso",
-  authMiddlewares.verifyEmpleado,
+  authMiddlewares.verifyEmpleado, //Si no es admin, debe estar asignado al caso
   controller.findByCaso
 );
 
-recordatorioRouter.get("/", authMiddlewares.verifyEmpleado, controller.findAll);
+recordatorioRouter.get("/", authMiddlewares.verifyAdmin, controller.findAll);
 
 recordatorioRouter.post(
   "/",
