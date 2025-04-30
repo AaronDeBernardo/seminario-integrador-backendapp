@@ -30,6 +30,11 @@ export const controller = {
       const fecha = format(subHours(new Date(), 3), "yyyy-MM-dd");
       const idAbogado = validateNumericId(req.params.id_abogado, "id_abogado");
 
+      if (req.usuario!.is_admin === false && idAbogado !== req.usuario!.id) {
+        res.status(403).json(new ApiResponse("Acceso denegado."));
+        return;
+      }
+
       const turnosOtorgados = await em.find(
         TurnoOtorgado,
         {

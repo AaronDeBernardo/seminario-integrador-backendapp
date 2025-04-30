@@ -7,7 +7,6 @@ import {
 import { abogadoCasoService } from "../abogado-caso/abogado-caso.service.js";
 import { ApiResponse } from "../../../utils/api-response.class.js";
 import { handleError } from "../../../utils/error-handler.js";
-import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
 import { Recordatorio } from "./recordatorio.entity.js";
 import { RecordatorioDTO } from "./recordatorio.dto.js";

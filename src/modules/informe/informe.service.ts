@@ -1,4 +1,5 @@
 import { es } from "date-fns/locale";
+import { EstadoCasoEnum } from "../../utils/enums.js";
 import { format } from "date-fns";
 import fs from "fs";
 import handlebars from "handlebars";
@@ -175,11 +176,13 @@ export const informeService = {
         especialidad: caso.especialidad,
         descripcion: caso.descripcion,
         fecha_inicio: caso.fecha_inicio,
-        estado: caso.estado,
-        fecha_estado: caso.fecha_estado,
+        estado:
+          caso.estado === EstadoCasoEnum.EN_CURSO
+            ? caso.estado
+            : `${caso.estado} (${caso.fecha_estado})`,
       },
       notas: notas.map((nota) => ({
-        fecha_hora: nota.fecha_hora,
+        fecha_hora: format(nota.fecha_hora, "dd/MM/yyyy HH:mm"),
         titulo: nota.titulo,
         abogado: `${nota.nombre} ${nota.apellido}`,
         descripcion: nota.descripcion,

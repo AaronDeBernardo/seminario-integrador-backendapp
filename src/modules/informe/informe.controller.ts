@@ -12,11 +12,12 @@ import {
   INotaCaso,
 } from "./informe.service.js";
 import { Request, Response } from "express";
+import { validateMonth, validateNumericId } from "../../utils/validators.js";
 import { ApiResponse } from "../../utils/api-response.class.js";
 import { handleError } from "../../utils/error-handler.js";
 import { orm } from "../../config/db.config.js";
+import { TipoUsuarioEnum } from "../../utils/enums.js";
 import { UsuarioSesion } from "../auth/usuario-sesion.dto.js";
-import { validateMonth } from "../../utils/validators.js";
 
 const em = orm.em;
 
@@ -101,16 +102,11 @@ export const controller = {
 
   sendCaseReport: async (req: Request, res: Response) => {
     try {
-      const id_caso = req.body.id_caso;
-
-      if (!id_caso) {
-        res.status(400).json(new ApiResponse("Debe seleccionar un caso."));
-        return;
-      }
+      const id_caso = validateNumericId(req.body.id_caso, "id_caso");
 
       const caso_base = await em.execute(
         `
-        SELECT c.id, c.descripcion, c.fecha_inicio, c.estado, c.fecha_estado, e.nombre as especialidad
+        SELECT c.id, c.id_cliente, c.descripcion, c.fecha_inicio, c.estado, c.fecha_estado, e.nombre as especialidad
         FROM casos c
         INNER JOIN especialidades e ON c.id_especialidad = e.id
         WHERE c.id = ?
@@ -120,6 +116,14 @@ export const controller = {
 
       if (!caso_base.length) {
         res.status(404).json(new ApiResponse("Caso no encontrado."));
+        return;
+      }
+
+      if (
+        req.usuario!.tipo_usuario === TipoUsuarioEnum.CLIENTE &&
+        req.usuario!.id !== caso_base[0].id_cliente
+      ) {
+        res.status(403).json(new ApiResponse("Acceso denegado."));
         return;
       }
 
