@@ -27,7 +27,7 @@ abogadoRouter.get("/:id", authMiddlewares.verifyAdmin, controller.findOne);
 
 abogadoRouter.get(
   "/:id/especialidades",
-  authMiddlewares.verifyAdmin,
+  authMiddlewares.verifyEmpleado,
   controller.findEspecialidades
 );
 
