@@ -1,11 +1,10 @@
 import { addDays, addHours, addMonths, addYears, format } from "date-fns";
+import { AbogadoCaso } from "../../appendix-caso/abogado-caso/abogado-caso.entity.js";
 import { Caso } from "./caso.entity.js";
 import { Cuota } from "../cuota/cuota.entity.js";
 import { FrecuenciaPagoEnum } from "../../../utils/enums.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
-import { Abogado } from "../../usuario/abogado/abogado.entity.js";
-import { AbogadoCaso } from "../../appendix-caso/abogado-caso/abogado-caso.entity.js";
 
 const em = orm.em;
 

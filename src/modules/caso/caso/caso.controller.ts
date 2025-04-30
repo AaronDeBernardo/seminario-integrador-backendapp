@@ -89,7 +89,7 @@ export const controller = {
           const abogado_principal =
             casoService.findAbogadoPrincipalFromCaso(caso);
 
-          new CasoDTO(caso, abogado_principal);
+          return new CasoDTO(caso, abogado_principal);
         });
       }
 
@@ -146,7 +146,7 @@ export const controller = {
           const abogado_principal =
             casoService.findAbogadoPrincipalFromCaso(caso);
 
-          new CasoDTO(caso, abogado_principal);
+          return new CasoDTO(caso, abogado_principal);
         });
       }
 

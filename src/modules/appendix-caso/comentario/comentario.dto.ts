@@ -2,8 +2,8 @@ import { Comentario } from "./comentario.entity.js";
 
 export class ComentarioDTO {
   id: number;
-  abogado: { nombre: string; apellido: string } | undefined;
-  padre: { id: number; comentario: string } | null;
+  abogado?: { id: number; nombre: string; apellido: string };
+  padre?: { id: number; comentario: string };
   respuestas: RespuestaDTO[];
   fecha_hora: Date;
   comentario: string;
@@ -13,6 +13,7 @@ export class ComentarioDTO {
 
     if (input.abogado) {
       this.abogado = {
+        id: input.abogado.usuario.id,
         nombre: input.abogado.usuario.nombre,
         apellido: input.abogado.usuario.apellido,
       };
@@ -22,7 +23,7 @@ export class ComentarioDTO {
 
     this.padre = input.padre
       ? { id: input.padre.id, comentario: input.padre.comentario }
-      : null;
+      : undefined;
 
     this.respuestas = input.respuestas.isInitialized()
       ? input.respuestas.getItems().map((respuesta) => ({
