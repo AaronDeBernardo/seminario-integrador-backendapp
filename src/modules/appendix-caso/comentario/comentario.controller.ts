@@ -3,11 +3,11 @@ import {
   validateEntity,
   validateNumericId,
 } from "../../../utils/validators.js";
-import { AbogadoCaso } from "../abogado-caso/abogado-caso.entity.js";
+import { abogadoCasoService } from "../abogado-caso/abogado-caso.service.js";
 import { ApiResponse } from "../../../utils/api-response.class.js";
 import { Comentario } from "./comentario.entity.js";
 import { ComentarioDTO } from "./comentario.dto.js";
-import { EstadoCasoEnum } from "../../../utils/enums.js";
+import { comentarioService } from "./comentario.service.js";
 import { handleError } from "../../../utils/error-handler.js";
 import { orm } from "../../../config/db.config.js";
 
@@ -18,13 +18,20 @@ export const controller = {
     try {
       const id_caso = validateNumericId(req.params.id_caso, "id_caso");
 
+      if (req.usuario!.is_admin === false)
+        await abogadoCasoService.checkAbogadoWorkingOnCaso(
+          req.usuario!.id,
+          id_caso,
+          false
+        );
+
       const comentarios = await em.find(
         Comentario,
         { caso: id_caso },
-        { populate: ["caso", "abogado.usuario", "padre", "respuestas"] }
+        { populate: ["abogado.usuario", "padre"] }
       );
 
-      const data = comentarios.map((c) => new ComentarioDTO(c));
+      const data = comentarioService.makeCommentsTree(comentarios);
 
       res
         .status(200)
@@ -36,46 +43,31 @@ export const controller = {
 
   addOrReply: async (req: Request, res: Response) => {
     try {
-      const id_caso = validateNumericId(req.body.id_caso, "id_caso");
-      const id_abogado = validateNumericId(req.body.id_abogado, "id_abogado");
+      if (req.usuario!.is_admin === false)
+        await abogadoCasoService.checkAbogadoWorkingOnCaso(
+          req.usuario!.id,
+          req.body.sanitizedInput.caso,
+          true
+        );
 
-      const abogadoCaso = await em.findOneOrFail(
-        AbogadoCaso,
-        {
-          caso: { id: id_caso, estado: EstadoCasoEnum.EN_CURSO },
-          abogado: { usuario: id_abogado },
-          fecha_baja: { $eq: null },
-        },
-        { populate: ["abogado.usuario", "caso"] }
-      );
-
-      const caso = abogadoCaso.caso;
-      const abogado = abogadoCaso.abogado;
-
-      let padre: Comentario | undefined = undefined;
-      if (req.params.id) {
-        const id_comentario_padre = validateNumericId(req.params.id, "id");
-        padre = await em.findOneOrFail(Comentario, { id: id_comentario_padre });
+      if (req.params.id_padre) {
+        req.body.sanitizedInput.padre = validateNumericId(
+          req.params.id_padre,
+          "id_padre"
+        );
       }
 
-      const comentario = em.create(Comentario, {
-        caso,
-        abogado,
-        padre,
-        comentario: req.body.sanitizedInput.comentario,
-        fecha_hora: new Date(),
-      });
-
+      const comentario = em.create(Comentario, req.body.sanitizedInput);
       validateEntity(comentario);
-
       await em.flush();
-      await em.populate(comentario, ["caso", "abogado", "padre", "respuestas"]);
 
       res
         .status(201)
         .json(
           new ApiResponse(
-            padre ? "Respuesta creada." : "Comentario creado.",
+            req.body.sanitizedInput.padre
+              ? "Respuesta creada."
+              : "Comentario creado.",
             new ComentarioDTO(comentario)
           )
         );
@@ -87,8 +79,18 @@ export const controller = {
   delete: async (req: Request, res: Response): Promise<void> => {
     try {
       const id = validateNumericId(req.params.id, "id");
+      const comentario = await em.findOneOrFail(Comentario, {
+        id,
+        abogado: { usuario: req.usuario!.id },
+      });
 
-      const comentario = await em.findOneOrFail(Comentario, { id });
+      if (req.usuario!.is_admin === false)
+        await abogadoCasoService.checkAbogadoWorkingOnCaso(
+          req.usuario!.id,
+          comentario.caso.id,
+          true
+        );
+
       const horasTranscurridas =
         (new Date().getTime() - comentario.fecha_hora.getTime()) /
         (1000 * 60 * 60);
@@ -114,6 +116,8 @@ export const controller = {
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
+        caso: validateNumericId(req.body.id_caso, "id_caso"),
+        abogado: req.usuario!.id,
         comentario: req.body.comentario?.trim(),
       };
 

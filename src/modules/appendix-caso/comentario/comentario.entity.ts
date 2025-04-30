@@ -22,16 +22,13 @@ export class Comentario {
   @ManyToOne(() => Abogado, { fieldName: "id_abogado" })
   abogado!: Rel<Abogado>;
 
-  @ManyToOne(() => Comentario, { nullable: true, fieldName: "id_padre" })
-  padre?: Comentario;
-
-  @OneToMany(() => Comentario, (comentario) => comentario.padre)
-  respuestas = new Collection<Comentario>(this);
-
-  @Property({ type: "datetime" })
+  @Property({ type: "datetime", nullable: true })
   fecha_hora!: Date;
 
   @NotEmptyAndMaxLength(65535, "comentario")
   @Property({ type: "text" })
   comentario!: string;
+
+  @ManyToOne(() => Comentario, { nullable: true, fieldName: "id_padre" })
+  padre?: Comentario;
 }

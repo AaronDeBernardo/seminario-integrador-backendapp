@@ -4,7 +4,6 @@ export class ComentarioDTO {
   id: number;
   abogado?: { id: number; nombre: string; apellido: string };
   padre?: { id: number; comentario: string };
-  respuestas: RespuestaDTO[];
   fecha_hora: Date;
   comentario: string;
 
@@ -17,37 +16,13 @@ export class ComentarioDTO {
         nombre: input.abogado.usuario.nombre,
         apellido: input.abogado.usuario.apellido,
       };
-    } else {
-      this.abogado = undefined;
     }
 
     this.padre = input.padre
       ? { id: input.padre.id, comentario: input.padre.comentario }
       : undefined;
 
-    this.respuestas = input.respuestas.isInitialized()
-      ? input.respuestas.getItems().map((respuesta) => ({
-          id: respuesta.id,
-          fecha_hora: respuesta.fecha_hora,
-          comentario: respuesta.comentario,
-          abogado: respuesta.abogado
-            ? {
-                nombre: respuesta.abogado.usuario.nombre,
-                apellido: respuesta.abogado.usuario.apellido,
-              }
-            : null,
-        }))
-      : [];
-
     this.fecha_hora = input.fecha_hora;
     this.comentario = input.comentario;
   }
 }
-
-// Tipo auxiliar para asegurar la estructura correcta de respuestas
-type RespuestaDTO = {
-  id: number;
-  fecha_hora: Date;
-  comentario: string;
-  abogado: { nombre: string; apellido: string } | null;
-};

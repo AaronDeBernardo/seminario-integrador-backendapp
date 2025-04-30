@@ -6,7 +6,7 @@ export const comentarioRouter = Router();
 
 comentarioRouter.get(
   "/:id_caso",
-  authMiddlewares.verifyEmpleado,
+  authMiddlewares.verifyEmpleado, //Si no es admin, debe estar asignado al caso
   controller.findByCaso
 );
 
@@ -18,7 +18,7 @@ comentarioRouter.post(
 );
 
 comentarioRouter.post(
-  "/:id",
+  "/:id_padre",
   authMiddlewares.verifyAbogado,
   controller.sanitize,
   controller.addOrReply

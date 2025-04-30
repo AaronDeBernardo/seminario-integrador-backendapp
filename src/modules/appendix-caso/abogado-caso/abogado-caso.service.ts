@@ -51,16 +51,36 @@ export const abogadoCasoService = {
 
   isAbogadoWorkingOnCaso: async (
     id_abogado: number,
-    id_caso: number
+    id_caso: number,
+    checkEstadoEnCurso: boolean
   ): Promise<boolean> => {
+    const filter = checkEstadoEnCurso
+      ? {
+          caso: { id: id_caso, estado: EstadoCasoEnum.EN_CURSO },
+        }
+      : { caso: { id: id_caso } };
+
     const abogado = await em.findOne(AbogadoCaso, {
-      caso: { id: id_caso, estado: EstadoCasoEnum.EN_CURSO },
+      ...filter,
       fecha_baja: null,
       abogado: { usuario: id_abogado },
     });
 
-    if (abogado) return true;
-    else return false;
+    return Boolean(abogado);
+  },
+
+  checkAbogadoWorkingOnCaso: async (
+    id_abogado: number,
+    id_caso: number,
+    checkEstadoEnCurso: boolean
+  ) => {
+    const isWorking = await abogadoCasoService.isAbogadoWorkingOnCaso(
+      id_abogado,
+      id_caso,
+      checkEstadoEnCurso
+    );
+
+    if (isWorking === false) throw new HttpError(403, "Acceso denegado.");
   },
 
   checkAbogadoPrincipal: async (id_abogado: number, id_caso: number) => {
@@ -106,7 +126,7 @@ export const abogadoCasoService = {
       const abogado_nuevo_existente = await em.findOne(AbogadoCaso, {
         caso: id_caso,
         fecha_baja: null,
-        abogado: id_abogado_principal as any,
+        abogado: { usuario: id_abogado_principal },
       });
 
       if (abogado_nuevo_existente) {
