@@ -18,7 +18,7 @@ documentoRouter.get(
   controller.findAllByCaso
 );
 
-documentoRouter.get("/", authMiddlewares.verifyAbogado, controller.findAll);
+documentoRouter.get("/", authMiddlewares.verifyAdmin, controller.findAll);
 
 documentoRouter.post(
   "/",

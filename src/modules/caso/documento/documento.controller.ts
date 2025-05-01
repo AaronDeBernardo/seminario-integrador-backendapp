@@ -3,6 +3,7 @@ import {
   validateEntity,
   validateNumericId,
 } from "../../../utils/validators.js";
+import { abogadoCasoService } from "../../appendix-caso/abogado-caso/abogado-caso.service.js";
 import { ApiResponse } from "../../../utils/api-response.class.js";
 import { Documento } from "./documento.entity.js";
 import { DocumentoDTO } from "./documento.dto.js";
@@ -52,6 +53,13 @@ export const controller = {
     try {
       const id_caso = validateNumericId(req.params.id_caso, "id_caso");
 
+      if (req.usuario!.is_admin === false)
+        await abogadoCasoService.checkAbogadoWorkingOnCaso(
+          req.usuario!.id,
+          id_caso,
+          false
+        );
+
       const documentos = await em.find(
         Documento,
         { caso: id_caso, fecha_baja: null },
@@ -86,6 +94,13 @@ export const controller = {
         fecha_baja: null,
       });
 
+      if (req.usuario!.is_admin === false)
+        await abogadoCasoService.checkAbogadoWorkingOnCaso(
+          req.usuario!.id,
+          documento.caso.id,
+          false
+        );
+
       const data = new DocumentoDTO(documento, false);
       res
         .status(200)
@@ -97,7 +112,14 @@ export const controller = {
 
   add: async (req: Request, res: Response): Promise<void> => {
     try {
+      await abogadoCasoService.checkAbogadoWorkingOnCaso(
+        req.usuario!.id,
+        req.body.sanitizedInput.caso,
+        true
+      );
+
       const em = orm.em.fork();
+
       const documento = em.create(Documento, req.body.sanitizedInput);
       validateEntity(documento);
 
@@ -113,21 +135,21 @@ export const controller = {
     try {
       const id = validateNumericId(req.params.id, "id");
 
-      const documento = await em.findOneOrFail(
-        Documento,
-        {
-          id,
-          fecha_baja: null,
-        },
-        { fields: ["id", "nombre", "fecha_carga", "fecha_baja"] }
+      const documento = await em.findOneOrFail(Documento, {
+        id,
+        fecha_baja: null,
+      });
+
+      await abogadoCasoService.checkAbogadoWorkingOnCaso(
+        req.usuario!.id,
+        documento.caso.id,
+        true
       );
 
       documento.fecha_baja = format(new Date(), "yyyy-MM-dd");
       await em.flush();
 
-      res
-        .status(200)
-        .json(new ApiResponse("Documento dado de baja.", documento));
+      res.status(200).json(new ApiResponse("Documento dado de baja."));
     } catch (error: unknown) {
       handleError(error, res);
     }

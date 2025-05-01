@@ -45,7 +45,7 @@ export const controller = {
 
   findByAbogado: async (req: Request, res: Response) => {
     try {
-      const idAbogado = validateNumericId(req.params.id, "id");
+      const idAbogado = validateNumericId(req.params.id_abogado, "id_abogado");
 
       const actividadesRealizadas = await em.find(
         ActividadRealizada,
@@ -96,7 +96,18 @@ export const controller = {
   update: async (req: Request, res: Response) => {
     try {
       const id = validateNumericId(req.params.id, "id");
-      const ar = await em.findOneOrFail(ActividadRealizada, id);
+      const ar = await em.findOneOrFail(ActividadRealizada, {
+        id,
+      });
+
+      if (
+        req.usuario!.is_admin === false &&
+        req.usuario!.id !== ar.abogado.usuario.id
+      ) {
+        res.status(403).json(new ApiResponse("Acceso denegado."));
+        return;
+      }
+
       em.assign(ar, req.body.sanitizedInput);
 
       await validateEntitiesActive(ar);
@@ -115,6 +126,14 @@ export const controller = {
     try {
       const id = validateNumericId(req.params.id, "id");
       const ar = await em.findOneOrFail(ActividadRealizada, id);
+
+      if (
+        req.usuario!.is_admin === false &&
+        req.usuario!.id !== ar.abogado.usuario.id
+      ) {
+        res.status(403).json(new ApiResponse("Acceso denegado."));
+        return;
+      }
 
       if (ar.fecha_hora < subDays(new Date(), 1)) {
         throw new HttpError(
@@ -136,7 +155,9 @@ export const controller = {
     try {
       req.body.sanitizedInput = {
         actividad: validateNumericId(req.body.id_actividad, "id_actividad"),
-        abogado: validateNumericId(req.body.id_abogado, "id_abogado"),
+        abogado: req.usuario!.is_admin
+          ? validateNumericId(req.body.id_abogado, "id_abogado")
+          : req.usuario!.id,
         cliente: validateNumericId(req.body.id_cliente, "id_cliente"),
       };
 

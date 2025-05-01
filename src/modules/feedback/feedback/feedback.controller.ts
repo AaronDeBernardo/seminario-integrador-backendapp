@@ -5,6 +5,8 @@ import {
   validateNumericId,
 } from "../../../utils/validators.js";
 import { ApiResponse } from "../../../utils/api-response.class.js";
+import { Caso } from "../../caso/caso/caso.entity.js";
+import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { Feedback } from "./feedback.entity.js";
 import { FeedbackDTO } from "./feedback.dto.js";
 import { feedbackService } from "./feedback.service.js";
@@ -56,10 +58,18 @@ export const controller = {
 
   findAbogadosForFeedback: async (req: Request, res: Response) => {
     try {
-      //TODO validar que el cliente logueado sea el del caso
-      //Devolver mensajes adecuados si el caso no está finalizado??? si no existe??
-
       const id_caso = validateNumericId(req.params.id_caso, "id_caso");
+      const caso = await em.findOneOrFail(Caso, { id: id_caso });
+
+      if (caso.cliente.usuario.id !== req.usuario!.id) {
+        res.status(403).json(new ApiResponse("Acceso denegado."));
+        return;
+      }
+
+      if (caso.estado !== EstadoCasoEnum.FINALIZADO) {
+        res.status(400).json(new ApiResponse("El caso no fue finalizado."));
+        return;
+      }
 
       const data = await feedbackService.getAbogadosForFeedback(id_caso);
 
@@ -78,7 +88,19 @@ export const controller = {
 
   add: async (req: Request, res: Response) => {
     try {
-      //TODO validar que el cliente logueado sea el del caso
+      const caso = await em.findOneOrFail(Caso, {
+        id: req.body.sanitizedInput.caso,
+      });
+
+      if (caso.cliente.usuario.id !== req.usuario!.id) {
+        res.status(403).json(new ApiResponse("Acceso denegado."));
+        return;
+      }
+
+      if (caso.estado !== EstadoCasoEnum.FINALIZADO) {
+        res.status(400).json(new ApiResponse("El caso no fue finalizado."));
+        return;
+      }
 
       const calificable = await feedbackService.isAbogadoCalificable(
         req.body.sanitizedInput.abogado,

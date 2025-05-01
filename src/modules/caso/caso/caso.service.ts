@@ -1,8 +1,8 @@
 import { addDays, addHours, addMonths, addYears, format } from "date-fns";
+import { EstadoCasoEnum, FrecuenciaPagoEnum } from "../../../utils/enums.js";
 import { AbogadoCaso } from "../../appendix-caso/abogado-caso/abogado-caso.entity.js";
 import { Caso } from "./caso.entity.js";
 import { Cuota } from "../cuota/cuota.entity.js";
-import { FrecuenciaPagoEnum } from "../../../utils/enums.js";
 import { HttpError } from "../../../utils/http-error.js";
 import { orm } from "../../../config/db.config.js";
 
@@ -94,5 +94,15 @@ export const casoService = {
       throw new Error("No hay ningún abogado principal en el caso.");
 
     return abogado_principal;
+  },
+
+  checkCasoIsActive: async (id: number) => {
+    const caso = await em.findOne(Caso, {
+      id,
+      estado: EstadoCasoEnum.EN_CURSO,
+    });
+
+    if (!caso)
+      throw new HttpError(400, "El caso no se encuentra con estado en curso.");
   },
 };

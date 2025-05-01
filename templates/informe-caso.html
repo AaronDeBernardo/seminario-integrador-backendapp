@@ -49,6 +49,7 @@
         border: 1px solid #ddd;
         padding: 8px;
         text-align: left;
+        min-width: 100px;
       }
       th {
         background-color: #f2f2f2;
@@ -70,7 +71,7 @@
 
     <div class="case-info">
       <div class="case-row">
-        <div class="case-label">Número caso:</div>
+        <div class="case-label">ID caso:</div>
         <div>{{caso.id}}</div>
       </div>
       <div class="case-row">
@@ -89,23 +90,18 @@
         <div class="case-label">Estado:</div>
         <div>{{caso.estado}}</div>
       </div>
-      <div class="case-row">
-        <div class="case-label">Fecha estado:</div>
-        <div>{{caso.fecha_estado}}</div>
-      </div>
     </div>
 
     <div class="divider"></div>
 
     <div class="notes-section">
-      <h2>Notas</h2>
+      <h2>Detalles</h2>
 
       {{#if notas.length}}
       <table>
         <thead>
           <tr>
             <th>Fecha y hora</th>
-            <th>Título</th>
             <th>Abogado</th>
             <th>Descripción</th>
           </tr>
@@ -114,15 +110,17 @@
           {{#each notas}}
           <tr>
             <td>{{this.fecha_hora}}</td>
-            <td>{{this.titulo}}</td>
             <td>{{this.abogado}}</td>
-            <td>{{this.descripcion}}</td>
+            <td>
+              <p><strong>{{this.titulo}}</strong></p>
+              {{this.descripcion}}
+            </td>
           </tr>
           {{/each}}
         </tbody>
       </table>
       {{else}}
-      <p>No hay notas registradas para este caso.</p>
+      <p>No se encontraron detalles del caso.</p>
       {{/if}}
     </div>
 
