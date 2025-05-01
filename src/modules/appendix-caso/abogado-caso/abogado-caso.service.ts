@@ -54,6 +54,7 @@ export const abogadoCasoService = {
     id_caso: number,
     checkEstadoEnCurso: boolean
   ): Promise<boolean> => {
+    const em = orm.em.fork();
     const filter = checkEstadoEnCurso
       ? {
           caso: { id: id_caso, estado: EstadoCasoEnum.EN_CURSO },

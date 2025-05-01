@@ -5,6 +5,7 @@ import {
 } from "../../../utils/validators.js";
 import { abogadoCasoService } from "../abogado-caso/abogado-caso.service.js";
 import { ApiResponse } from "../../../utils/api-response.class.js";
+import { casoService } from "../../caso/caso/caso.service.js";
 import { Comentario } from "./comentario.entity.js";
 import { ComentarioDTO } from "./comentario.dto.js";
 import { comentarioService } from "./comentario.service.js";
@@ -47,7 +48,7 @@ export const controller = {
         await abogadoCasoService.checkAbogadoWorkingOnCaso(
           req.usuario!.id,
           req.body.sanitizedInput.caso,
-          true
+          false
         );
 
       if (req.params.id_padre) {
@@ -56,6 +57,8 @@ export const controller = {
           "id_padre"
         );
       }
+
+      await casoService.checkCasoIsActive(req.body.sanitizedInput.caso);
 
       const comentario = em.create(Comentario, req.body.sanitizedInput);
       validateEntity(comentario);
@@ -88,8 +91,10 @@ export const controller = {
         await abogadoCasoService.checkAbogadoWorkingOnCaso(
           req.usuario!.id,
           comentario.caso.id,
-          true
+          false
         );
+
+      await casoService.checkCasoIsActive(req.body.sanitizedInput.caso);
 
       const horasTranscurridas =
         (new Date().getTime() - comentario.fecha_hora.getTime()) /

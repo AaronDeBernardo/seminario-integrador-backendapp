@@ -147,7 +147,8 @@ export const controller = {
 
       const horarioTurno = await em.findOneOrFail(HorarioTurno, {
         id,
-        fecha_baja: { $eq: null },
+        fecha_baja: null,
+        abogado: req.body.sanitizedInput.abogado,
       });
 
       await em.transactional(async (em) => {
@@ -176,7 +177,8 @@ export const controller = {
 
       const horarioTurno = await em.findOneOrFail(HorarioTurno, {
         id,
-        fecha_baja: { $eq: null },
+        fecha_baja: null,
+        abogado: { usuario: req.usuario!.id },
       });
 
       horarioTurno.fecha_baja = format(new Date(), "yyyy-MM-dd");
@@ -194,8 +196,7 @@ export const controller = {
   sanitize: (req: Request, res: Response, next: NextFunction) => {
     try {
       req.body.sanitizedInput = {
-        abogado: validateNumericId(req.body.id_abogado, "id_abogado"),
-        //TODO validar que sea el abogado logueado
+        abogado: req.usuario!.id,
         hora_inicio: validateTime(req.body.hora_inicio, "hora_inicio"),
         hora_fin: validateTime(req.body.hora_fin, "hora_fin"),
         dia_semana: validateIntegerInRange(
