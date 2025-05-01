@@ -7,6 +7,7 @@ import {
 import { AbogadoCaso } from "../../appendix-caso/abogado-caso/abogado-caso.entity.js";
 import { ApiResponse } from "../../../utils/api-response.class.js";
 import bcrypt from "bcrypt";
+import { Caso } from "../../caso/caso/caso.entity.js";
 import { EstadoCasoEnum } from "../../../utils/enums.js";
 import { format } from "date-fns";
 import { handleError } from "../../../utils/error-handler.js";
@@ -82,6 +83,21 @@ export const controller = {
           caso: { estado: EstadoCasoEnum.EN_CURSO },
         });
         abogadosCasos.forEach((abCaso) => (abCaso.fecha_baja = fechaBaja));
+      } else if (usuario.cliente !== null) {
+        const cantidadCasosActivos = await em.count(Caso, {
+          estado: EstadoCasoEnum.EN_CURSO,
+          cliente: usuario.cliente,
+        });
+        if (cantidadCasosActivos !== 0) {
+          res
+            .status(409)
+            .json(
+              new ApiResponse(
+                "No se pudo eliminar al cliente. Tiene casos en curso."
+              )
+            );
+          return;
+        }
       }
 
       usuario.fecha_baja = fechaBaja;

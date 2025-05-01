@@ -56,7 +56,7 @@ export const controller = {
           const abogado_principal =
             casoService.findAbogadoPrincipalFromCaso(caso);
 
-          return new CasoDTO(caso, abogado_principal!);
+          return new CasoDTO(caso, abogado_principal, true);
         });
       } else {
         const abogadoCasos = await em.find(
@@ -89,7 +89,7 @@ export const controller = {
           const abogado_principal =
             casoService.findAbogadoPrincipalFromCaso(caso);
 
-          return new CasoDTO(caso, abogado_principal);
+          return new CasoDTO(caso, abogado_principal, true);
         });
       }
 
@@ -122,7 +122,7 @@ export const controller = {
           const abogado_principal =
             casoService.findAbogadoPrincipalFromCaso(caso);
 
-          return new CasoDTO(caso, abogado_principal!);
+          return new CasoDTO(caso, abogado_principal, true);
         });
       } else {
         const abogadoCasos = await em.find(
@@ -146,7 +146,7 @@ export const controller = {
           const abogado_principal =
             casoService.findAbogadoPrincipalFromCaso(caso);
 
-          return new CasoDTO(caso, abogado_principal);
+          return new CasoDTO(caso, abogado_principal, true);
         });
       }
 
@@ -181,7 +181,7 @@ export const controller = {
         const abogado_principal =
           casoService.findAbogadoPrincipalFromCaso(caso);
 
-        return new CasoDTO(caso, abogado_principal!);
+        return new CasoDTO(caso, abogado_principal, true);
       });
 
       res
@@ -224,7 +224,7 @@ export const controller = {
       const abogado_principal = await casoService.findAbogadoPrincipalFromDB(
         caso
       );
-      const data = new CasoDTO(caso, abogado_principal);
+      const data = new CasoDTO(caso, abogado_principal, true);
 
       res.status(200).json(new ApiResponse("El caso fue encontrado.", data));
     } catch (error: unknown) {

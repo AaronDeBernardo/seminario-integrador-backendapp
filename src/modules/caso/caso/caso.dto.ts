@@ -12,7 +12,7 @@ export class CasoDTO {
   descripcion: string;
   estado: string;
   fecha_estado: string;
-  abogado_principal?: { id: number; nombre: string; apellido: string };
+  abogado_principal?: { id: number; nombre: string; apellido: string } | string;
 
   monto_caso?: number;
   cuotas?: {
@@ -23,7 +23,11 @@ export class CasoDTO {
     forma_cobro: string | undefined;
   }[];
 
-  constructor(input: Caso, abogado_principal?: Abogado) {
+  constructor(
+    input: Caso,
+    abogado_principal?: Abogado,
+    incluir_abogado_principal: boolean = false
+  ) {
     this.id = input.id;
     this.cliente = input.cliente ? new ClienteDTO(input.cliente) : undefined;
     this.especialidad = input.especialidad
@@ -40,11 +44,19 @@ export class CasoDTO {
         nombre: abogado_principal.usuario.nombre,
         apellido: abogado_principal.usuario.apellido,
       };
+    } else {
+      this.abogado_principal = incluir_abogado_principal
+        ? "El abogado principal fue eliminado."
+        : undefined;
     }
   }
 
-  static fromCaso(caso: Caso, abogado_principal?: Abogado): CasoDTO {
-    return new CasoDTO(caso, abogado_principal);
+  static fromCaso(
+    caso: Caso,
+    abogado_principal?: Abogado,
+    incluir_abogado_principal: boolean = false
+  ): CasoDTO {
+    return new CasoDTO(caso, abogado_principal, incluir_abogado_principal);
   }
 
   static fromCasoAndCuotas(caso: Caso, cuotas: Cuota[]): CasoDTO {

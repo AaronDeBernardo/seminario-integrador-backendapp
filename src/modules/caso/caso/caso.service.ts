@@ -1,5 +1,6 @@
 import { addDays, addHours, addMonths, addYears, format } from "date-fns";
 import { EstadoCasoEnum, FrecuenciaPagoEnum } from "../../../utils/enums.js";
+import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 import { AbogadoCaso } from "../../appendix-caso/abogado-caso/abogado-caso.entity.js";
 import { Caso } from "./caso.entity.js";
 import { Cuota } from "../cuota/cuota.entity.js";
@@ -66,7 +67,9 @@ export const casoService = {
     return format(expirationDate, "yyyy-MM-dd");
   },
 
-  findAbogadoPrincipalFromDB: async (caso: Caso) => {
+  findAbogadoPrincipalFromDB: async (
+    caso: Caso
+  ): Promise<Abogado | undefined> => {
     const abogadoCasoPrincipal = await em.findOne(
       AbogadoCaso,
       {
@@ -77,21 +80,15 @@ export const casoService = {
       { populate: ["abogado.usuario"] }
     );
 
-    if (!abogadoCasoPrincipal)
-      throw new Error("No hay ningún abogado principal en el caso.");
-
-    return abogadoCasoPrincipal.abogado;
+    return abogadoCasoPrincipal?.abogado;
   },
 
-  findAbogadoPrincipalFromCaso: (caso: Caso) => {
+  findAbogadoPrincipalFromCaso: (caso: Caso): Abogado | undefined => {
     const abogado_principal = caso.abogadosCaso
       .getItems()
       .find((ac: AbogadoCaso) => {
         return ac.fecha_baja === null && ac.es_principal;
       })?.abogado;
-
-    if (!abogado_principal)
-      throw new Error("No hay ningún abogado principal en el caso.");
 
     return abogado_principal;
   },
