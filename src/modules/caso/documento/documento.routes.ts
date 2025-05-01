@@ -10,11 +10,11 @@ const fileUploadMiddleware = createFileUploadMiddleware({
 
 export const documentoRouter = Router();
 
-documentoRouter.get("/:id", authMiddlewares.verifyAbogado, controller.findOne);
+documentoRouter.get("/:id", authMiddlewares.verifyEmpleado, controller.findOne); //Si no es admin, debe estar asignado al caso
 
 documentoRouter.get(
   "/por-caso/:id_caso",
-  authMiddlewares.verifyAbogado,
+  authMiddlewares.verifyEmpleado, //Si no es admin, debe estar asignado al caso
   controller.findAllByCaso
 );
 
