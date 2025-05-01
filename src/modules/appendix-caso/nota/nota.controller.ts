@@ -33,8 +33,8 @@ export const controller = {
 
       if (req.usuario?.is_admin === false) {
         abogadoCasoService.checkAbogadoWorkingOnCaso(
-          req.body.sanitizedInput.abogado,
-          req.body.sanitizedInput.caso,
+          req.usuario!.id,
+          id_caso,
           false
         );
       }
