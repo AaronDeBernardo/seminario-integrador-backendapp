@@ -58,9 +58,18 @@ export const controller = {
         }
       );
 
-      const data = recordatorios.map(
-        (recordatorio) => new RecordatorioDTO(recordatorio)
-      );
+      const now = new Date();
+      const recordatoriosPasados = [];
+      const recordatoriosFuturos = [];
+
+      for (const recordatorio of recordatorios) {
+        const aux = new RecordatorioDTO(recordatorio);
+        if (recordatorio.fecha_hora_limite < now)
+          recordatoriosPasados.push(aux);
+        else recordatoriosFuturos.push(aux);
+      }
+
+      const data = { recordatoriosPasados, recordatoriosFuturos };
       res
         .status(200)
         .json(new ApiResponse("Recordatorios del caso encontrados.", data));
