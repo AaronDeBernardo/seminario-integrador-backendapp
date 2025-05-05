@@ -40,7 +40,9 @@ export const feedbackService = {
       WHERE ca.id = ?
         AND ca.estado = ?
         AND ca.fecha_estado >= ?
-        AND fe.id_abogado IS NULL;`,
+        AND fe.id_abogado IS NULL
+      ORDER BY us.nombre, us.apellido;
+      `,
       [id_caso, EstadoCasoEnum.FINALIZADO, dateFrom]
     );
 

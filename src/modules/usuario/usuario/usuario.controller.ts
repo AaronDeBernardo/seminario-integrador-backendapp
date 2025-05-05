@@ -29,18 +29,20 @@ export const controller = {
         populate: ["abogado.rol"],
       });
 
-      if (req.body.contrasena !== undefined) {
-        const correctPassword = bcrypt.compareSync(
-          req.body.aux_info.contrasena_anterior || "",
-          usuario.contrasena
-        );
+      const correctPassword = bcrypt.compareSync(
+        req.body.aux_info.contrasena_anterior || "",
+        usuario.contrasena
+      );
 
-        if (!correctPassword) {
-          res
-            .status(400)
-            .json(new ApiResponse("La contraseña anterior no es válida."));
-          return;
-        }
+      if (!correctPassword) {
+        res
+          .status(400)
+          .json(
+            new ApiResponse(
+              "La contraseña actual ingresada es incorrecta. Por favor, verifica e intenta nuevamente."
+            )
+          );
+        return;
       }
 
       em.assign(usuario, req.body.sanitizedInput);
