@@ -23,7 +23,10 @@ export const controller = {
           secretario: { $ne: null },
           fecha_baja: { $eq: null },
         },
-        { populate: ["secretario"] }
+        {
+          populate: ["secretario"],
+          orderBy: { apellido: "ASC", nombre: "ASC" },
+        }
       );
 
       const data = secretarios.map((s) => new SecretarioDTO(s));

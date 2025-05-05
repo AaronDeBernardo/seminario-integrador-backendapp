@@ -24,7 +24,7 @@ export const controller = {
           cliente: { $ne: null },
           fecha_baja: { $eq: null },
         },
-        { populate: ["cliente"] }
+        { populate: ["cliente"], orderBy: { nombre: "ASC", apellido: "ASC" } }
       );
 
       const data = clientes.map((c) => new ClienteDTO(c));

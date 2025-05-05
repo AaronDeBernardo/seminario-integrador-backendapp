@@ -94,7 +94,7 @@ export const controller = {
           false
         );
 
-      await casoService.checkCasoIsActive(req.body.sanitizedInput.caso);
+      await casoService.checkCasoIsActive(comentario.caso.id);
 
       const horasTranscurridas =
         (new Date().getTime() - comentario.fecha_hora.getTime()) /

@@ -28,6 +28,7 @@ export const controller = {
         },
         {
           populate: ["abogado", "abogado.rol", "abogado.especialidades"],
+          orderBy: { apellido: "ASC", nombre: "ASC" },
         }
       );
 
