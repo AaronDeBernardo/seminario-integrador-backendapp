@@ -10,6 +10,8 @@ export class AbogadoCasoDTO {
     nombre: string;
     apellido: string;
     matricula: string;
+    email: string;
+    telefono: string;
     rol: { id: number; nombre: string };
   };
 
@@ -25,6 +27,8 @@ export class AbogadoCasoDTO {
         nombre: input.abogado.usuario.nombre,
         apellido: input.abogado.usuario.apellido,
         matricula: input.abogado.matricula,
+        email: input.abogado.usuario.email,
+        telefono: input.abogado.usuario.telefono,
         rol: { id: input.abogado.rol.id, nombre: input.abogado.rol.nombre },
       };
     }
