@@ -1,21 +1,18 @@
 import multer, { FileFilterCallback } from "multer";
 import { NextFunction, Request, Response } from "express";
 import { ApiResponse } from "../utils/api-response.class.js";
-import { politicasService } from "../modules/misc/politicas/politicas.service.js";
-import { validateNumericId } from "../utils/validators.js";
 
 type UploadOptions = {
   allowedMimeTypes: string[];
   fieldName: string;
+  maxFileSizeMB: number;
 };
-
-const politicas = await politicasService.loadPoliticas();
-validateNumericId(politicas.tam_max_archivo_mb, "tam_max_archivo_mb");
-const MAX_FILE_SIZE = politicas.tam_max_archivo_mb * 1024 * 1024;
 
 const storage = multer.memoryStorage();
 
 export function createFileUploadMiddleware(options: UploadOptions) {
+  const maxFileSize = 1024 * 1024 * options.maxFileSizeMB;
+
   function fileFilter(
     _req: Request,
     file: Express.Multer.File,
@@ -34,7 +31,7 @@ export function createFileUploadMiddleware(options: UploadOptions) {
 
   const upload = multer({
     storage,
-    limits: { fileSize: MAX_FILE_SIZE },
+    limits: { fileSize: maxFileSize },
     fileFilter,
   });
 
@@ -53,7 +50,7 @@ export function createFileUploadMiddleware(options: UploadOptions) {
               .status(400)
               .json(
                 new ApiResponse(
-                  `El archivo excede el tamaño máximo permitido (${politicas.tam_max_archivo_mb} MB)`
+                  `El archivo excede el tamaño máximo permitido (${options.maxFileSizeMB} MB)`
                 )
               );
             return;

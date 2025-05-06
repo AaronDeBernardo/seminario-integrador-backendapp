@@ -1,11 +1,15 @@
 import { authMiddlewares } from "../../auth/auth.middlewares.js";
 import { controller } from "./documento.controller.js";
 import { createFileUploadMiddleware } from "../../../middleware/multer.config.js";
+import { politicasService } from "../../misc/politicas/politicas.service.js";
 import { Router } from "express";
+
+const politicas = await politicasService.getPoliticas();
 
 const fileUploadMiddleware = createFileUploadMiddleware({
   allowedMimeTypes: ["application/pdf", "image/jpeg", "image/png"],
   fieldName: "archivo",
+  maxFileSizeMB: politicas.tam_max_documento_mb,
 });
 
 export const documentoRouter = Router();

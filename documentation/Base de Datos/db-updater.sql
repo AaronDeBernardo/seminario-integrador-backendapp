@@ -181,3 +181,10 @@ ALTER TABLE `sistema_juridico`.`comentarios`
   REFERENCES `sistema_juridico`.`comentarios` (`id`)
   ON DELETE CASCADE
   ON UPDATE CASCADE;
+
+
+-- Update to V12.0 - 2025-05-06 16:41:52
+ALTER TABLE `politicas`
+DROP COLUMN `tam_max_archivo_mb`,
+ADD COLUMN `tam_max_foto_usuario_mb` INT NOT NULL,
+ADD COLUMN `tam_max_documento_mb` INT NOT NULL;

@@ -9,5 +9,8 @@ export class Politicas {
   max_cuotas!: number;
 
   @Property()
-  tam_max_archivo_mb!: number;
+  tam_max_foto_usuario_mb!: number;
+
+  @Property()
+  tam_max_documento_mb!: number;
 }

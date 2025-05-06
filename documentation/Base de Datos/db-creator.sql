@@ -207,8 +207,8 @@ CREATE TABLE `comentarios` (
   KEY `fk_comentarios_comentarios_idx` (`id_padre`),
   CONSTRAINT `fk_comentarios_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_comentarios_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
   CONSTRAINT `fk_comentarios_comentarios` FOREIGN KEY (`id_padre`) REFERENCES `comentarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -388,7 +388,8 @@ DROP TABLE IF EXISTS `politicas`;
 CREATE TABLE `politicas` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `max_cuotas` int NOT NULL,
-  `tam_max_archivo_mb` int NOT NULL,
+  `tam_max_foto_usuario_mb` int NOT NULL,
+  `tam_max_documento_mb` int NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -624,4 +625,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-05 23:10:40
+-- Dump completed on 2025-05-06 16:41:52

@@ -360,7 +360,7 @@ export const controller = {
         return;
       }
 
-      const politicas = await politicasService.loadPoliticas();
+      const politicas = await politicasService.getPoliticas();
 
       if (req.body.sanitizedInput.num_cuotas > politicas.max_cuotas) {
         res
