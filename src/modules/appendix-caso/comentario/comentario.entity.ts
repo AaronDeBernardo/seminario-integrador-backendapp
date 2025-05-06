@@ -1,12 +1,4 @@
-import {
-  Collection,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryKey,
-  Property,
-  Rel,
-} from "@mikro-orm/core";
+import { Entity, ManyToOne, PrimaryKey, Property, Rel } from "@mikro-orm/core";
 import { Abogado } from "../../usuario/abogado/abogado.entity.js";
 import { Caso } from "../../caso/caso/caso.entity.js";
 import { NotEmptyAndMaxLength } from "../../../utils/validators.js";

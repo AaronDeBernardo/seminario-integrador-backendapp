@@ -169,3 +169,15 @@ DELIMITER ;
 -- Update to V10.0 - 2025-04-25 11:51:58
 ALTER TABLE `sistema_juridico`.`turnos_otorgados` 
 ADD COLUMN `codigo_cancelacion` VARCHAR(72) NOT NULL AFTER `fecha_turno`;
+
+
+-- Update to V11.0 - 2025-05-05 23:10:40
+ALTER TABLE `sistema_juridico`.`comentarios`
+  DROP FOREIGN KEY `fk_comentarios_comentarios`;
+
+ALTER TABLE `sistema_juridico`.`comentarios`
+  ADD CONSTRAINT `fk_comentarios_comentarios`
+  FOREIGN KEY (`id_padre`)
+  REFERENCES `sistema_juridico`.`comentarios` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;

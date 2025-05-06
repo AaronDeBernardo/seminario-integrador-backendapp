@@ -67,7 +67,7 @@ CREATE TABLE `abogados_casos` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `abogados_casos_BEFORE_INSERT` BEFORE INSERT ON `abogados_casos` FOR EACH ROW BEGIN
-	SET NEW.fecha_alta = CURRENT_DATE;
+    SET NEW.fecha_alta = CURRENT_DATE;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -163,7 +163,7 @@ CREATE TABLE `casos` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `casos_BEFORE_INSERT` BEFORE INSERT ON `casos` FOR EACH ROW BEGIN
-	SET NEW.fecha_inicio = CURRENT_DATE;
+    SET NEW.fecha_inicio = CURRENT_DATE;
     SET NEW.fecha_estado = CURRENT_DATE;
 END */;;
 DELIMITER ;
@@ -207,8 +207,8 @@ CREATE TABLE `comentarios` (
   KEY `fk_comentarios_comentarios_idx` (`id_padre`),
   CONSTRAINT `fk_comentarios_abogados` FOREIGN KEY (`id_abogado`) REFERENCES `abogados` (`id_usuario`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_comentarios_casos` FOREIGN KEY (`id_caso`) REFERENCES `casos` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_comentarios_comentarios` FOREIGN KEY (`id_padre`) REFERENCES `comentarios` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `fk_comentarios_comentarios` FOREIGN KEY (`id_padre`) REFERENCES `comentarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -275,7 +275,7 @@ CREATE TABLE `documentos` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `documentos_BEFORE_INSERT` BEFORE INSERT ON `documentos` FOR EACH ROW BEGIN
-	SET NEW.fecha_carga = CURRENT_DATE;
+    SET NEW.fecha_carga = CURRENT_DATE;
     SET NEW.fecha_carga = CURRENT_DATE;
 END */;;
 DELIMITER ;
@@ -532,7 +532,7 @@ CREATE TABLE `usuarios` (
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `usuarios_BEFORE_INSERT` BEFORE INSERT ON `usuarios` FOR EACH ROW BEGIN
-	SET NEW.fecha_alta = CURRENT_DATE;
+    SET NEW.fecha_alta = CURRENT_DATE;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -624,4 +624,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-26 16:51:01
+-- Dump completed on 2025-05-05 23:10:40
