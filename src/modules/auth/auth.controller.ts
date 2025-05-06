@@ -84,10 +84,14 @@ export const controller = {
   refresh: async function (req: Request, res: Response) {
     try {
       const token = authService.decodeToken(req);
-      const usuario = await em.findOneOrFail(Usuario, {
-        id: token.id,
-        fecha_baja: null,
-      });
+      const usuario = await em.findOneOrFail(
+        Usuario,
+        {
+          id: token.id,
+          fecha_baja: null,
+        },
+        { populate: ["abogado.rol"] }
+      );
 
       authService.refreshToken(token, res);
       const data = new UsuarioSesion(usuario);
