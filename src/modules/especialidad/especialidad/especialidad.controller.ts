@@ -64,7 +64,7 @@ export const controller = {
 
       const abogados = especialidad.abogados.getItems();
 
-      const data = abogados.map((abogado) => new AbogadoDTO(abogado));
+      const data = abogados.map((abogado) => new AbogadoDTO(abogado, false));
 
       res
         .status(200)
