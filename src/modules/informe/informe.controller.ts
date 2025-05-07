@@ -3,12 +3,9 @@ import {
   IAbogado,
   IActividad,
   IActividadRealizada,
-  ICaso,
   ICasoBase,
-  IComentario,
   ICuota,
   informeService,
-  INota,
   INotaCaso,
 } from "./informe.service.js";
 import { Request, Response } from "express";
@@ -188,110 +185,36 @@ export const controller = {
         return;
       }
 
-      const cantidad_turnos = await em.execute(
-        `
+      const cantidad_turnos_otorgados = (
+        await em.execute(
+          `
         SELECT COUNT(*) as cantidad
         FROM abogados a
-        INNER JOIN horarios_turnos ht ON a.id_usuario = ht.id_abogado
-        INNER JOIN turnos_otorgados t ON ht.id = t.id_horario_turno
+        INNER JOIN horarios_turnos ht
+          ON a.id_usuario = ht.id_abogado
+        INNER JOIN turnos_otorgados t
+          ON ht.id = t.id_horario_turno
         WHERE id_abogado = ?
-        AND t.fecha_turno BETWEEN ? AND ?
+          AND t.fecha_turno BETWEEN ? AND ?
         `,
-        [id_abogado, inicioMes, finMes]
-      );
-
-      const cantidad_turnos_otorgados = cantidad_turnos[0].cantidad;
-
-      const casos_base = await em.execute(
-        `
-        SELECT c.id, c.estado, c.descripcion, ac.fecha_alta, ac.fecha_baja, c.fecha_estado
-        FROM casos c
-        INNER JOIN abogados_casos ac ON c.id = ac.id_caso
-        WHERE ac.id_abogado = ?
-        AND (
-          (ac.fecha_alta BETWEEN ? AND ?) OR
-          (ac.fecha_baja BETWEEN ? AND ?) OR
-          (ac.fecha_alta <= ? AND (ac.fecha_baja IS NULL OR ac.fecha_baja >= ?))
+          [id_abogado, inicioMes, finMes]
         )
-        AND (                           
-            c.estado = 'En curso'       
-            OR
-            (c.estado IN ('Finalizado', 'Cancelado') AND c.fecha_estado BETWEEN ? AND ?) 
-        )  
-        `,
-        [id_abogado, inicioMes, finMes, inicioMes, finMes, finMes, inicioMes]
+      )[0].cantidad;
+
+      const casos = await informeService.findCasosWhereAbogadoWorked(
+        id_abogado,
+        inicioMes,
+        finMes
       );
-
-      const casos: ICaso[] = [];
-
-      for (const caso_base of casos_base) {
-        const notas = await em.execute<INota[]>(
-          `
-          SELECT fecha_hora, titulo, descripcion
-          FROM notas 
-          WHERE id_caso = ?
-          AND fecha_hora BETWEEN ? AND ?
-          ORDER BY fecha_hora
-          `,
-          [caso_base.id, inicioMes, finMes]
-        );
-
-        const comentarios = await em.execute<IComentario[]>(
-          `
-          SELECT fecha_hora, comentario
-          FROM comentarios
-          WHERE id_caso = ?
-          AND id_abogado = ?
-          AND fecha_hora BETWEEN ? AND ?
-          ORDER BY fecha_hora
-          `,
-          [caso_base.id, id_abogado, inicioMes, finMes]
-        );
-
-        const feedbacks = await em.execute(
-          `
-          SELECT f.fecha_hora, f.descripcion, f.puntuacion
-          FROM abogados a
-          INNER JOIN abogados_casos ac ON a.id_usuario = ac.id_abogado
-          INNER JOIN casos c ON ac.id_caso = c.id
-          INNER JOIN feedbacks f ON ac.id_abogado = f.id_abogado and ac.id_caso = f.id_caso
-          WHERE f.id_caso = ?
-          AND f.fecha_hora BETWEEN ? AND ?
-          ORDER BY f.fecha_hora DESC
-          LIMIT 1
-          `,
-          [caso_base.id, inicioMes, finMes]
-        );
-
-        const feedback =
-          feedbacks.length > 0
-            ? {
-                fecha_hora: feedbacks[0].fecha_hora,
-                descripcion: feedbacks[0].descripcion,
-                puntuacion: feedbacks[0].puntuacion,
-              }
-            : undefined;
-
-        casos.push({
-          id: caso_base.id,
-          estado: caso_base.estado,
-          descripcion: caso_base.descripcion,
-          fecha_alta: caso_base.fecha_alta,
-          fecha_baja: caso_base.fecha_baja,
-          notas,
-          comentarios,
-          feedback,
-        });
-      }
 
       const actividades_realizadas = await em.execute<IActividadRealizada[]>(
         `
         SELECT ar.fecha_hora, a.nombre
         FROM actividades_realizadas ar
-        INNER JOIN actividades a ON ar.id_actividad = a.id
+        INNER JOIN actividades a
+          ON ar.id_actividad = a.id
         WHERE ar.id_abogado = ?
-        AND ar.fecha_hora BETWEEN ? AND ?
-        ORDER BY ar.fecha_hora
+          AND ar.fecha_hora BETWEEN ? AND ?;
         `,
         [id_abogado, inicioMes, finMes]
       );

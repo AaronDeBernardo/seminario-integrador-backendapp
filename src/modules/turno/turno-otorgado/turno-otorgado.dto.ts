@@ -7,9 +7,11 @@ export class TurnoOtorgadoDTO {
   hora_inicio: string;
   hora_fin: string;
   cliente: {
+    id?: number;
     nombre: string;
-    apellido: string | undefined;
-    id: number;
+    apellido?: string;
+    email: string;
+    telefono: string;
   };
 
   constructor(input: TurnoOtorgado) {
@@ -22,9 +24,11 @@ export class TurnoOtorgadoDTO {
     this.hora_inicio = input.horarioTurno.hora_inicio;
     this.hora_fin = input.horarioTurno.hora_fin;
     this.cliente = {
-      id: input.cliente?.usuario.id || 0, // 0 si el cliente no se encuentra registrado
-      nombre: input.cliente?.usuario.nombre || (input.nombre as string),
+      id: input.cliente?.usuario.id,
+      nombre: input.cliente?.usuario.nombre || input.nombre!,
       apellido: input.cliente?.usuario.apellido || undefined,
+      email: input.cliente?.usuario.email || input.email!,
+      telefono: input.cliente?.usuario.telefono || input.telefono!,
     };
   }
 }

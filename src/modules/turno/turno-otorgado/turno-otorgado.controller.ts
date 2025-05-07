@@ -45,6 +45,7 @@ export const controller = {
           fecha_cancelacion: { $eq: null },
         },
         {
+          orderBy: { fecha_turno: "ASC" },
           populate: ["cliente.usuario", "horarioTurno.abogado.usuario"],
         }
       );

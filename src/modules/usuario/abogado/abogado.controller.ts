@@ -32,7 +32,7 @@ export const controller = {
         }
       );
 
-      const data = abogados.map((a) => new AbogadoDTO(a));
+      const data = abogados.map((a) => new AbogadoDTO(a, false));
 
       res
         .status(200)
@@ -54,7 +54,7 @@ export const controller = {
         { populate: ["usuario", "rol"] }
       );
 
-      const data = new AbogadoDTO(abogado);
+      const data = new AbogadoDTO(abogado, true);
 
       res.status(200).json(new ApiResponse("El abogado fue encontrado.", data));
     } catch (error: unknown) {
@@ -76,10 +76,16 @@ export const controller = {
 
       const especialidades = abogado.especialidades.getItems();
 
-      const data = especialidades.map((esp) => ({
-        id: esp.id,
-        nombre: esp.nombre,
-      }));
+      const data = especialidades
+        .map((esp) => ({
+          id: esp.id,
+          nombre: esp.nombre,
+        }))
+        .sort((a, b) => {
+          if (a.nombre === "Otro") return 1; // 'Otro' va al final
+          if (b.nombre === "Otro") return -1;
+          return a.nombre.localeCompare(b.nombre);
+        });
 
       res
         .status(200)
@@ -124,7 +130,7 @@ export const controller = {
         }
       );
 
-      const data = abogados.map((a) => new AbogadoDTO(a));
+      const data = abogados.map((a) => new AbogadoDTO(a, false));
 
       res
         .status(200)
@@ -184,7 +190,7 @@ export const controller = {
         }
       );
 
-      const data = abogados.map((a) => new AbogadoDTO(a));
+      const data = abogados.map((a) => new AbogadoDTO(a, false));
 
       res
         .status(200)
@@ -216,7 +222,7 @@ export const controller = {
       validateEntity(abogado);
 
       await em.flush();
-      const data = new AbogadoDTO(abogado);
+      const data = new AbogadoDTO(abogado, true);
 
       res.status(201).json(new ApiResponse("Abogado creado.", data));
     } catch (error: unknown) {
@@ -257,7 +263,7 @@ export const controller = {
       validateEntity(abogado);
 
       await em.flush();
-      const data = new AbogadoDTO(abogado);
+      const data = new AbogadoDTO(abogado, true);
 
       res.status(200).json(new ApiResponse("Abogado actualizado.", data));
     } catch (error: unknown) {

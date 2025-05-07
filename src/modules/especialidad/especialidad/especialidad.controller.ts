@@ -12,9 +12,17 @@ const em = orm.em;
 export const controller = {
   findAll: async (_req: Request, res: Response) => {
     try {
-      const especialidades = await em.findAll(Especialidad);
+      const especialidades = await em.findAll(Especialidad, {
+        orderBy: { nombre: "ASC" },
+      });
 
-      const data = especialidades.map((e) => new EspecialidadDTO(e));
+      const data = especialidades
+        .map((e) => new EspecialidadDTO(e))
+        .sort((a, b) => {
+          if (a.nombre === "Otro") return 1;
+          if (b.nombre === "Otro") return -1;
+          return a.nombre.localeCompare(b.nombre);
+        });
 
       res
         .status(200)
@@ -56,7 +64,7 @@ export const controller = {
 
       const abogados = especialidad.abogados.getItems();
 
-      const data = abogados.map((abogado) => new AbogadoDTO(abogado));
+      const data = abogados.map((abogado) => new AbogadoDTO(abogado, false));
 
       res
         .status(200)

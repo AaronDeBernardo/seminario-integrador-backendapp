@@ -12,12 +12,12 @@ export class AbogadoDTO {
   tipo_doc: string;
   nro_doc: string;
   fecha_alta: string;
-  foto: Buffer;
+  foto?: Buffer;
   matricula: string;
   rol: Rol;
   especialidades: Especialidad[] | null;
 
-  constructor(input: Abogado | Usuario) {
+  constructor(input: Abogado | Usuario, includeFoto: boolean) {
     if (input instanceof Abogado) {
       this.id = input.usuario.id;
       this.nombre = input.usuario.nombre;
@@ -27,7 +27,7 @@ export class AbogadoDTO {
       this.tipo_doc = input.usuario.tipo_doc;
       this.nro_doc = input.usuario.nro_doc;
       this.fecha_alta = input.usuario.fecha_alta;
-      this.foto = input.foto;
+      this.foto = includeFoto ? input.foto : undefined;
       this.matricula = input.matricula;
       this.rol = input.rol;
       this.especialidades = input.especialidades.getItems();
@@ -40,7 +40,7 @@ export class AbogadoDTO {
       this.tipo_doc = input.tipo_doc;
       this.nro_doc = input.nro_doc;
       this.fecha_alta = input.fecha_alta;
-      this.foto = input.abogado!.foto;
+      this.foto = includeFoto ? input.abogado!.foto : undefined;
       this.matricula = input.abogado!.matricula;
       this.rol = input.abogado!.rol;
       this.especialidades = input.abogado!.especialidades.getItems();
