@@ -3,6 +3,7 @@ import { EstadoCasoEnum } from "../../utils/enums.js";
 import { format } from "date-fns";
 import fs from "fs";
 import handlebars from "handlebars";
+import { orm } from "../../config/db.config.js";
 import { sendEmail } from "../../utils/notifications.js";
 import { Usuario } from "../usuario/usuario/usuario.entity.js";
 
@@ -59,14 +60,14 @@ export interface IFeedback {
   puntuacion: number;
 }
 
-export interface ICaso {
+export interface ICasoReporte {
   id: number;
   estado: string;
   fecha_alta: string;
   fecha_baja?: string;
   descripcion: string;
-  notas: INota[];
-  comentarios: IComentario[];
+  notas?: INota[];
+  comentarios?: IComentario[];
   feedback?: IFeedback;
 }
 
@@ -74,6 +75,8 @@ export interface IActividadRealizada {
   fecha_hora: string;
   nombre: string;
 }
+
+const em = orm.em;
 
 export const informeService = {
   sendIncomeMail: async (
@@ -199,7 +202,7 @@ export const informeService = {
     receivers: string[],
     abogado: { nombre: string; apellido: string },
     cantidad_turnos_otorgados: number,
-    casos: ICaso[],
+    casos: ICasoReporte[],
     actividades_realizadas: IActividadRealizada[]
   ) => {
     const templateSource = fs.readFileSync(
@@ -215,11 +218,11 @@ export const informeService = {
         caso.fecha_baja = format(caso.fecha_baja, "dd/MM/yyyy");
       }
 
-      caso.notas.forEach((nota) => {
+      caso.notas?.forEach((nota) => {
         nota.fecha_hora = format(nota.fecha_hora, "dd/MM/yyyy HH:mm:ss");
       });
 
-      caso.comentarios.forEach((comentario) => {
+      caso.comentarios?.forEach((comentario) => {
         comentario.fecha_hora = format(
           comentario.fecha_hora,
           "dd/MM/yyyy HH:mm:ss"
@@ -259,5 +262,122 @@ export const informeService = {
       htmlContent,
       receivers
     );
+  },
+
+  findCasosWhereAbogadoWorked: async (
+    id_abogado: number,
+    inicioMes: Date,
+    finMes: Date
+  ) => {
+    const casos = await em.execute(
+      `
+        SELECT c.id, c.estado, c.descripcion, ac.fecha_alta, ac.fecha_baja, c.fecha_estado
+        FROM casos c
+        INNER JOIN abogados_casos ac ON c.id = ac.id_caso
+        WHERE ac.id_abogado = ?
+          AND ac.fecha_alta <= ?
+          AND (ac.fecha_baja IS NULL OR ac.fecha_baja >= ?)
+          AND (c.estado = 'En curso'
+            OR (c.estado IN ('Finalizado', 'Cancelado')
+              AND c.fecha_estado BETWEEN ? AND ?
+            )
+          )
+        `,
+      [id_abogado, finMes, inicioMes, inicioMes, finMes]
+    );
+
+    const casosEmail: ICasoReporte[] = [];
+
+    for (const caso of casos) {
+      const notas = await em.execute<INota[]>(
+        `
+          SELECT fecha_hora, titulo, descripcion
+          FROM notas 
+          WHERE id_caso = ?
+            AND id_abogado = ?
+            AND fecha_hora BETWEEN ? AND ?
+          ORDER BY fecha_hora;
+          `,
+        [caso, id_abogado, inicioMes, finMes]
+      );
+
+      const comentarios = await em.execute<IComentario[]>(
+        `
+          SELECT fecha_hora, comentario
+          FROM comentarios
+          WHERE id_caso = ?
+            AND id_abogado = ?
+            AND fecha_hora BETWEEN ? AND ?
+          ORDER BY fecha_hora
+          `,
+        [caso.id, id_abogado, inicioMes, finMes]
+      );
+
+      casosEmail.push({
+        id: caso.id,
+        estado: caso.estado,
+        descripcion: caso.descripcion,
+        fecha_alta: caso.fecha_alta,
+        fecha_baja: caso.fecha_baja,
+        notas,
+        comentarios,
+      });
+    }
+
+    const feedbacks = await em.execute<
+      {
+        id_caso: number;
+        estado: string;
+        descripcion_caso: string;
+        fecha_alta: string;
+        fecha_baja?: string;
+        fecha_estado: string;
+        fecha_hora: string;
+        puntuacion: number;
+        descripcion_feedback: string;
+      }[]
+    >(
+      `
+        SELECT c.id AS id_caso, c.estado, c.descripcion AS descripcion_caso, c.fecha_estado
+          , ac.fecha_alta, ac.fecha_baja
+          , f.fecha_hora, f.descripcion AS descripcion_feedback, f.puntuacion
+        FROM feedbacks f
+        INNER JOIN casos c
+          ON c.id = f.id_caso
+        INNER JOIN abogados_casos ac
+          ON c.id = ac.id_caso
+          AND f.id_abogado = ac.id_abogado
+        WHERE f.id_abogado = ?
+          AND f.fecha_hora BETWEEN ? AND ?
+        LIMIT 1;
+      `, //solo puede haber un feedback para un abogado y un caso
+      [id_abogado, inicioMes, finMes]
+    );
+
+    feedbacks.forEach((f) => {
+      const i = casosEmail.findIndex((c) => c.id === f.id_caso);
+      if (i !== -1) {
+        casosEmail[i].feedback = {
+          fecha_hora: f.fecha_hora,
+          descripcion: f.descripcion_feedback,
+          puntuacion: f.puntuacion,
+        };
+      } else {
+        casosEmail.push({
+          id: f.id_caso,
+          estado: f.estado,
+          descripcion: f.descripcion_caso,
+          fecha_alta: f.fecha_alta,
+          fecha_baja: f.fecha_baja,
+          feedback: {
+            fecha_hora: f.fecha_hora,
+            descripcion: f.descripcion_feedback,
+            puntuacion: f.puntuacion,
+          },
+        });
+      }
+    });
+
+    return casosEmail;
   },
 };

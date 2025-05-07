@@ -76,10 +76,16 @@ export const controller = {
 
       const especialidades = abogado.especialidades.getItems();
 
-      const data = especialidades.map((esp) => ({
-        id: esp.id,
-        nombre: esp.nombre,
-      }));
+      const data = especialidades
+        .map((esp) => ({
+          id: esp.id,
+          nombre: esp.nombre,
+        }))
+        .sort((a, b) => {
+          if (a.nombre === "Otro") return 1; // 'Otro' va al final
+          if (b.nombre === "Otro") return -1;
+          return a.nombre.localeCompare(b.nombre);
+        });
 
       res
         .status(200)
