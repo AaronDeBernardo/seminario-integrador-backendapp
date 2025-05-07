@@ -14,7 +14,9 @@ export class CasoDTO {
   fecha_estado: string;
   abogado_principal?: { id: number; nombre: string; apellido: string } | string;
 
-  monto_caso?: number;
+  monto_jus?: number;
+  deuda_jus?: number;
+
   cuotas?: {
     numero: number;
     cant_jus: number;
@@ -37,7 +39,9 @@ export class CasoDTO {
     this.descripcion = input.descripcion;
     this.estado = input.estado;
     this.fecha_estado = input.fecha_estado;
-    this.monto_caso = input.monto_caso || undefined;
+    this.monto_jus = input.monto_jus || undefined;
+    this.deuda_jus = input.deuda_jus || undefined;
+
     if (abogado_principal) {
       this.abogado_principal = {
         id: abogado_principal.usuario.id,

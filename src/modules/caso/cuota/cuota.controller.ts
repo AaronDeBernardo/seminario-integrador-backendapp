@@ -151,10 +151,14 @@ export const controller = {
       const numero = validateNumericId(req.params.numero, "numero");
 
       const cuota = await em.transactional(async (tem) => {
-        const cuota = await tem.findOneOrFail(Cuota, {
-          caso: id_caso,
-          numero: numero,
-        });
+        const cuota = await tem.findOneOrFail(
+          Cuota,
+          {
+            caso: id_caso,
+            numero: numero,
+          },
+          { populate: ["caso"] }
+        );
 
         if (cuota.fecha_hora_cobro) {
           throw new HttpError(409, "La cuota ya ha sido cobrada.");
@@ -175,6 +179,7 @@ export const controller = {
 
         cuota.fecha_hora_cobro = new Date();
         tem.assign(cuota, req.body.sanitizedInput);
+        cuota.caso.deuda_jus = cuota.caso.deuda_jus! - cuota.cant_jus;
         return cuota;
       });
 
@@ -194,7 +199,7 @@ export const controller = {
           caso: id,
           fecha_hora_cobro: { $ne: null },
         },
-        { orderBy: { numero: QueryOrder.DESC } }
+        { orderBy: { numero: QueryOrder.DESC }, populate: ["caso"] }
       );
 
       if (!cuota)
@@ -205,6 +210,8 @@ export const controller = {
 
       cuota.fecha_hora_cobro = undefined;
       cuota.forma_cobro = undefined;
+      cuota.caso.deuda_jus = cuota.caso.deuda_jus! + cuota.cant_jus;
+
       await em.flush();
 
       const data = new CuotaDTO(cuota, false);

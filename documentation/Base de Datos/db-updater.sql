@@ -188,3 +188,9 @@ ALTER TABLE `politicas`
 DROP COLUMN `tam_max_archivo_mb`,
 ADD COLUMN `tam_max_foto_usuario_mb` INT NOT NULL,
 ADD COLUMN `tam_max_documento_mb` INT NOT NULL;
+
+
+-- Update to V13.0 - 2025-05-07 18:51:28
+ALTER TABLE `sistema_juridico`.`casos` 
+ADD COLUMN `deuda_jus` DECIMAL(9,3) NULL DEFAULT NULL AFTER `monto_jus`,
+CHANGE COLUMN `monto_caso` `monto_jus` DECIMAL(9,3) NULL DEFAULT NULL ;

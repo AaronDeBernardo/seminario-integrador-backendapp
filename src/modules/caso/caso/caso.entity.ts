@@ -42,7 +42,12 @@ export class Caso {
   fecha_estado!: string;
 
   @Property({ type: "decimal", nullable: true })
-  monto_caso?: number;
+  monto_jus?: number;
+
+  @Property({ type: "decimal", nullable: true })
+  deuda_jus?: number;
+
+  // Relaciones
 
   @ManyToMany(() => Abogado, (abogado) => abogado.casos, {
     pivotEntity: "AbogadoCaso",

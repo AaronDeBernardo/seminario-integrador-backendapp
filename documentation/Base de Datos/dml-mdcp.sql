@@ -76,7 +76,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `casos` WRITE;
 /*!40000 ALTER TABLE `casos` DISABLE KEYS */;
-INSERT INTO `casos` VALUES (1,3,5,'2023-12-12','Divorcio','Finalizado','2024-08-18',7500.000),(2,2,7,'2024-03-10','Demanda por trabajo informal','En curso','2024-03-10',NULL),(3,1,8,'2024-01-22','Demanda por derechos de autor','Cancelado','2024-02-01',NULL);
+INSERT INTO `casos` VALUES (1,3,5,'2023-12-12','Divorcio','Finalizado','2024-08-18',7500.000,5000.000),(2,2,7,'2024-03-10','Demanda por trabajo informal','En curso','2024-03-10',NULL),(3,1,8,'2024-01-22','Demanda por derechos de autor','Cancelado','2024-02-01',NULL);
 /*!40000 ALTER TABLE `casos` ENABLE KEYS */;
 UNLOCK TABLES;
 

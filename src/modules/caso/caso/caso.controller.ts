@@ -41,6 +41,9 @@ export const controller = {
               {
                 estado: EstadoCasoEnum.EN_CURSO,
               },
+              {
+                deuda_jus: { $ne: null },
+              },
             ],
           },
           {
@@ -375,6 +378,9 @@ export const controller = {
 
       caso.estado = EstadoCasoEnum.FINALIZADO;
       caso.fecha_estado = format(new Date(), "yyyy-MM-dd");
+      caso.monto_jus = req.body.sanitizedInput.cant_jus;
+      caso.deuda_jus = req.body.sanitizedInput.cant_jus;
+
       const cuotas: Cuota[] = casoService.generateCuotas(
         caso,
         req.body.sanitizedInput
