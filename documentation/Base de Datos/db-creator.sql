@@ -145,7 +145,8 @@ CREATE TABLE `casos` (
   `descripcion` text NOT NULL,
   `estado` varchar(20) NOT NULL,
   `fecha_estado` date NOT NULL,
-  `monto_caso` decimal(9,3) DEFAULT NULL,
+  `monto_jus` decimal(9,3) DEFAULT NULL,
+  `deuda_jus` decimal(9,3) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_casos_especialidades_idx` (`id_especialidad`),
   KEY `fk_casos_clientes_idx` (`id_cliente`),
@@ -625,4 +626,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-06 16:41:52
+-- Dump completed on 2025-05-07 18:51:28
