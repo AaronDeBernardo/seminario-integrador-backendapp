@@ -76,7 +76,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `casos` WRITE;
 /*!40000 ALTER TABLE `casos` DISABLE KEYS */;
-INSERT INTO `casos` VALUES (1,3,5,'2023-12-12','Divorcio','Finalizado','2024-08-18',7500.000,5000.000),(2,2,7,'2024-03-10','Demanda por trabajo informal','En curso','2024-03-10',NULL,NULL),(3,1,8,'2024-01-22','Demanda por derechos de autor','Cancelado','2024-02-01',NULL,NULL);
+INSERT INTO `casos` VALUES (1,3,5,'2023-12-12','Divorcio','Finalizado','2024-08-18',7.500,5.000),(2,2,7,'2024-03-10','Demanda por trabajo informal','En curso','2024-03-10',NULL,NULL),(3,1,8,'2024-01-22','Demanda por derechos de autor','Cancelado','2024-02-01',NULL,NULL);
 /*!40000 ALTER TABLE `casos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -116,7 +116,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `cuotas` WRITE;
 /*!40000 ALTER TABLE `cuotas` DISABLE KEYS */;
-INSERT INTO `cuotas` VALUES (1,1,2500.000,'2024-09-18','2024-09-18 15:35:42','Transferencia'),(1,2,2500.000,'2024-10-18',NULL,NULL),(1,3,2500.000,'2024-11-18',NULL,NULL);
+INSERT INTO `cuotas` VALUES (1,1,2.500,'2024-09-18','2024-09-18 15:35:42','Transferencia'),(1,2,2.500,'2024-10-18',NULL,NULL),(1,3,2.500,'2024-11-18',NULL,NULL);
 /*!40000 ALTER TABLE `cuotas` ENABLE KEYS */;
 UNLOCK TABLES;
 

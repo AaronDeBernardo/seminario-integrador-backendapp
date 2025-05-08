@@ -220,6 +220,7 @@ export const controller = {
 
       validateEntity(abogado.usuario);
       validateEntity(abogado);
+      await usuarioService.validateUniqueDocumento(abogado.usuario);
 
       await em.flush();
       const data = new AbogadoDTO(abogado, true);
@@ -227,14 +228,26 @@ export const controller = {
       res.status(201).json(new ApiResponse("Abogado creado.", data));
     } catch (error: unknown) {
       if (error instanceof UniqueConstraintViolationException) {
-        res
-          .status(409)
-          .send(
-            new ApiResponse("Ya existe un usuario con el email ingresado.")
-          );
-      } else {
-        handleError(error, res);
+        if (error.sqlMessage?.includes("matricula_UNIQUE")) {
+          res
+            .status(409)
+            .send(
+              new ApiResponse(
+                "Ya existe un abogado con la matrícula ingresada."
+              )
+            );
+          return;
+        } else if (error.sqlMessage?.includes("email_UNIQUE")) {
+          res
+            .status(409)
+            .send(
+              new ApiResponse("Ya existe un usuario con el email ingresado.")
+            );
+          return;
+        }
       }
+
+      handleError(error, res);
     }
   },
 
@@ -261,6 +274,7 @@ export const controller = {
 
       validateEntity(abogado.usuario);
       validateEntity(abogado);
+      await usuarioService.validateUniqueDocumento(abogado.usuario);
 
       await em.flush();
       const data = new AbogadoDTO(abogado, true);
@@ -268,14 +282,26 @@ export const controller = {
       res.status(200).json(new ApiResponse("Abogado actualizado.", data));
     } catch (error: unknown) {
       if (error instanceof UniqueConstraintViolationException) {
-        res
-          .status(409)
-          .send(
-            new ApiResponse("Ya existe un usuario con el email ingresado.")
-          );
-      } else {
-        handleError(error, res);
+        if (error.sqlMessage?.includes("matricula_UNIQUE")) {
+          res
+            .status(409)
+            .send(
+              new ApiResponse(
+                "Ya existe un abogado con la matrícula ingresada."
+              )
+            );
+          return;
+        } else if (error.sqlMessage?.includes("email_UNIQUE")) {
+          res
+            .status(409)
+            .send(
+              new ApiResponse("Ya existe un usuario con el email ingresado.")
+            );
+          return;
+        }
       }
+
+      handleError(error, res);
     }
   },
 

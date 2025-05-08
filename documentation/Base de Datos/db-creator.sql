@@ -30,6 +30,7 @@ CREATE TABLE `abogados` (
   `foto` mediumblob NOT NULL,
   `matricula` varchar(20) NOT NULL,
   PRIMARY KEY (`id_usuario`),
+  UNIQUE KEY `matricula_UNIQUE` (`matricula`),
   KEY `fk_abogados_roles_idx` (`id_rol`),
   CONSTRAINT `fk_abogados_roles` FOREIGN KEY (`id_rol`) REFERENCES `roles` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_abogados_usuarios` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE

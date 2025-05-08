@@ -22,7 +22,7 @@ casoRouter.get(
 
 casoRouter.get(
   "/:id/abogados",
-  authMiddlewares.verifyEmpleado, //Si no es admin, debe ser el abogado principal del caso
+  authMiddlewares.verifyEmpleado, //Si no es admin, debe estar asignado al caso
   controller.findAbogadosByCaso
 );
 
