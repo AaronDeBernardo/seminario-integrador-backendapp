@@ -66,8 +66,10 @@ export const controller = {
   add: async (req: Request, res: Response) => {
     try {
       const secretario = em.create(Secretario, req.body.sanitizedInput);
+
       validateEntity(secretario.usuario);
       validateEntity(secretario);
+      await usuarioService.validateUniqueDocumento(secretario.usuario);
 
       await em.flush();
 
@@ -103,6 +105,7 @@ export const controller = {
 
       validateEntity(secretario.usuario);
       validateEntity(secretario);
+      await usuarioService.validateUniqueDocumento(secretario.usuario);
 
       await em.flush();
       const data = new SecretarioDTO(secretario);

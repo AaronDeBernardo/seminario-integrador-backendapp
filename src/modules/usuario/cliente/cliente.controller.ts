@@ -62,6 +62,7 @@ export const controller = {
       const cliente = em.create(Cliente, req.body.sanitizedInput);
       validateEntity(cliente.usuario);
       validateEntity(cliente);
+      await usuarioService.validateUniqueDocumento(cliente.usuario);
 
       if (
         (cliente.es_empresa && cliente.usuario.apellido) ||
@@ -105,6 +106,7 @@ export const controller = {
 
       validateEntity(cliente.usuario);
       validateEntity(cliente);
+      await usuarioService.validateUniqueDocumento(cliente.usuario);
 
       if (
         (cliente.es_empresa && cliente.usuario.apellido) ||

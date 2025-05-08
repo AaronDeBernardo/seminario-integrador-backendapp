@@ -194,3 +194,8 @@ ADD COLUMN `tam_max_documento_mb` INT NOT NULL;
 ALTER TABLE `sistema_juridico`.`casos` 
 ADD COLUMN `deuda_jus` DECIMAL(9,3) NULL DEFAULT NULL AFTER `monto_jus`,
 CHANGE COLUMN `monto_caso` `monto_jus` DECIMAL(9,3) NULL DEFAULT NULL ;
+
+
+-- Update to V14.0 - 2025-05-08 11:32:54
+ALTER TABLE `sistema_juridico`.`abogados` 
+ADD UNIQUE INDEX `matricula_UNIQUE` (`matricula` ASC) VISIBLE;
