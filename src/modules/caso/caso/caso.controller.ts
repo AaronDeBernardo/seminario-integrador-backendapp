@@ -249,11 +249,13 @@ export const controller = {
       );
 
       if (req.usuario?.is_admin === false) {
-        const abogadoPrincipal = abogadosCasos.find((ac) => {
-          return ac.es_principal === true && ac.fecha_baja === null;
-        })?.abogado;
+        const workingOnCaso = await abogadoCasoService.isAbogadoWorkingOnCaso(
+          req.usuario.id,
+          id_caso,
+          true
+        );
 
-        if (abogadoPrincipal?.usuario.id !== req.usuario.id) {
+        if (!workingOnCaso) {
           res.status(403).json(new ApiResponse("Acceso denegado."));
           return;
         }
