@@ -4,6 +4,8 @@ Este proyecto fue desarrollado con **Node.js**, **Express** y **TypeScript** par
 
 Se trata de una API REST que es consumida por un frontend desarrollado en Angular. El sitio web ofrece información para visitantes (potenciales clientes) y cuenta con **tres niveles de acceso**: administradores, abogados y clientes.
 
+🔧 **Backend desarrollado por Aarón De Bernardo y Santiago Spini**<br>
+🎨 **Frontend desarrollado por Milton Borsato, Elías Danteo y Francisca Gramaglia**<br>
 👉 **Link al frontend:** [Repositorio Frontend GitLaw](https://github.com/EliasDanteo/seminario-integrador-frontendapp.git)
 
 ---
