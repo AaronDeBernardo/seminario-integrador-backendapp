@@ -1,8 +1,10 @@
+import { Caso } from "../caso/caso/caso.entity.js";
 import { es } from "date-fns/locale";
 import { EstadoCasoEnum } from "../../utils/enums.js";
 import { format } from "date-fns";
 import fs from "fs";
 import handlebars from "handlebars";
+import { Nota } from "../appendix-caso/nota/nota.entity.js";
 import { orm } from "../../config/db.config.js";
 import { sendEmail } from "../../utils/notifications.js";
 import { Usuario } from "../usuario/usuario/usuario.entity.js";
@@ -18,15 +20,6 @@ export interface IActividad {
   nombre: string;
   fecha_hora: string;
   pesos: string;
-}
-
-export interface ICasoBase {
-  id: number;
-  descripcion: string;
-  fecha_inicio: string;
-  estado: string;
-  fecha_estado: string;
-  especialidad: string;
 }
 
 export interface INotaCaso {
@@ -154,11 +147,7 @@ export const informeService = {
     );
   },
 
-  sendCaseReport: async (
-    receivers: string[],
-    caso: ICasoBase,
-    notas: INotaCaso[]
-  ) => {
+  sendCaseReport: async (receivers: string[], caso: Caso, notas: Nota[]) => {
     const templateSource = fs.readFileSync(
       "templates/informe-caso.html",
       "utf8"
@@ -169,25 +158,29 @@ export const informeService = {
     caso.fecha_inicio = format(caso.fecha_inicio, "dd/MM/yyyy");
     caso.fecha_estado = format(caso.fecha_estado, "dd/MM/yyyy");
 
-    notas.forEach((nota) => {
-      nota.fecha_hora = format(nota.fecha_hora, "dd/MM/yyyy HH:mm:ss");
-    });
+    let cliente = caso.cliente.usuario.nombre;
+    if (caso.cliente.usuario.apellido)
+      cliente += " " + caso.cliente.usuario.apellido;
 
     const data = {
+      cliente,
+
       caso: {
         id: caso.id,
-        especialidad: caso.especialidad,
+        especialidad: caso.especialidad.nombre,
         descripcion: caso.descripcion,
         fecha_inicio: caso.fecha_inicio,
         estado:
           caso.estado === EstadoCasoEnum.EN_CURSO
             ? caso.estado
             : `${caso.estado} (${caso.fecha_estado})`,
+        monto: caso.monto_jus,
       },
+
       notas: notas.map((nota) => ({
         fecha_hora: format(nota.fecha_hora, "dd/MM/yyyy HH:mm"),
         titulo: nota.titulo,
-        abogado: `${nota.nombre} ${nota.apellido}`,
+        abogado: `${nota.abogado.usuario.nombre} ${nota.abogado.usuario.apellido}`,
         descripcion: nota.descripcion,
       })),
     };

@@ -75,6 +75,10 @@
         <div>{{caso.id}}</div>
       </div>
       <div class="case-row">
+        <div class="case-label">Cliente</div>
+        <div>{{cliente}}</div>
+      </div>
+      <div class="case-row">
         <div class="case-label">Especialidad:</div>
         <div>{{caso.especialidad}}</div>
       </div>
@@ -90,6 +94,13 @@
         <div class="case-label">Estado:</div>
         <div>{{caso.estado}}</div>
       </div>
+
+      {{#if caso.monto}}
+      <div class="case-row">
+        <div class="case-label">Monto caso:</div>
+        <div>{{caso.monto}}</div>
+      </div>
+      {{/if}}
     </div>
 
     <div class="divider"></div>

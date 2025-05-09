@@ -3,15 +3,15 @@ import {
   IAbogado,
   IActividad,
   IActividadRealizada,
-  ICasoBase,
   ICuota,
   informeService,
-  INotaCaso,
 } from "./informe.service.js";
 import { Request, Response } from "express";
 import { validateMonth, validateNumericId } from "../../utils/validators.js";
 import { ApiResponse } from "../../utils/api-response.class.js";
+import { Caso } from "../caso/caso/caso.entity.js";
 import { handleError } from "../../utils/error-handler.js";
+import { Nota } from "../appendix-caso/nota/nota.entity.js";
 import { orm } from "../../config/db.config.js";
 import { TipoUsuarioEnum } from "../../utils/enums.js";
 import { UsuarioSesion } from "../auth/usuario-sesion.dto.js";
@@ -101,48 +101,29 @@ export const controller = {
     try {
       const id_caso = validateNumericId(req.body.id_caso, "id_caso");
 
-      const caso_base = await em.execute(
-        `
-        SELECT c.id, c.id_cliente, c.descripcion, c.fecha_inicio, c.estado, c.fecha_estado, e.nombre as especialidad
-        FROM casos c
-        INNER JOIN especialidades e ON c.id_especialidad = e.id
-        WHERE c.id = ?
-        `,
-        [id_caso]
+      const caso = await em.findOneOrFail(
+        Caso,
+        { id: id_caso },
+        { populate: ["especialidad", "cliente.usuario"] }
       );
-
-      if (!caso_base.length) {
-        res.status(404).json(new ApiResponse("Caso no encontrado."));
-        return;
-      }
 
       if (
         req.usuario!.tipo_usuario === TipoUsuarioEnum.CLIENTE &&
-        req.usuario!.id !== caso_base[0].id_cliente
+        req.usuario!.id !== caso.cliente.usuario.id
       ) {
         res.status(403).json(new ApiResponse("Acceso denegado."));
         return;
       }
 
-      const notas = await em.execute(
-        `
-        SELECT n.fecha_hora, n.titulo, n.descripcion, u.nombre, u.apellido
-        FROM notas n
-        INNER JOIN abogados a ON n.id_abogado = a.id_usuario
-        INNER JOIN usuarios u ON u.id = a.id_usuario
-        WHERE n.id_caso = ?
-        ORDER BY n.fecha_hora DESC
-        `,
-        [id_caso]
+      const notas = await em.find(
+        Nota,
+        { caso: id_caso },
+        { populate: ["abogado.usuario"] }
       );
 
       const receivers = [req.usuario!.email];
 
-      await informeService.sendCaseReport(
-        receivers,
-        caso_base[0] as unknown as ICasoBase,
-        notas as unknown as INotaCaso[]
-      );
+      await informeService.sendCaseReport(receivers, caso, notas);
 
       res.status(200).json(new ApiResponse("Informe enviado."));
     } catch (error: unknown) {
