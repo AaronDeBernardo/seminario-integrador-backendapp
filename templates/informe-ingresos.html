@@ -67,17 +67,17 @@
     <table>
       <thead>
         <tr>
+          <th>Fecha y hora</th>
           <th>Actividad</th>
-          <th>Fecha y hora de realización</th>
           <th>Monto (en pesos)</th>
         </tr>
       </thead>
       <tbody>
         {{#each actividades}}
         <tr>
-          <td>{{nombre}}</td>
           <td>{{fecha_hora}}</td>
-          <td>${{pesos}}</td>
+          <td>{{nombre}}</td>
+          <td>${{monto_pesos}}</td>
         </tr>
         {{/each}}
       </tbody>

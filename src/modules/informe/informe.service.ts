@@ -1,3 +1,4 @@
+import { Abogado } from "../usuario/abogado/abogado.entity.js";
 import { Caso } from "../caso/caso/caso.entity.js";
 import { es } from "date-fns/locale";
 import { EstadoCasoEnum } from "../../utils/enums.js";
@@ -7,7 +8,6 @@ import handlebars from "handlebars";
 import { Nota } from "../appendix-caso/nota/nota.entity.js";
 import { orm } from "../../config/db.config.js";
 import { sendEmail } from "../../utils/notifications.js";
-import { Usuario } from "../usuario/usuario/usuario.entity.js";
 
 export interface ICuota {
   id_caso: number;
@@ -16,24 +16,11 @@ export interface ICuota {
   pesos: string;
 }
 
-export interface IActividad {
-  nombre: string;
+export interface IActividadRealizada {
   fecha_hora: string;
-  pesos: string;
-}
-
-export interface INotaCaso {
-  fecha_hora: string;
-  titulo: string;
-  descripcion: string;
   nombre: string;
-  apellido: string;
-}
-
-export interface IAbogado {
-  usuario: Usuario;
-  nombre: string;
-  apellido: string;
+  cant_jus: string;
+  monto_pesos: string;
 }
 
 export interface INota {
@@ -64,11 +51,6 @@ export interface ICasoReporte {
   feedback?: IFeedback;
 }
 
-export interface IActividadRealizada {
-  fecha_hora: string;
-  nombre: string;
-}
-
 const em = orm.em;
 
 export const informeService = {
@@ -76,7 +58,7 @@ export const informeService = {
     mes: Date,
     receivers: string[],
     cuotas: ICuota[],
-    actividades: IActividad[]
+    actividades: IActividadRealizada[]
   ) => {
     const templateSource = fs.readFileSync(
       "templates/informe-ingresos.html",
@@ -91,7 +73,8 @@ export const informeService = {
     );
 
     const totalActividades = actividades.reduce(
-      (total: number, actividad: IActividad) => total + Number(actividad.pesos),
+      (total: number, actividad: IActividadRealizada) =>
+        total + Number(actividad.monto_pesos),
       0
     );
 
@@ -107,7 +90,7 @@ export const informeService = {
 
     actividades.forEach((a) => {
       a.fecha_hora = format(a.fecha_hora, "dd/MM/yyyy HH:mm");
-      a.pesos = Number(a.pesos).toLocaleString("es-AR", {
+      a.monto_pesos = Number(a.monto_pesos).toLocaleString("es-AR", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       });
@@ -193,7 +176,7 @@ export const informeService = {
   sendPerformanceReport: async (
     mes: Date,
     receivers: string[],
-    abogado: { nombre: string; apellido: string },
+    abogado: Abogado,
     cantidad_turnos_otorgados: number,
     casos: ICasoReporte[],
     actividades_realizadas: IActividadRealizada[]
@@ -230,7 +213,26 @@ export const informeService = {
       }
     });
 
+    let monto_total_jus = 0;
+    let monto_total_pesos = 0;
+
     actividades_realizadas.forEach((actividad) => {
+      monto_total_jus += Number(actividad.cant_jus);
+      monto_total_pesos += Number(actividad.monto_pesos);
+
+      actividad.cant_jus = Number(actividad.cant_jus).toLocaleString("es-AR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+      actividad.monto_pesos = Number(actividad.monto_pesos).toLocaleString(
+        "es-AR",
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }
+      );
+
       actividad.fecha_hora = format(
         actividad.fecha_hora,
         "dd/MM/yyyy HH:mm:ss"
@@ -241,17 +243,22 @@ export const informeService = {
     const año = format(mes, "yyyy");
 
     const data = {
-      abogado: `${abogado.nombre} ${abogado.apellido}`,
+      abogado: `${abogado.usuario.nombre} ${abogado.usuario.apellido}`,
       mes: `${nombreMes} ${año}`,
       cantidad_turnos_otorgados,
       casos,
       actividades_realizadas,
+      monto_total_jus,
+      monto_total_pesos: monto_total_pesos.toLocaleString("es-AR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
     };
 
     const htmlContent = template(data);
 
     await sendEmail(
-      `Informe de desempeño ${abogado.nombre} ${abogado.apellido} - ${nombreMes} de ${año}`,
+      `Informe de desempeño ${abogado.usuario.nombre} ${abogado.usuario.apellido} - ${nombreMes} de ${año}`,
       htmlContent,
       receivers
     );

@@ -197,6 +197,8 @@
         <tr>
           <th>Fecha y hora</th>
           <th>Actividad</th>
+          <th>Precio (JUS)</th>
+          <th>Precio (Pesos)</th>
         </tr>
       </thead>
       <tbody>
@@ -204,8 +206,16 @@
         <tr>
           <td>{{fecha_hora}}</td>
           <td>{{nombre}}</td>
+          <td>{{cant_jus}}</td>
+          <td>${{monto_pesos}}</td>
         </tr>
         {{/each}}
+
+        <tr>
+          <td colspan="2" style="text-align: right"><b>TOTAL</b></td>
+          <td><b>{{monto_total_jus}}</b></td>
+          <td><b>${{monto_total_pesos}}</b></td>
+        </tr>
       </tbody>
     </table>
     {{else}}

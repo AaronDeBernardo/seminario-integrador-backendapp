@@ -1,19 +1,19 @@
 import { endOfMonth, format, parse, startOfMonth } from "date-fns";
 import {
-  IAbogado,
-  IActividad,
   IActividadRealizada,
   ICuota,
   informeService,
 } from "./informe.service.js";
 import { Request, Response } from "express";
 import { validateMonth, validateNumericId } from "../../utils/validators.js";
+import { Abogado } from "../usuario/abogado/abogado.entity.js";
 import { ApiResponse } from "../../utils/api-response.class.js";
 import { Caso } from "../caso/caso/caso.entity.js";
 import { handleError } from "../../utils/error-handler.js";
 import { Nota } from "../appendix-caso/nota/nota.entity.js";
 import { orm } from "../../config/db.config.js";
 import { TipoUsuarioEnum } from "../../utils/enums.js";
+import { TurnoOtorgado } from "../turno/turno-otorgado/turno-otorgado.entity.js";
 import { UsuarioSesion } from "../auth/usuario-sesion.dto.js";
 
 const em = orm.em;
@@ -59,9 +59,10 @@ export const controller = {
         [inicioMes, finMes]
       );
 
-      const actividades_cobradas = await em.execute<IActividad[]>(
+      const actividades_cobradas = await em.execute<IActividadRealizada[]>(
         `
-        SELECT ac.nombre, ac_re.fecha_hora, co_ac.cant_jus * pr_jus.valor AS pesos
+        SELECT ac.nombre, ac_re.fecha_hora
+          , co_ac.cant_jus, co_ac.cant_jus * pr_jus.valor AS monto_pesos
         FROM actividades_realizadas ac_re
         INNER JOIN actividades ac
           ON ac_re.id_actividad = ac.id
@@ -70,6 +71,7 @@ export const controller = {
             SELECT MAX(ca.fecha_hora_desde)
             FROM costos_actividades ca
             WHERE ca.fecha_hora_desde <= ac_re.fecha_hora
+              AND ca.id_actividad = ac_re.id_actividad
           )
         INNER JOIN precios_jus pr_jus
           ON pr_jus.fecha_hora_desde = (
@@ -153,11 +155,11 @@ export const controller = {
       const inicioMes = startOfMonth(parsedDate);
       const finMes = endOfMonth(parsedDate);
 
-      const abogado = (await em.findOne(
-        "Abogado",
+      const abogado = await em.findOne(
+        Abogado,
         { usuario: id_abogado },
         { populate: ["usuario"] }
-      )) as IAbogado;
+      );
 
       if (!abogado) {
         res
@@ -166,21 +168,13 @@ export const controller = {
         return;
       }
 
-      const cantidad_turnos_otorgados = (
-        await em.execute(
-          `
-        SELECT COUNT(*) as cantidad
-        FROM abogados a
-        INNER JOIN horarios_turnos ht
-          ON a.id_usuario = ht.id_abogado
-        INNER JOIN turnos_otorgados t
-          ON ht.id = t.id_horario_turno
-        WHERE id_abogado = ?
-          AND t.fecha_turno BETWEEN ? AND ?
-        `,
-          [id_abogado, inicioMes, finMes]
-        )
-      )[0].cantidad;
+      const cantidad_turnos_otorgados = await em.count(TurnoOtorgado, {
+        horarioTurno: { abogado: id_abogado },
+        fecha_turno: {
+          $gte: format(inicioMes, "yyyy-MM-dd"),
+          $lte: format(finMes, "yyyy-MM-dd"),
+        },
+      });
 
       const casos = await informeService.findCasosWhereAbogadoWorked(
         id_abogado,
@@ -190,12 +184,26 @@ export const controller = {
 
       const actividades_realizadas = await em.execute<IActividadRealizada[]>(
         `
-        SELECT ar.fecha_hora, a.nombre
-        FROM actividades_realizadas ar
-        INNER JOIN actividades a
-          ON ar.id_actividad = a.id
-        WHERE ar.id_abogado = ?
-          AND ar.fecha_hora BETWEEN ? AND ?;
+        SELECT ac.nombre, ac_re.fecha_hora
+	      , co_ac.cant_jus, co_ac.cant_jus * pr_jus.valor AS monto_pesos
+        FROM actividades_realizadas ac_re
+        INNER JOIN actividades ac
+          ON ac_re.id_actividad = ac.id
+        INNER JOIN costos_actividades co_ac
+          ON co_ac.fecha_hora_desde = (
+            SELECT MAX(ca.fecha_hora_desde)
+            FROM costos_actividades ca
+            WHERE ca.fecha_hora_desde <= ac_re.fecha_hora
+              AND ca.id_actividad = ac_re.id_actividad
+          )
+        INNER JOIN precios_jus pr_jus
+          ON pr_jus.fecha_hora_desde = (
+            SELECT MAX(pj.fecha_hora_desde)
+            FROM precios_jus pj
+            WHERE pj.fecha_hora_desde <= ac_re.fecha_hora
+          )
+        WHERE ac_re.id_abogado = ?
+          AND ac_re.fecha_hora BETWEEN ? AND ?;
         `,
         [id_abogado, inicioMes, finMes]
       );
@@ -205,7 +213,7 @@ export const controller = {
       await informeService.sendPerformanceReport(
         parsedDate,
         receivers,
-        { nombre: abogado.usuario.nombre, apellido: abogado.usuario.apellido },
+        abogado,
         cantidad_turnos_otorgados,
         casos,
         actividades_realizadas
